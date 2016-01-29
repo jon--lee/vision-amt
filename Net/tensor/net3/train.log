@@ -1,0 +1,4 @@
+DEBUG:root:[ Iteration 0 ] Training loss: 0.0951268
+DEBUG:root:Saving...
+DEBUG:root:Saved model to net3net3_01-29-2016_13h42m51s.ckpt
+DEBUG:root:Optimization done.
