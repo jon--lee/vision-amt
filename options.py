@@ -9,10 +9,10 @@ class Options():
     translations = [0.0, 0.0, 0.0, 0.0]
     scales = [40.0, 120.0, 90.0, 100.0]
     drift = 20.0
-    OFFSET_X = 455
-    OFFSET_Y = 260
-    WIDTH = 420
-    HEIGHT = 420
+    OFFSET_X = 190
+    OFFSET_Y = 105
+    WIDTH = 260
+    HEIGHT = 260
     
     #root_dir = '/Users/JonathanLee/Desktop/sandbox/vision/'
     root_dir = os.path.dirname(os.path.realpath(__file__)) + "/"

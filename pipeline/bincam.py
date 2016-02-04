@@ -40,8 +40,8 @@ def mapRange(frame, loc):
 class BinaryCamera():
     
     tolerance = 2000                        # tolerance from distance around ring's border
-    lower_green = np.array([30,10,0])       # table's lowest shade of green
-    upper_green = np.array([70,140,180])    # highest green
+    lower_green = np.array([30,10,0], dtype=np.uint8)       # table's lowest shade of green
+    upper_green = np.array([70,140,180], dtype=np.uint8)    # highest green
     lower_black = (0,0,0)                   # ring's lowest black
     upper_black = (130,130,130)             # highest black
     intermediate_green = [120, 180, 120]    # intermediate green value (between range)
@@ -77,7 +77,7 @@ class BinaryCamera():
         """ Returns cropped frame of raw video """
         rval, frame = self.vc.read()
         frame = frame[0+Options.OFFSET_Y:Options.HEIGHT+Options.OFFSET_Y, 0+Options.OFFSET_X:Options.WIDTH+Options.OFFSET_X]
-        
+        frame = cv2.resize(frame, (420, 420))
         if record:
             self.recording.append(frame)
             self.states.append(state)
@@ -147,3 +147,6 @@ class BinaryCamera():
             string += " " + str(s)
 
         return string
+        
+        
+        

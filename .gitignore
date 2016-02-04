@@ -19,3 +19,4 @@ legacy/
 .idea/
 *.zip
 *.jpg
+*.py~
