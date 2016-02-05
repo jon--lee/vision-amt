@@ -226,7 +226,7 @@ class AMT():
                 test_writer.write(new_line)
     
     def save_initial(self, tups):
-        tups = self.roll(tups, 5)
+        tups = self.roll(tups, 4)
         print "Saving initial demonstration"
         prefix = datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss")
         print "Saving raw frames to " + self.options.originals_dir + "..."
@@ -310,12 +310,12 @@ class AMT():
         return s
 
         
-        @staticmethod
-        def roll(tuples, change):
-            frames, states =  zip(*tups)
-            frames = frames[change:]
-            states = states[:-change]
-            return zip(frames, states)
+    @staticmethod
+    def roll(tuples, change):
+        frames, states =  zip(*tuples)
+        frames = frames[change:]
+        states = states[:-change]
+        return zip(frames, states)
 
 if __name__ == "__main__":
     

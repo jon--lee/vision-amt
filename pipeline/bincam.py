@@ -65,7 +65,11 @@ class BinaryCamera():
         
     def open(self):
         self.vc = cv2.VideoCapture(0)
-        self.vc.set(cv2.cv.CV_CAP_PROP_BUFFERSIZE,0)
+        print "EXPOSURE ",self.vc.get(cv2.cv.CV_CAP_PROP_SATURATION)
+        #for more saturated version, set saturation to .35
+        self.vc.set(cv2.cv.CV_CAP_PROP_SATURATION ,0.15)
+        self.vc.set(cv2.cv.CV_CAP_PROP_CONTRAST ,0.12)
+        self.vc.set(cv2.cv.CV_CAP_PROP_BRIGHTNESS ,0.5)
     def release(self):
         self.vc.release()
         

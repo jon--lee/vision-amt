@@ -126,8 +126,8 @@ def getDirs(controller):
     dPadDirs = [
                 controller.get_button(0),
                 controller.get_button(1),
-                controller.get_button(2),
-                controller.get_button(3)
+                controller.get_button(4),
+                controller.get_button(5)
     ]
     return dPadDirs
 
