@@ -31,4 +31,5 @@ izzy = PyControl(115200, .04, [0,0,0,0,0],[0,0,0]); # same with this
 
 while True: 
     print izzy.getState()
+    print t.getState()
     time.sleep(.3)

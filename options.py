@@ -52,5 +52,11 @@ class AMTOptions(Options):
     binaries_dir = Options.amt_dir + "binaries/"
     originals_dir = Options.amt_dir + "frames/"
 
-    ROTATE_UPPER_BOUND = 3.88486
-    ROTATE_LOWER_BOUND = 3.2069
+    ROTATE_UPPER_BOUND = 4.03313
+    ROTATE_LOWER_BOUND = 3.16954
+    
+    GRIP_UPPER_BOUND = .0375
+    GRIP_LOWER_BOUND = .0023
+    
+    TABLE_LOWER_BOUND = .002
+    TABLE_UPPER_BOUND = 7.0    

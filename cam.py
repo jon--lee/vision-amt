@@ -13,8 +13,13 @@ writer = cv2.VideoWriter("testing123.mov", fourcc, 10.0, (Options.WIDTH,Options.
 try:
     while True:
 	    frame = bc.read_frame()
+	    cv2.imshow("camera",frame)
+	    cv2.waitKey(30)
+	    print frame
+	    
 	    frames.append(frame)
-	    time.sleep(.08)
+	    #time.sleep(0.08)
+	    
 except KeyboardInterrupt:
     pass
     

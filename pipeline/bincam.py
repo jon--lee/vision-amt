@@ -47,7 +47,7 @@ class BinaryCamera():
     intermediate_green = [120, 180, 120]    # intermediate green value (between range)
 
 
-    def __init__(self, meta='./pipeline/meta.txt'):
+    def __init__(self, meta='./meta.txt'):
         """
         meta -  path to file with calibration data (x,y\ndistance), e.g.
                 212,207
@@ -65,6 +65,9 @@ class BinaryCamera():
         
     def open(self):
         self.vc = cv2.VideoCapture(0)
+        self.vc.set(cv2.cv.CV_CAP_PROP_BUFFERSIZE,0)
+    def release(self):
+        self.vc.release()
         
     def close(self):
         if self.is_open():

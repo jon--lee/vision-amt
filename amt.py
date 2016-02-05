@@ -10,12 +10,14 @@ from gripper.xboxController import *
 from pipeline.bincam import BinaryCamera
 #from Net.tensor import inputdata, net3
 import time
+import datetime
 import os
 import random
 import cv2
 import imp
 import IPython
 import reset_rollout
+import numpy as np
 
 sys.path[0] = sys.path[0] + '/../../GPIS/src/grasp_selection/control/DexControls'
         
@@ -58,45 +60,52 @@ class AMT():
     def initial_demonstration(self, controller):
         recording = []
         try:
+            previous_state = None
+            frame = None
             while True:
+                if self.izzy.is_action_complete() and self.turntable.is_action_complete():
+                    
 
-                initial_state = self.long2short_state(self.izzy.getState().state, self.turntable.getState().state)
-                
-                controls = controller.getUpdates()
-                deltas = self.controls2deltas(controls)
-                new_izzy, new_t = self.apply_deltas(deltas)
-                self.izzy.gotoState(ZekeState(new_izzy))
-                self.turntable.gotoState(TurntableState(new_t))
-                print new_izzy, new_t
-                self.izzy.gotoState(ZekeState(new_izzy))
+                    controls = controller.getUpdates()
+                    deltas = self.controls2deltas(controls)
+                    print deltas
+                    if not all(d == 0.0 for d in deltas):
+                        previous_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
+                        frame = self.bc.read_frame()
+                        new_izzy, new_t = self.apply_deltas(deltas)
+                        recording.append((frame, deltas))
+                                               
+                        self.izzy._zeke._queueState(ZekeState(new_izzy))
+						                        
+                        
+                        self.turntable.gotoState(TurntableState(new_t), .25, .25)
+                        time.sleep(0.08)
+                    else:
+                        previous_state = None
+                        frame = None
 
-                final_state = self.long2short_state(self.izzy.getState().state, self.turntable.getState().state)
-                delta_state = [ final - initial for final, initial in zip(final_state, initial_state) ]
-
-                frame = self.bc.read_frame()
-
-                recording.append((frame, delta_state))
-
-                self.save_initial(recording)                
-
-                time.sleep(.03)
         except KeyboardInterrupt:
             pass
 
+        self.save_initial(recording)
+        
+    # [rot, elev, ext, wrist, grip, turntable]
     @staticmethod
     def controls2deltas(controls):
-        controls = [ c if abs(c) > self.options.drift else 0.0 for c in controls ]
+        #controls = [ c if abs(c) > AMTOptions.drift else 0.0 for c in controls ]
         deltas = [0.0] * 4
-        deltas[0] = controls[0] / 500.0
-        deltas[1] = controls[2] / 10000.0
-        deltas[2] = controls[4] / 500.0
-        deltas[3] = 0.0
+        deltas[0] = controls[0] / 300.0
+        deltas[1] = controls[2] / 1000.0
+        deltas[2] = controls[4] / 8000.0
+        deltas[3] = controls[5] / 800.0
         if abs(deltas[0]) < 2e-3:
             deltas[0] = 0.0
-        if abs(deltas[2]) < 2e-3:
+        if abs(deltas[1]) < 2e-2:
+       	    deltas[1] = 0.0
+       	if abs(deltas[2]) < 5e-3:
        	    deltas[2] = 0.0
-       	if abs(deltas[4]) < 2e-2:
-       	    deltas[4] = 0.0 
+        if abs(deltas[3]) < 2e-2:
+            deltas[3] = 0.0 
         return deltas
 
     def rollout_caffe(self, num_frames=50):
@@ -113,7 +122,7 @@ class AMT():
                 #binary_frame = self.bc.pipe(frame)
                 
                 # for pycontrol
-                self.recording.append((frame, self.long2short_state(self.izzy.getState(), self.turntable.getState())))
+                self.recording.append((frame, self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))))
 
                 # for zekestate
                 #self.recording.append((frame, self.long2short_state(self.izzy.getState().state, self.turntable.getState().state)))
@@ -132,6 +141,7 @@ class AMT():
         except KeyboardInterrupt:
             pass
         #sess.close()
+        self.bc.release()
         self.prompt_save()
         #self.r.move_reset()
     
@@ -162,15 +172,23 @@ class AMT():
             return None
         self.prompt_save()
 
+	# TODO: prevent rotation from going too far
     def apply_deltas(self, delta_state):
         izzy_state = self.state(self.izzy.getState())
         t_state = self.state(self.turntable.getState())
         izzy_state[0] += delta_state[0]
-        izzy_state[1] = None
+        izzy_state[1] = 0.00952
         izzy_state[2] += delta_state[1]
-        izzy_state[3] = None
+        izzy_state[3] = 2.465
         izzy_state[4] += delta_state[2]
         t_state[0] += delta_state[3]
+        izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND, izzy_state[0])
+        izzy_state[0] = max(self.options.ROTATE_LOWER_BOUND, izzy_state[0])
+        izzy_state[4] = min(self.options.GRIP_UPPER_BOUND, izzy_state[4])
+        izzy_state[4] = max(self.options.GRIP_LOWER_BOUND, izzy_state[4])
+        t_state[0] = min(self.options.TABLE_UPPER_BOUND, t_state[0])
+        t_state[0] = max(self.options.TABLE_LOWER_BOUND, t_state[0])
+ 
         return izzy_state, t_state
 
 
@@ -192,7 +210,7 @@ class AMT():
         self.options.tf_net_path = net.optimize(iterations, batch_size=300, path=path,  data=data)
 
     def segment(self, frame):
-        binary_frame = self.bc.pipe(frame)
+        binary_frame = self.bc.pipe(np.copy(frame))
         return binary_frame
 
 
@@ -207,7 +225,7 @@ class AMT():
             else:
                 test_writer.write(new_line)
     
-    def save_initial(self, tups)
+    def save_initial(self, tups):
         print "Saving initial demonstration"
         prefix = datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss")
         print "Saving raw frames to " + self.options.originals_dir + "..."
@@ -301,9 +319,10 @@ if __name__ == "__main__":
 
     #t = TurnTableControl() # the com number may need to be changed. Default of com7 is used
     #izzy = PyControl(115200, .04, [0,0,0,0,0],[0,0,0]) # same with this
-    #c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
-    c = None
+    c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
+    #c = None
     izzy = DexRobotZeke()
+    izzy._zeke.steady(False)
     t = DexRobotTurntable()
 
 
@@ -323,7 +342,7 @@ if __name__ == "__main__":
     amt = AMT(bincam, izzy, t, c, options=options)
 
     while True:
-        print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 't' -> test): "
+        print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 't' -> test, 'd' -> demonstrate): "
         char = getch()
         if char == 'q':
             print "Quitting..."
