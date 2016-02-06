@@ -57,41 +57,32 @@ class AMT():
         self.r = reset_rollout.reset(izzy, turntable)
 
     def initial_demonstration(self, controller):
+        print "Starting supervisor demonstration..."
         recording = []
         try:
-            previous_state = None
-            frame = None
             while True:
-                if self.izzy.is_action_complete() and self.turntable.is_action_complete():
-                    
-
-                    controls = controller.getUpdates()
-                    deltas = self.controls2deltas(controls)
-                    print deltas
-                    if not all(d == 0.0 for d in deltas):
-                        previous_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
-                        frame = self.bc.read_frame()
-                        new_izzy, new_t = self.apply_deltas(deltas)
-                        recording.append((frame, deltas))
+                controls = controller.getUpdates()
+                deltas = self.controls2deltas(controls)
+                print deltas
+                if not all(d == 0.0 for d in deltas):
+                    frame = self.bc.read_frame()
+                    new_izzy, new_t = self.apply_deltas(deltas)
+                    recording.append((frame, deltas))
                                                
-                        self.izzy._zeke._queueState(ZekeState(new_izzy))
-						                        
+                    self.izzy._zeke._queueState(ZekeState(new_izzy))
+                    self.turntable.gotoState(TurntableState(new_t), .25, .25)
                         
-                        self.turntable.gotoState(TurntableState(new_t), .25, .25)
-                        time.sleep(0.08)
-                    else:
-                        previous_state = None
-                        frame = None
+                    time.sleep(0.08)
 
         except KeyboardInterrupt:
             pass
 
         self.save_initial(recording)
-        
+        print "Supervisor demonstration done."
+
     # [rot, elev, ext, wrist, grip, turntable]
     @staticmethod
     def controls2deltas(controls):
-        #controls = [ c if abs(c) > AMTOptions.drift else 0.0 for c in controls ]
         deltas = [0.0] * 4
         deltas[0] = controls[0] / 300.0
         deltas[1] = controls[2] / 1000.0
@@ -107,28 +98,24 @@ class AMT():
             deltas[3] = 0.0 
         return deltas
 
-    def rollout_caffe(self, num_frames=50):
-        raise NotImplementedError
 
     # TODO: uncomment stuff for real rollout
     def rollout_tf(self, num_frames=150):
         #net = self.options.tf_net
         #path = self.options.tf_net_path
-        #sess = net.load(var_path=path)
+        #sess = net.load(var_path=self.options.tf_net_path)
+        recording = []
         try:
             for i in range(num_frames):
                 frame = self.bc.read_frame()
-                #binary_frame = self.bc.pipe(frame)
-                
-                # for pycontrol
-                self.recording.append((frame, self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))))
+                binary_frame = self.segment(frame)               
+                binary_frame = np.reshape(binary_frame, (125, 125, 1))
+ 
+                current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
+                recording.append((frame, current_state))
 
-                # for zekestate
-                #self.recording.append((frame, self.long2short_state(self.izzy.getState().state, self.turntable.getState().state)))
-                #binary_frame = np.reshape(binary_frame, (125, 125, 1))
-
-                #delta_state = net.output(sess, binary_frame)
-                #new_izzy, new_t = self.apply_deltas(delta_state)
+                delta_state = net.output(sess, binary_frame)
+                new_izzy, new_t = self.apply_deltas(delta_state)
 
                 # TODO: uncomment these to update izzy and t
                 #print new_izzy, new_t
@@ -140,7 +127,6 @@ class AMT():
         except KeyboardInterrupt:
             pass
         #sess.close()
-        self.bc.release()
         self.prompt_save()
         #self.r.move_reset()
     
@@ -156,6 +142,9 @@ class AMT():
             
     @staticmethod
     def state(state):
+        """
+            Necessary wrapper for quickly converting between PyControl and ZekeCode
+        """
         if isinstance(state, ZekeState) or isinstance(state, TurntableState):
             return state.state
         return state
@@ -171,8 +160,11 @@ class AMT():
             return None
         self.prompt_save()
 
-	# TODO: prevent rotation from going too far
     def apply_deltas(self, delta_state):
+        """
+            Get current states and apply given deltas
+            Handle max and min states as well
+        """
         izzy_state = self.state(self.izzy.getState())
         t_state = self.state(self.turntable.getState())
         izzy_state[0] += delta_state[0]
@@ -193,16 +185,23 @@ class AMT():
 
     @staticmethod
     def short2long_state(short_state):
+        """
+            Convert 4-element state to izzy and turntable states
+            Returns a tuple (first element is izzy state, second is turntable)
+        """
         izzy_state = [short_state[0], 0, short_state[1], 0, short_state[2], 0]
         t_state = [short_state[-1]]
         return izzy_state, t_state
 
     @staticmethod
     def long2short_state(izzy_state, t_state):
+        """
+            Convert given izzy state and t state to four element state
+        """
         return [izzy_state[0], izzy_state[2], izzy_state[4], t_state[0]]
 
+    
     def update_weights(self, iterations=10):
-
         net = self.options.tf_net
         path = self.options.tf_net_path
         data = inputdata.AMTData(self.options.train_file, self.options.test_file)
@@ -225,6 +224,10 @@ class AMT():
                 test_writer.write(new_line)
     
     def save_initial(self, tups):
+        """
+            Different from save recording in that this is intended
+            for saving initial supervisor demonstrations
+        """
         tups = self.roll(tups, 4)
         print "Saving initial demonstration"
         prefix = datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss")
@@ -253,7 +256,6 @@ class AMT():
         print "Saving rollout to " + rollout_path + "..."
         os.makedirs(rollout_path)
         rollout_states_file = open(rollout_path + "states.txt", 'a+')
-
 
         print "Saving raw frames to " + self.options.originals_dir + "..."
         print "Saving binaries to " + self.options.binaries_dir + "..."
@@ -307,7 +309,6 @@ class AMT():
         for el in lst:
             s += " " + str(el)
         return s
-
         
     @staticmethod
     def roll(tuples, change):
@@ -327,24 +328,12 @@ if __name__ == "__main__":
     #t = TurnTableControl() # the com number may need to be changed. Default of com7 is used
     #izzy = PyControl(115200, .04, [0,0,0,0,0],[0,0,0]) # same with this
     c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
-    #c = None
     izzy = DexRobotZeke()
     izzy._zeke.steady(False)
     t = DexRobotTurntable()
 
-
-    #options.tf_net = net2.NetTwo()
-    #options.tf_net_path = options.tf_dir + 'net2/net2_01-21-2016_02h14m08s.ckpt'
-    #options.tf_net = net3.NetThree()
-    #options.tf_net_path = options.tf_dir + 'net3/net3_01-19-2016_00h47m49s.ckpt'
+    options.tf_net = None
     options.tf_net_path = None    
-
-    # TODO: set actual train/test paths
-    options.train_path = 'path/to/train.txt'
-    options.test_path = 'path/to/test.txt'
-    # TODO: set path to raw image directory and segmented image directory
-    options.raw_path = 'path/to/raw_images/'
-    options.seg_path = 'path/to/seg_images/'
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

@@ -14,11 +14,6 @@ import os
 
 class TensorNet():
 
-    ROOT = '/Users/JonathanLee/Desktop/vision/'
-
-    TRAIN_PATH = ROOT + 'Net/hdf/train.txt'
-    TEST_PATH = ROOT + 'Net/hdf/test.txt'
-
     def __init__(self):
         raise NotImplementedError
 
@@ -53,7 +48,7 @@ class TensorNet():
         return sess
 
 
-    def optimize(self, iterations, path=None, data=None, batch_size=100):
+    def optimize(self, iterations, data, path=None, batch_size=100):
         """
             optimize net for [iterations]. path is either absolute or 
             relative to current working directory. data is InputData object (see class for details)
@@ -74,10 +69,6 @@ class TensorNet():
         
         try:
             with sess.as_default():
-                if not data:
-                    print "Loading data..."                
-                    data = inputdata.InputData(self.TRAIN_PATH, self.TEST_PATH)
-                    print "Data loaded."
                 for i in range(iterations):
                     batch = data.next_train_batch(batch_size)
                     ims, labels = batch
@@ -87,12 +78,15 @@ class TensorNet():
                         batch_loss = self.loss.eval(feed_dict=feed_dict)
                         self.log("[ Iteration " + str(i) + " ] Training loss: " + str(batch_loss))
                     self.train.run(feed_dict=feed_dict)
-                    time.sleep(1.1)
                 
 
         except KeyboardInterrupt:
             pass
-        dir, old_name = os.path.split(path)
+        
+        if path:
+            dir, old_name = os.path.split(path)
+        else:
+            dir = './'
         new_name = self.name + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + ".ckpt"
         save_path = self.save(sess, save_path=dir + new_name)
         sess.close()
@@ -129,13 +123,11 @@ class TensorNet():
     @staticmethod
     def reduce_shape(shape):
         """
-            Given shape iterable with dimension elements
-            reduce shape to total nodes
+            Given shape iterable, return total number of nodes/elements
         """
         shape = [ x.value for x in shape ]
         f = lambda x, y: 1 if y is None else x * y
         return reduce(f, shape, 1)
-
 
 
     def weight_variable(self, shape):
