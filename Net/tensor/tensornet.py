@@ -37,6 +37,11 @@ class TensorNet():
 
 
     def load(self, var_path=None):
+        """
+            load net's variables from absolute path or relative
+            to the current working directory. Returns the session
+            with those weights/biases restored.
+        """
         if not var_path:
             raise Exception("No path to model variables specified")
         print "Restoring existing net from " + var_path + "..."
@@ -49,6 +54,11 @@ class TensorNet():
 
 
     def optimize(self, iterations, path=None, data=None, batch_size=100):
+        """
+            optimize net for [iterations]. path is either absolute or 
+            relative to current working directory. data is InputData object (see class for details)
+            mini_batch_size as well
+        """
         if path:
             sess = self.load(var_path=path)
         else:

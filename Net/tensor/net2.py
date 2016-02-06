@@ -40,8 +40,7 @@ class NetTwo(TensorNet):
 
  
         
-
-
-#net = NetTwo()
-#net.optimize(100, batch_size=300)
+if __name == '__main__':
+    net = NetTwo()
+    net.optimize(100, batch_size=300)
 

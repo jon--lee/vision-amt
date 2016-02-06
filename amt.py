@@ -29,9 +29,8 @@ from TurntableState import TurntableState
 
 def getch():
     """
-        getch will cause python program to wait until
-        command is given rather than constantly checking
-        from updates while looping.
+        Pause the program until key press
+        Return key press character
     """
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)

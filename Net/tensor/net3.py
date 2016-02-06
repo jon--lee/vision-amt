@@ -54,9 +54,13 @@ class NetThree(TensorNet):
         
 
 
-    
+if __name__ = '__main__':
+    var_path = "/home/annal/Izzy/vision_amt/Net/tensor/net3/net3-01-19-2016_00h47m49s.ckpt"
+    train_path = "home/annal/Izzy/vision_amt/data/amt/train.txt"
+    test_path = "home/annal/Izzy/vision_amt/data/amt/test.txt"
+    input_data = inputdata.AMTData(train_path, test_path)
+    net = NetThree()
+    net.optimize(100, path='net3/net3-01-19-2016_00h47m49s.ckpt')    
     
 
 
-net = NetThree()
-net.optimize(100, path='net3/net3_01-19-2016_00h47m49s.ckpt')
