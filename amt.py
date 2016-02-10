@@ -8,7 +8,7 @@ from gripper.TurnTableControl import *
 from gripper.PyControl import *
 from gripper.xboxController import *
 from pipeline.bincam import BinaryCamera
-#from Net.tensor import inputdata, net3
+from Net.tensor import inputdata, net3
 import time
 import datetime
 import os
@@ -50,10 +50,6 @@ class AMT():
         self.turntable = turntable
         self.c = controller
         self.options = options
-
-        self.recording = []
-        self.states = []
-        
         self.r = reset_rollout.reset(izzy, turntable)
 
     def initial_demonstration(self, controller):
@@ -98,37 +94,58 @@ class AMT():
             deltas[3] = 0.0 
         return deltas
 
+    def deltaSafetyLimites(self,deltas):
+        #Rotation 15 degrees
+        #Extension 1 cm 
+        #Gripper 0.5 cm
+        #Table 15 degrees
 
-    # TODO: uncomment stuff for real rollout
+        deltas[0] = np.sign(deltas[0])*np.max(0.2,np.abs(deltas[0]))
+        deltas[1] = np.sign(deltas[1])*np.max(0.01,np.abs(deltas[1]))
+        deltas[2] = np.sign(deltas[2])*np.max(0.005,np.abs(deltas[2]))
+        deltas[3] = np.sign(deltas[3])*np.max(0.2,np.abs(deltas[3]))
+        return deltas
+
     def rollout_tf(self, num_frames=150):
-        #net = self.options.tf_net
-        #path = self.options.tf_net_path
-        #sess = net.load(var_path=self.options.tf_net_path)
+        net = self.options.tf_net
+        path = self.options.tf_net_path
+        sess = net.load(var_path=self.options.tf_net_path)
         recording = []
+        #Clear Buffer ... NEED TO TEST
+        for i in range(4):
+            self.bc.read_frame()
         try:
+
             for i in range(num_frames):
                 frame = self.bc.read_frame()
                 binary_frame = self.segment(frame)               
                 binary_frame = np.reshape(binary_frame, (125, 125, 1))
+                # cv2.imshow("camera",binary_frame)
+                # cv2.waitKey(30)
+
  
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
                 recording.append((frame, current_state))
 
                 delta_state = net.output(sess, binary_frame)
+                delta_state = self.deltaSafetyLimites(delta_state)
                 new_izzy, new_t = self.apply_deltas(delta_state)
 
                 # TODO: uncomment these to update izzy and t
-                #print new_izzy, new_t
-                #self.izzy.sendStateRequest(new_izzy)
-                #self.turntable.sendStateRequest(new_t)
+                print "DELTA STATE ",delta_state
+                # self.izzy._zeke._queueState(ZekeState(new_izzy))
+                # self.turntable.gotoState(TurntableState(new_t), .25, .25)
 
                 time.sleep(.03)
-                
+       
         except KeyboardInterrupt:
             pass
-        #sess.close()
-        self.prompt_save()
-        #self.r.move_reset()
+        IPython.embed()
+        sess.close()
+        # self.izzy._zeke.steady(True)
+        self.prompt_save(recording)
+        self.r.move_reset()
+        # self.izzy._zeke.steady(False)
     
     def test(self):
         try:
@@ -149,14 +166,14 @@ class AMT():
             return state.state
         return state
 
-    def prompt_save(self):
+    def prompt_save(self, recording):
         num_rollouts = len(AMT.rollout_dirs())
         print "There are " + str(num_rollouts) + " rollouts. Save this one? (y/n): "
         char = getch()
         if char == 'y':
-            return self.save_recording()
+            return self.save_recording(recording)
         elif char == 'n':
-            self.recording = []   # erase recordings and states
+            recording = []   # erase recordings and states
             return None
         self.prompt_save()
 
@@ -205,7 +222,7 @@ class AMT():
         net = self.options.tf_net
         path = self.options.tf_net_path
         data = inputdata.AMTData(self.options.train_file, self.options.test_file)
-        self.options.tf_net_path = net.optimize(iterations, batch_size=300, path=path,  data=data)
+        self.options.tf_net_path = net.optimize(iterations, data, batch_size=50, path=path)
 
     def segment(self, frame):
         binary_frame = self.bc.pipe(np.copy(frame))
@@ -244,12 +261,12 @@ class AMT():
         deltas_file.close()
         print "Done saving."
 
-    def save_recording(self):
+    def save_recording(self, recording):
         """
-        Save instance recordings and states by writing filename and corresponding state
-        to states files and writing images to master frames dir and appropriate rollout dir.
-        Clear recordings and states from memory when done writing
-        :return:
+            Save instance recordings and states by writing filename and corresponding state
+            to states files and writing images to master frames dir and appropriate rollout dir.
+            Clear recordings and states from memory when done writing
+            :return:
         """
         rollout_name = self.next_rollout()
         rollout_path = self.options.rollouts_dir + rollout_name + '/'
@@ -263,7 +280,7 @@ class AMT():
         raw_states_file = open(self.options.originals_dir + "states.txt", 'a+')
 
         i = 0
-        for frame, state in self.recording:
+        for frame, state in recording:
             filename = rollout_name + "_frame_" + str(i) + ".jpg"
             raw_states_file.write(filename + self.lst2str(state) + "\n") 
             rollout_states_file.write(filename + self.lst2str(state) + "\n")
@@ -273,7 +290,7 @@ class AMT():
             i += 1
         raw_states_file.close()
         rollout_states_file.close()
-        self.recording = []
+        recording = []
         print "Done saving."
 
     @staticmethod
@@ -332,8 +349,8 @@ if __name__ == "__main__":
     izzy._zeke.steady(False)
     t = DexRobotTurntable()
 
-    options.tf_net = None
-    options.tf_net_path = None    
+    options.tf_net = net3.NetThree()
+    options.tf_net_path = 'net3_02-06-2016_19h48m29s.ckpt'   
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

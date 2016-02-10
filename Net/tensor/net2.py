@@ -40,7 +40,8 @@ class NetTwo(TensorNet):
 
  
         
-if __name == '__main__':
+if __name__ == '__main__':
+    pass
     # these lines are broken now
     #net = NetTwo()
     #net.optimize(100, batch_size=300)

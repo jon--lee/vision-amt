@@ -14,6 +14,7 @@ try:
     while True:
 	    frame = bc.read_binary_frame()
 	    cv2.imshow("camera",frame)
+
 	    cv2.waitKey(30)
 
 	    

@@ -1,3 +1,22 @@
+"""
+    DO NOT INSTANTIATE THIS CLASS!!!!
+    Instead use subclasses that actually contain the net architectures
+
+    General information about TensorNet
+        - Save will save the current sessions variables to the given path.
+          If no path given, it saves to 'self.dir/[timestamped net name].ckpt'
+        - Load takes a path and returns a session with those tf variables
+        - Optimize will load variables from path if given. Otherwise it will initialize new ones.
+          Will save to new timestamp rather than overwriting given path
+        - Output takes a session (that was ideally loaded from TensorNet.load) and image and returns
+        - the net output in a list. Try not to edit the binary image. output will automatically reformat normal cv2.imread
+          or BinaryCamera.read_binary_frame images.
+
+    Try to close sessions after using them (i.e. sess.close()). If more than one is open at a time, exceptions are thrown
+
+"""
+
+
 import tensorflow as tf
 import time
 import datetime
@@ -48,7 +67,7 @@ class TensorNet():
         return sess
 
 
-    def optimize(self, iterations, data, path=None, batch_size=100):
+    def optimize(self, iterations, data, path=None, batch_size=100, test_print=20):
         """
             optimize net for [iterations]. path is either absolute or 
             relative to current working directory. data is InputData object (see class for details)
@@ -62,10 +81,10 @@ class TensorNet():
             sess.run(tf.initialize_all_variables())
             
         if options:
-            log_path = options.Options.tf_dir + self.dir + 'train.log'
+            self.log_path = options.Options.tf_dir + self.dir + 'train.log'
         else:
-            log_path = self.dir + 'train.log'
-        logging.basicConfig(filename=log_path, level=logging.DEBUG)
+            self.log_path = self.dir + 'train.log'
+        #logging.basicConfig(filename=log_path, level=logging.DEBUG)
         
         try:
             with sess.as_default():
@@ -77,6 +96,12 @@ class TensorNet():
                     if i % 3 == 0:
                         batch_loss = self.loss.eval(feed_dict=feed_dict)
                         self.log("[ Iteration " + str(i) + " ] Training loss: " + str(batch_loss))
+                    if i % test_print == 0:
+                        test_batch = data.next_test_batch()
+                        test_ims, test_labels = test_batch
+                        test_dict = { self.x: test_ims, self.y_: test_labels }
+                        test_loss = self.loss.eval(feed_dict=test_dict)
+                        self.log("[ Iteration " + str(i) + " ] Test loss: " + str(test_loss))
                     self.train.run(feed_dict=feed_dict)
                 
 
@@ -86,7 +111,7 @@ class TensorNet():
         if path:
             dir, old_name = os.path.split(path)
         else:
-            dir = './'
+            dir = options.Options.tf_dir + self.dir
         new_name = self.name + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + ".ckpt"
         save_path = self.save(sess, save_path=dir + new_name)
         sess.close()
@@ -141,7 +166,8 @@ class TensorNet():
     def conv2d(self, x, W):
         return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
-    @staticmethod
-    def log(info):
-        print info
-        logging.debug(info)
+    def log(self, message):
+        print message
+        f = open(self.log_path, 'a+')
+        #logging.debug(message)
+        f.write("DEBUG:root:" + message + "\n")
