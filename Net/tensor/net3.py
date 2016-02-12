@@ -23,13 +23,13 @@ class NetThree(TensorNet):
     def __init__(self):
         self.dir = "./net3/"
         self.name = "net3"
-        channels = 3
+        channels = 1
 
         self.x = tf.placeholder('float', shape=[None, 250, 250, channels])
         self.y_ = tf.placeholder("float", shape=[None, 4])
 
-        self.w_conv1 = self.weight_variable([5, 5, channels, 32])
-        self.b_conv1 = self.bias_variable([32])
+        self.w_conv1 = self.weight_variable([5, 5, channels, 15])
+        self.b_conv1 = self.bias_variable([15])
 
         self.h_conv1 = tf.nn.relu(self.conv2d(self.x, self.w_conv1) + self.b_conv1)
 
@@ -58,7 +58,7 @@ class NetThree(TensorNet):
 
 
 if __name__ == '__main__':
-    var_path = "/home/annal/Izzy/vision_amt/Net/tensor/net3/net3-01-19-2016_00h47m49s.ckpt"
+    var_path = "/home/annal/Izzy/vision_amt/Net/tensor/net3/net3_02-11-2016_17h03m16s.ckpt"
     train_path = "home/annal/Izzy/vision_amt/data/amt/train.txt"
     test_path = "home/annal/Izzy/vision_amt/data/amt/test.txt"
     input_data = inputdata.AMTData(train_path, test_path)

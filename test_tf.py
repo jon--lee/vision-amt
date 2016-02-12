@@ -5,5 +5,5 @@ from options import AMTOptions
 data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file)
 net = net3.NetThree()
 
-net.optimize(200, data, batch_size=100)
+net.optimize(400, data, batch_size=100)
 

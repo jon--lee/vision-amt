@@ -108,10 +108,10 @@ class AMT():
         #Gripper 0.5 cm
         #Table 15 degrees
 
-        deltas[0] = np.sign(deltas[0])*np.max(0.2,np.abs(deltas[0]))
-        deltas[1] = np.sign(deltas[1])*np.max(0.01,np.abs(deltas[1]))
-        deltas[2] = np.sign(deltas[2])*np.max(0.005,np.abs(deltas[2]))
-        deltas[3] = np.sign(deltas[3])*np.max(0.2,np.abs(deltas[3]))
+        deltas[0] = np.sign(deltas[0])*np.min([0.2,np.abs(deltas[0])])
+        deltas[1] = np.sign(deltas[1])*np.min([0.01,np.abs(deltas[1])])
+        deltas[2] = np.sign(deltas[2])*np.min([0.005,np.abs(deltas[2])])
+        deltas[3] = np.sign(deltas[3])*np.min([0.2,np.abs(deltas[3])])
         return deltas
 
     def rollout_tf(self, num_frames=150):
@@ -137,17 +137,23 @@ class AMT():
                 frame = self.bc.read_frame()
                 #frame = self.qc.read_frame()
                 # done reading
-            
-                binary_frame = self.segment(frame)               
-                binary_frame = np.reshape(binary_frame, (125, 125, 1))
-                cv2.imshow("camera",binary_frame)
+                if(False):
+                    gray_frame = self.gray(frame) 
+                else:
+                    gray_frame = self.segment(frame)
+
+                gray_frame = np.reshape(gray_frame, (250, 250, 1))
+              
+
+                cv2.imshow("camera",gray_frame)
                 cv2.waitKey(30)
 
  
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
                 recording.append((frame, current_state))
 
-                delta_state = net.output(sess, binary_frame)
+                delta_state = net.output(sess, gray_frame)
+              
                 delta_state = self.deltaSafetyLimites(delta_state)
                 new_izzy, new_t = self.apply_deltas(delta_state)
 
@@ -381,7 +387,7 @@ if __name__ == "__main__":
     t = DexRobotTurntable()
 
     options.tf_net = net3.NetThree()
-    options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net3/net3_02-10-2016_14h17m27s.ckpt'   
+    options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net3/net3_02-11-2016_21h16m25s.ckpt'   
 
     amt = AMT(bincam, izzy, t, c, options=options)
 
