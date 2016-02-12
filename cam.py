@@ -12,7 +12,7 @@ fourcc = cv2.cv.CV_FOURCC(*'mp4v')
 writer = cv2.VideoWriter("testing123.mov", fourcc, 10.0, (Options.WIDTH,Options.HEIGHT))
 try:
     while True:
-	    frame = bc.read_binary_frame()
+	    frame = bc.read_grayscale_frame()
 	    cv2.imshow("camera",frame)
 
 	    cv2.waitKey(30)
@@ -24,6 +24,6 @@ try:
 except KeyboardInterrupt:
     pass
     
-for frame in frames:
-    writer.write(frame)
-writer.release()
+#for frame in frames:
+#    writer.write(frame)
+#writer.release()

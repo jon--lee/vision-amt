@@ -65,6 +65,7 @@ class BinaryCamera():
         
     def open(self):
         self.vc = cv2.VideoCapture(0)
+        # self.vc.set(cv2.cv.CV_CAP_P]ROP_BUFFERSIZE, 1)
         print "EXPOSURE ",self.vc.get(cv2.cv.CV_CAP_PROP_SATURATION)
         #for more saturated version, set saturation to .35
         self.vc.set(cv2.cv.CV_CAP_PROP_SATURATION ,0.15)
@@ -92,6 +93,11 @@ class BinaryCamera():
             cv2.imshow("preview", frame)
         return frame
         
+    def read_grayscale_frame(self, show=False, record=False, state=[0.0,0.0,0.0,0.0,0.0,0.0]):
+        frame = self.read_frame(show, record, state)
+        frame_grayscale = self.gray(frame)
+        return frame_grayscale
+
     def read_binary_frame(self, show=False, record=False, state=[0.0,0.0,0.0,0.0,0.0,0.0]):
         """ Returns a cropped binary frame of the video
         Significantly slower than read_frame due to the pipeline. """
@@ -108,7 +114,12 @@ class BinaryCamera():
             
         return frame_binary
         
-    def pipe(self, frame, h=125, w=125):
+    def gray(self, frame, h=250, w=250):
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame = cv2.resize(frame, (h, w))
+        return frame
+
+    def pipe(self, frame, h=250, w=250):
         """ sends frame through cv2 pipeline to render
         binary image of original frame. Assumes calibration """
 

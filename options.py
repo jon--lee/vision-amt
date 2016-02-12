@@ -51,6 +51,7 @@ class AMTOptions(Options):
     rollouts_dir = Options.amt_dir + "rollouts/"
     binaries_dir = Options.amt_dir + "binaries/"
     originals_dir = Options.amt_dir + "frames/"
+    grayscales_dir = Options.amt_dir + "grayscales/"
 
     ROTATE_UPPER_BOUND = 4.03313
     ROTATE_LOWER_BOUND = 3.16954

@@ -18,6 +18,9 @@ import imp
 import IPython
 import reset_rollout
 import numpy as np
+import compile_sets
+
+from query_cam import query_cam
 
 sys.path[0] = sys.path[0] + '/../../GPIS/src/grasp_selection/control/DexControls'
         
@@ -51,6 +54,11 @@ class AMT():
         self.c = controller
         self.options = options
         self.r = reset_rollout.reset(izzy, turntable)
+
+        # self.qc = query_cam(self.bc)
+
+
+
 
     def initial_demonstration(self, controller):
         print "Starting supervisor demonstration..."
@@ -111,17 +119,29 @@ class AMT():
         path = self.options.tf_net_path
         sess = net.load(var_path=self.options.tf_net_path)
         recording = []
-        #Clear Buffer ... NEED TO TEST
+        # self.qc = query_cam(self.bc)
+        # #Clear Buffer ... NEED TO TEST
+        # # self.qc.start()
+        # while(self.qc.read_frame() is None):
+        #     print self.qc.frame
+        #     pass # wait until images start coming through
+        #
         for i in range(4):
-            self.bc.read_frame()
+            self.bc.vc.grab()
         try:
 
             for i in range(num_frames):
+                # Read from the most updated frame
+                for i in range(4):
+                    self.bc.vc.grab()
                 frame = self.bc.read_frame()
+                #frame = self.qc.read_frame()
+                # done reading
+            
                 binary_frame = self.segment(frame)               
                 binary_frame = np.reshape(binary_frame, (125, 125, 1))
-                # cv2.imshow("camera",binary_frame)
-                # cv2.waitKey(30)
+                cv2.imshow("camera",binary_frame)
+                cv2.waitKey(30)
 
  
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
@@ -133,18 +153,24 @@ class AMT():
 
                 # TODO: uncomment these to update izzy and t
                 print "DELTA STATE ",delta_state
-                # self.izzy._zeke._queueState(ZekeState(new_izzy))
-                # self.turntable.gotoState(TurntableState(new_t), .25, .25)
+                self.izzy._zeke._queueState(ZekeState(new_izzy))
+                self.turntable.gotoState(TurntableState(new_t), .25, .25)
 
+                
                 time.sleep(.03)
        
         except KeyboardInterrupt:
             pass
-        IPython.embed()
+
+        # stop querying the camera
+        # self.qc.terminate()
+        # terminated
+
+       
         sess.close()
         # self.izzy._zeke.steady(True)
         self.prompt_save(recording)
-        self.r.move_reset()
+        # self.r.move_reset()
         # self.izzy._zeke.steady(False)
     
     def test(self):
@@ -228,6 +254,10 @@ class AMT():
         binary_frame = self.bc.pipe(np.copy(frame))
         return binary_frame
 
+    def gray(self, frame):
+        grayscale = self.bc.gray(np.copy(frame))
+        return grayscale
+
 
     def write_train_test_sets(self):
         deltas_file = open(self.options.deltas_file, 'r')
@@ -285,6 +315,7 @@ class AMT():
             raw_states_file.write(filename + self.lst2str(state) + "\n") 
             rollout_states_file.write(filename + self.lst2str(state) + "\n")
             cv2.imwrite(self.options.originals_dir + filename, frame)
+            cv2.imwrite(self.options.grayscales_dir + filename, self.gray(frame))
             cv2.imwrite(self.options.binaries_dir + filename, self.segment(frame))
             cv2.imwrite(rollout_path + filename, frame)
             i += 1
@@ -350,12 +381,12 @@ if __name__ == "__main__":
     t = DexRobotTurntable()
 
     options.tf_net = net3.NetThree()
-    options.tf_net_path = 'net3_02-06-2016_19h48m29s.ckpt'   
+    options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net3/net3_02-10-2016_14h17m27s.ckpt'   
 
     amt = AMT(bincam, izzy, t, c, options=options)
 
     while True:
-        print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 't' -> test, 'd' -> demonstrate): "
+        print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 't' -> test, 'd' -> demonstrate, 'c' -> compile train/test sets): "
         char = getch()
         if char == 'q':
             print "Quitting..."
@@ -375,6 +406,11 @@ if __name__ == "__main__":
             print "Initial demonstration..."
             amt.initial_demonstration(c)
             print "Done demonstrating."
+
+        elif char == 'c':
+            print 'Compiling train and test sets...'
+            compile_sets.compile()
+            print 'Done compiling sets'
 
         elif char == 't':
             amt.test()

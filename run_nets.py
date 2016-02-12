@@ -1,12 +1,13 @@
-from Net.tensor import net3, net2, inputdata
+from Net.tensor import net3, net2, net4, inputdata
 from options import AMTOptions
+import tensorflow as tf
 
 
 
 if __name__ == '__main__':
-    net_classes = [net2.NetTwo, net3.NetThree]
+    data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file)
+    nets = [net2.NetTwo(), net3.NetThree(), net4.NetFour()]
 
-    for net_class in nets:
-        data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file)
-        n = net_class()
-        net.optimize(350, data, batch_size=200)
+    for net in nets:
+        net.optimize(200, data, batch_size=200)
+
