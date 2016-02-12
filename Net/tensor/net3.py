@@ -17,6 +17,7 @@ import random
 from tensornet import TensorNet
 import time
 import datetime
+import Ipython 
 
 class NetThree(TensorNet):
 
@@ -31,6 +32,8 @@ class NetThree(TensorNet):
 
         self.w_conv1 = self.weight_variable([5, 5, channels, 15])
         self.b_conv1 = self.bias_variable([15])
+
+        
 
 
         self.h_conv1 = tf.nn.relu(self.conv2d(self.x, self.w_conv1) + self.b_conv1)
@@ -65,6 +68,8 @@ if __name__ == '__main__':
     test_path = "home/annal/Izzy/vision_amt/data/amt/test.txt"
     input_data = inputdata.AMTData(train_path, test_path)
     net = NetThree()
+
+
     net.optimize(100, input_data, path='net3_02-06-2016_16h38m28s.ckpt')    
     
 
