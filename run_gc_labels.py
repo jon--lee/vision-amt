@@ -64,9 +64,6 @@ class CircleTracker(object):
         
 
     def getPose(self,template,img,gripper = False): 
-       
-
-
         w = template.shape[0]
         h = template.shape[1]
         img2 = img.copy()
