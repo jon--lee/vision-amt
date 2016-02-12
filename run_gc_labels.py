@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import numpy.linalg as LA
+from template_finder import TemplateGUI
 
 
 class CircleTracker(object):
@@ -55,9 +56,16 @@ class CircleTracker(object):
         else: 
             self.prev_pos = cur_pos
             return cur_pos
+
+
+    def getTemplate(self,img):
+        tg = TemplateGUI(img=img)
+        self.gc = tg.getTemplate()
         
 
     def getPose(self,template,img,gripper = False): 
+       
+
 
         w = template.shape[0]
         h = template.shape[1]
@@ -130,6 +138,8 @@ class CircleTracker(object):
             self.getRollout(rollout)
             idx = 0
             self.first = True
+
+            self.gc = self.getTemplate(self.frames[0])
             for img in self.frames:
                 # if(idx == 55):
                 #     IPython.embed()
