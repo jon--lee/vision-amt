@@ -17,7 +17,6 @@ import random
 from tensornet import TensorNet
 import time
 import datetime
-import Ipython 
 
 class NetThree(TensorNet):
 
