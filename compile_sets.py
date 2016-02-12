@@ -14,7 +14,7 @@ def compile():
 
     for line in deltas_file:            
         #path = AMTOptions.originals_dir
-        path = AMTOptions.binaries_dir 
+        path = AMTOptions.grayscales_dir 
         if random.random() > .2:
             train_file.write(path + line)
         else:

@@ -137,7 +137,7 @@ class AMT():
                 frame = self.bc.read_frame()
                 #frame = self.qc.read_frame()
                 # done reading
-                if(False):
+                if(True):
                     gray_frame = self.gray(frame) 
                 else:
                     gray_frame = self.segment(frame)
@@ -387,7 +387,7 @@ if __name__ == "__main__":
     t = DexRobotTurntable()
 
     options.tf_net = net3.NetThree()
-    options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net3/net3_02-11-2016_21h16m25s.ckpt'   
+    options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net3/net3_02-12-2016_00h08m36s.ckpt'   
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

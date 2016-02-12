@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import numpy.linalg as LA
+from template_finder import TemplateGUI
 
 
 class CircleTracker(object):
@@ -55,9 +56,16 @@ class CircleTracker(object):
         else: 
             self.prev_pos = cur_pos
             return cur_pos
+
+
+    def getTemplate(self,img):
+        tg = TemplateGUI(img=img.copy())
+        return tg.getTemplate()
         
 
     def getPose(self,template,img,gripper = False): 
+       
+
 
         w = template.shape[0]
         h = template.shape[1]
@@ -65,7 +73,7 @@ class CircleTracker(object):
         if(gripper):
             methods = ['cv2.TM_SQDIFF']
         else: 
-            methods = ['cv2.TM_SQDIFF_NORMED']
+            methods = ['cv2.TM_CCORR_NORMED']
 
         for meth in methods:
             img = img2.copy()
@@ -98,7 +106,7 @@ class CircleTracker(object):
              
                 cv2.imshow("figue",img)
                 cv2.waitKey(30)
-                IPython.embed()
+               
 
         
         return pos
@@ -146,6 +154,11 @@ class CircleTracker(object):
             self.getRollout(rollout)
             idx = 0
             self.first = True
+
+            self.gc = self.getTemplate(self.frames[0])
+            cv2.imshow("template",self.gc)
+            cv2.waitKey(30)
+            IPython.embed()
             for img in self.frames:
                 # if(idx == 55):
                 #     IPython.embed()

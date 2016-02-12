@@ -28,8 +28,10 @@ class NetThree(TensorNet):
         self.x = tf.placeholder('float', shape=[None, 250, 250, channels])
         self.y_ = tf.placeholder("float", shape=[None, 4])
 
+
         self.w_conv1 = self.weight_variable([5, 5, channels, 15])
         self.b_conv1 = self.bias_variable([15])
+
 
         self.h_conv1 = tf.nn.relu(self.conv2d(self.x, self.w_conv1) + self.b_conv1)
 
