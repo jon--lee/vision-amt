@@ -2020,3 +2020,27 @@ DEBUG:root:[ Iteration 108 ] Training loss: 0.0382441
 DEBUG:root:Saving...
 DEBUG:root:Saved model to /home/annal/Izzy/vision_amt/Net/tensor/./net3/net3_02-12-2016_23h53m29s.ckpt
 DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.66934
+DEBUG:root:[ Iteration 3 ] Training loss: 0.442604
+DEBUG:root:[ Iteration 6 ] Training loss: 0.483356
+DEBUG:root:[ Iteration 9 ] Training loss: 0.484019
+DEBUG:root:[ Iteration 12 ] Training loss: 0.505924
+DEBUG:root:[ Iteration 15 ] Training loss: 0.482236
+DEBUG:root:[ Iteration 18 ] Training loss: 0.494066
+DEBUG:root:[ Iteration 20 ] Test loss: 0.507288
+DEBUG:root:[ Iteration 21 ] Training loss: 0.515574
+DEBUG:root:[ Iteration 24 ] Training loss: 0.468291
+DEBUG:root:[ Iteration 27 ] Training loss: 0.496129
+DEBUG:root:[ Iteration 30 ] Training loss: 0.49319
+DEBUG:root:[ Iteration 33 ] Training loss: 0.503052
+DEBUG:root:[ Iteration 36 ] Training loss: 0.482517
+DEBUG:root:[ Iteration 39 ] Training loss: 0.517775
+DEBUG:root:[ Iteration 40 ] Test loss: 0.511331
+DEBUG:root:[ Iteration 42 ] Training loss: 0.518159
+DEBUG:root:[ Iteration 45 ] Training loss: 0.485802
+DEBUG:root:[ Iteration 48 ] Training loss: 0.4894
+DEBUG:root:[ Iteration 51 ] Training loss: 0.489646
+DEBUG:root:[ Iteration 54 ] Training loss: 0.519943
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /home/annal/Izzy/vision_amt/Net/tensor/./net3/net3_02-12-2016_23h58m44s.ckpt
+DEBUG:root:Optimization done.
