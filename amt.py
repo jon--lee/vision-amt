@@ -114,6 +114,14 @@ class AMT():
         deltas[3] = np.sign(deltas[3])*np.min([0.2,np.abs(deltas[3])])
         return deltas
 
+    def rescale(self,deltas):
+        deltas[0] = float(deltas[0])*0.2
+        deltas[1] = float(deltas[1])*0.01
+        deltas[2] = float(deltas[2])*0.005    
+        deltas[3] = float(deltas[3])*0.2
+        return deltas
+
+
     def rollout_tf(self, num_frames=150):
         net = self.options.tf_net
         path = self.options.tf_net_path
@@ -152,7 +160,7 @@ class AMT():
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
                 recording.append((frame, current_state))
 
-                delta_state = net.output(sess, gray_frame)
+                delta_state = self.rescale(net.output(sess, gray_frame))
               
                 delta_state = self.deltaSafetyLimites(delta_state)
                 new_izzy, new_t = self.apply_deltas(delta_state)
@@ -387,7 +395,7 @@ if __name__ == "__main__":
     t = DexRobotTurntable()
 
     options.tf_net = net3.NetThree()
-    options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net3/net3_02-12-2016_00h08m36s.ckpt'   
+    options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net3/net3_02-12-2016_16h25m13s.ckpt'   
 
     amt = AMT(bincam, izzy, t, c, options=options)
 
@@ -420,5 +428,8 @@ if __name__ == "__main__":
 
         elif char == 't':
             amt.test()
+
+        elif char == 's':
+            amt.r.move_reset()
 
     print "Done."

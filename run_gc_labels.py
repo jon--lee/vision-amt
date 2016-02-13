@@ -167,8 +167,8 @@ class CircleTracker(object):
 
 if __name__ == '__main__':
     print "running"
-    rng = [0,21]
-    ct = CircleTracker(rng,debug= True)
+    rng = [22,41]
+    ct = CircleTracker(rng,debug= False)
     ct.run()
     ct.file_lbl.close()
 

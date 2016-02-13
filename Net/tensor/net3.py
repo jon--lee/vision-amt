@@ -32,10 +32,12 @@ class NetThree(TensorNet):
         self.w_conv1 = self.weight_variable([5, 5, channels, 15])
         self.b_conv1 = self.bias_variable([15])
 
-        
-
+        """ Modifying net3 to contain max pooling layer"""        
+       
 
         self.h_conv1 = tf.nn.relu(self.conv2d(self.x, self.w_conv1) + self.b_conv1)
+
+        self.h_conv1 = self.max_pool(self.h_conv1, 4)
 
         # print self.h_conv1.get_shape()
         conv1_num_nodes = NetThree.reduce_shape(self.h_conv1.get_shape())
@@ -54,11 +56,12 @@ class NetThree(TensorNet):
         self.y_out = tf.tanh(tf.matmul(self.h_fc1, self.w_fc2) + self.b_fc2)
 
         self.loss = tf.reduce_mean(.5*tf.square(self.y_out - self.y_))
-        self.train_step = tf.train.MomentumOptimizer(.003, .9)
+        self.train_step = tf.train.MomentumOptimizer(.03, .9)
         self.train = self.train_step.minimize(self.loss)
 
         
-        
+    def max_pool(self, conv, k):
+        return tf.nn.max_pool(conv, ksize=[1,k,k,1], strides=[1,k,k,1], padding='SAME')
 
 
 if __name__ == '__main__':

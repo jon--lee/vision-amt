@@ -67,7 +67,7 @@ class TensorNet():
         return sess
 
 
-    def optimize(self, iterations, data, path=None, batch_size=100, test_print=20):
+    def optimize(self, iterations, data, path=None, batch_size=100, test_print=20, test_im=None):
         """
             optimize net for [iterations]. path is either absolute or 
             relative to current working directory. data is InputData object (see class for details)
@@ -91,12 +91,11 @@ class TensorNet():
                 for i in range(iterations):
                     batch = data.next_train_batch(batch_size)
                     ims, labels = batch
-
                     feed_dict = { self.x: ims, self.y_: labels }
                     if i % 3 == 0:
                         batch_loss = self.loss.eval(feed_dict=feed_dict)
                         self.log("[ Iteration " + str(i) + " ] Training loss: " + str(batch_loss))
-                    if i % test_print == 0:
+                    elif i % test_print == 0:
                         test_batch = data.next_test_batch()
                         test_ims, test_labels = test_batch
                         test_dict = { self.x: test_ims, self.y_: test_labels }
@@ -107,13 +106,12 @@ class TensorNet():
 
         except KeyboardInterrupt:
             pass
-        
-        if path:
-            dir, old_name = os.path.split(path)
-        else:
+        if test_im:
+            print "Labels after optimization method: " + str(self.output(sess, test_im))
+        if not path:
             dir = options.Options.tf_dir + self.dir
-        new_name = self.name + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + ".ckpt"
-        save_path = self.save(sess, save_path=dir + new_name)
+            path = dir + self.name + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + ".ckpt"
+        save_path = self.save(sess, save_path=path)
         sess.close()
         self.log( "Optimization done." )
         return save_path
@@ -124,6 +122,7 @@ class TensorNet():
             accepts 3-channel image with pixel values from 
             0-255 and returns controls in four element list
         """
+        
         sess = self.load(var_path=path)
         im = inputdata.im2tensor(im)
         shape = np.shape(im)
@@ -160,7 +159,7 @@ class TensorNet():
         return tf.Variable(initial)
 
     def bias_variable(self, shape):
-        initial = tf.constant(.1, shape=shape)
+        initial = tf.constant(.05, shape=shape)
         return tf.Variable(initial)
 
     def conv2d(self, x, W):

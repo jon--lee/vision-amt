@@ -43,6 +43,8 @@ class reset():
         time.sleep(1*val)
         DexRobotZeke.PHI += 0.3
         ZekeState([])
+        self.izzy._zeke.steady(True)
+        time.sleep(.01)
         self.izzy.reset(tra_speed = .25)
         originalPHI = DexRobotZeke.PHI
         self.izzy.gotoState(ZekeState([None, .1, None, None, None, None]), tra_speed = .25)
@@ -60,6 +62,7 @@ class reset():
             pass # busy waiting
         self.turn.gotoState(TurntableState([(.5-val) * pi]),  .1, .1)
         DexRobotZeke.PHI = originalPHI
+        self.izzy._zeke.steady(False)
         return
         
         

@@ -108,13 +108,14 @@ class AMTData(InputData):
         self.i = self.i + n
         return list(batch[0]), list(batch[1])
 
-    def next_test_batch(self):
+    def next_test_batch(self, size=100):
         """
         read into memory on request
         :return: tuple with images in [0], labels in [1]
         """
         batch = []
-        for path, labels in self.test_tups:
+        random.shuffle(self.test_tups)
+        for path, labels in self.test_tups[:size]:
             im = cv2.imread(path)
             im = im2tensor(im)
             batch.append((im, labels))

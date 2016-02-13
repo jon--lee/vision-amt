@@ -1,6 +1,15 @@
 from options import AMTOptions
 import random
 
+
+def scale(deltas): 
+    deltas[0] = float(deltas[0])/0.2
+    deltas[1] = float(deltas[1])/0.01
+    deltas[2] = float(deltas[2])/0.005    
+    deltas[3] = float(deltas[3])/0.2
+    return deltas
+
+
 def compile():
     train_path = AMTOptions.train_file
     test_path = AMTOptions.test_file
@@ -13,8 +22,14 @@ def compile():
     deltas_file = open(deltas_path, 'r')
 
     for line in deltas_file:            
-        #path = AMTOptions.originals_dir
-        path = AMTOptions.grayscales_dir 
+        path = AMTOptions.grayscales_dir
+        labels = line.split()
+
+        img_name = labels[0]
+        deltas_t = labels[1:5]
+        deltas = scale(deltas_t)
+        line = img_name+" "+str(deltas[0])+" "+str(deltas[1])+" "+str(deltas[2])+" "+str(deltas[3])+"\n"
+   
         if random.random() > .2:
             train_file.write(path + line)
         else:
