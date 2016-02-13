@@ -387,7 +387,7 @@ if __name__ == "__main__":
     t = DexRobotTurntable()
 
     options.tf_net = net3.NetThree()
-    options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net3/net3_02-12-2016_00h08m36s.ckpt'   
+    options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensornet3_02-13-2016_11h48m58s.ckpt'  
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

@@ -1,2 +1,2 @@
-model_checkpoint_path: "net3net3_01-29-2016_13h42m51s.ckpt"
-all_model_checkpoint_paths: "net3net3_01-29-2016_13h42m51s.ckpt"
+model_checkpoint_path: "/home/annal/Izzy/vision_amt/Net/tensor/./net3net3_02-13-2016_11h38m47s.ckpt"
+all_model_checkpoint_paths: "/home/annal/Izzy/vision_amt/Net/tensor/./net3net3_02-13-2016_11h38m47s.ckpt"
