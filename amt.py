@@ -8,7 +8,7 @@ from gripper.TurnTableControl import *
 from gripper.PyControl import *
 from gripper.xboxController import *
 from pipeline.bincam import BinaryCamera
-from Net.tensor import inputdata, net3
+from Net.tensor import inputdata, net3,net4
 import time
 import datetime
 import os
@@ -102,6 +102,16 @@ class AMT():
             deltas[3] = 0.0 
         return deltas
 
+    def rescale(self,deltas):
+
+        deltas[0] = deltas[0]*0.2
+        deltas[1] = deltas[1]*0.01
+        deltas[2] = deltas[2]*0.005
+        deltas[3] = deltas[3]*0.2
+        return deltas
+
+
+
     def deltaSafetyLimites(self,deltas):
         #Rotation 15 degrees
         #Extension 1 cm 
@@ -114,7 +124,7 @@ class AMT():
         deltas[3] = np.sign(deltas[3])*np.min([0.2,np.abs(deltas[3])])
         return deltas
 
-    def rollout_tf(self, num_frames=150):
+    def rollout_tf(self, num_frames=100):
         net = self.options.tf_net
         path = self.options.tf_net_path
         sess = net.load(var_path=self.options.tf_net_path)
@@ -137,13 +147,15 @@ class AMT():
                 frame = self.bc.read_frame()
                 #frame = self.qc.read_frame()
                 # done reading
-                if(True):
+                if(False):
                     gray_frame = self.gray(frame) 
-                else:
+                elif(False):
                     gray_frame = self.segment(frame)
+                elif(True):
+                    gray_frame = self.color(frame)
 
-                gray_frame = np.reshape(gray_frame, (250, 250, 1))
-              
+                gray_frame = np.reshape(gray_frame, (250, 250, 3))
+            
 
                 cv2.imshow("camera",gray_frame)
                 cv2.waitKey(30)
@@ -152,8 +164,8 @@ class AMT():
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
                 recording.append((frame, current_state))
 
-                delta_state = net.output(sess, gray_frame)
-              
+                delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
+                # delta_state = net.output(sess, gray_frame,channels=3)
                 delta_state = self.deltaSafetyLimites(delta_state)
                 new_izzy, new_t = self.apply_deltas(delta_state)
 
@@ -263,6 +275,9 @@ class AMT():
     def gray(self, frame):
         grayscale = self.bc.gray(np.copy(frame))
         return grayscale
+    def color(self,frame): 
+        color_frame = cv2.resize(frame.copy(), (250, 250))
+        return color_frame
 
 
     def write_train_test_sets(self):
@@ -386,8 +401,8 @@ if __name__ == "__main__":
     izzy._zeke.steady(False)
     t = DexRobotTurntable()
 
-    options.tf_net = net3.NetThree()
-    options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensornet3_02-13-2016_11h48m58s.ckpt'  
+    options.tf_net = net4.NetFour()
+    options.tf_net_path = '/home/annal/Izzy/vision_amtnet4_02-13-2016_18h51m16s.ckpt'
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

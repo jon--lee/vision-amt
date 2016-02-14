@@ -32,7 +32,7 @@ class CircleTracker(object):
         self.frames = []
         self.img_name = []
         self.states = []
-        for i in range(0,150):
+        for i in range(0,100):
             self.frames.append(cv2.imread(self.addr+rollout+'/'+rollout+'_frame_'+str(i)+'.jpg',1))
             self.img_name.append(rollout+'_frame_'+str(i)+'.jpg')
 
@@ -153,9 +153,13 @@ class CircleTracker(object):
             self.first = True
 
             self.gc = self.getTemplate(self.frames[0])
-            cv2.imshow("template",self.gc)
+            cv2.imshow("template_gc",self.gc)
             cv2.waitKey(30)
-            IPython.embed()
+            self.gripper = self.getTemplate(self.frames[0])
+            cv2.imshow("template_grip",self.gc)
+            cv2.waitKey(30)
+
+           
             for img in self.frames:
                 # if(idx == 55):
                 #     IPython.embed()
@@ -167,7 +171,7 @@ class CircleTracker(object):
 
 if __name__ == '__main__':
     print "running"
-    rng = [0,21]
+    rng = [42,81]
     ct = CircleTracker(rng,debug= True)
     ct.run()
     ct.file_lbl.close()

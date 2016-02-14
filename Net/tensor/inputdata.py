@@ -65,7 +65,7 @@ def parse(filepath, stop=-1):
     return tups
 
 
-def im2tensor(im):
+def im2tensor(im,channels=1):
     """
         convert 3d image (height, width, 3-channel) where values range [0,255]
         to appropriate pipeline shape and values of either 0 or 1
@@ -73,18 +73,20 @@ def im2tensor(im):
     """
     shape = np.shape(im)
     h, w = shape[0], shape[1]
-    zeros = np.zeros((h, w, 1))
-    zeros[:,:,0] = np.round(im[:,:,0] / 255.0, 0)
+    zeros = np.zeros((h, w, channels))
+    for i in range(channels):
+        zeros[:,:,i] = np.round(im[:,:,i] / 255.0, 0)
     return zeros
 
 
 class AMTData(InputData):
     
-    def __init__(self, train_path, test_path):
+    def __init__(self, train_path, test_path,channels=1):
         self.train_tups = parse(train_path)
         self.test_tups = parse(test_path)
 
         self.i = 0
+        self.channels = channels
 
         random.shuffle(self.train_tups)
         random.shuffle(self.test_tups)
@@ -102,7 +104,8 @@ class AMTData(InputData):
         batch = []
         for path, labels in batch_tups:
             im = cv2.imread(path)
-            im = im2tensor(im)
+         
+            im = im2tensor(im,self.channels)
             batch.append((im, labels))
         batch = zip(*batch)
         self.i = self.i + n
@@ -115,8 +118,8 @@ class AMTData(InputData):
         """
         batch = []
         for path, labels in self.test_tups:
-            im = cv2.imread(path)
-            im = im2tensor(im)
+            im = cv2.imread(path,self.channels)
+            im = im2tensor(im,self.channels)
             batch.append((im, labels))
         batch = zip(*batch)
         return list(batch[0]), list(batch[1])

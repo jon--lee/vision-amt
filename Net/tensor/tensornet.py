@@ -132,12 +132,12 @@ class TensorNet():
             return sess.run(self.y_out, feed_dict={self.x:im})
         
 
-    def output(self, sess, im):
+    def output(self, sess, im,channels):
         """
             accepts batch of 3d images, converts to tensor
             and returns four element list of controls
         """
-        im = inputdata.im2tensor(im)
+        im = inputdata.im2tensor(im,channels)
         shape = np.shape(im)
         im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
         with sess.as_default():
