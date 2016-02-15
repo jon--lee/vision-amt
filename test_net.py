@@ -47,6 +47,7 @@ class NetTest(object):
             img = np.reshape(img, (250, 250, 3))
             net_v = np.array(self.getNetOutput(img),dtype=np.float32)
             true_v = np.array(self.scale(deltas_t),dtype=np.float32)
+
             err = 0.5*LA.norm(net_v-true_v)**2
             self.vals.append(err)
 
@@ -61,6 +62,6 @@ class NetTest(object):
 
 if __name__ == '__main__':
 
-    nt = NetTest(net_path ='/home/annal/Izzy/vision_amt/Net/tensornet4_02-13-2016_16h52m48s.ckpt')
+    nt = NetTest(net_path ='/home/annal/Izzy/vision_amt/Netnet4_02-13-2016_18h44m24s.ckpt')
     nt.rollCall()
 

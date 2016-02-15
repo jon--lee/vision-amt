@@ -8,7 +8,7 @@ from gripper.TurnTableControl import *
 from gripper.PyControl import *
 from gripper.xboxController import *
 from pipeline.bincam import BinaryCamera
-from Net.tensor import inputdata, net3,net4
+from Net.tensor import inputdata, net3,net4,net5
 import time
 import datetime
 import os
@@ -165,7 +165,7 @@ class AMT():
                 recording.append((frame, current_state))
 
                 delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
-                # delta_state = net.output(sess, gray_frame,channels=3)
+                #delta_state = net.output(sess, gray_frame,channels=3)
                 delta_state = self.deltaSafetyLimites(delta_state)
                 new_izzy, new_t = self.apply_deltas(delta_state)
 
@@ -402,7 +402,7 @@ if __name__ == "__main__":
     t = DexRobotTurntable()
 
     options.tf_net = net4.NetFour()
-    options.tf_net_path = '/home/annal/Izzy/vision_amtnet4_02-13-2016_18h51m16s.ckpt'
+    options.tf_net_path = '/home/annal/Izzy/vision_amt/Netnet4_02-13-2016_18h44m24s.ckpt'
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

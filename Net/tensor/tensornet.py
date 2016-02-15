@@ -110,6 +110,7 @@ class TensorNet():
         
         if path:
             dir, old_name = os.path.split(path)
+            dir = dir + '/'
         else:
             dir = options.Options.tf_dir + self.dir
         new_name = self.name + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + ".ckpt"
@@ -156,15 +157,20 @@ class TensorNet():
 
 
     def weight_variable(self, shape):
-        initial = tf.truncated_normal(shape, stddev=0.1)
+        initial = tf.random_normal(shape, stddev=.05)
+        #initial = tf.truncated_normal(shape, stddev=0.1)
         return tf.Variable(initial)
 
     def bias_variable(self, shape):
-        initial = tf.constant(.1, shape=shape)
+        #initial = tf.random_normal(shape, stddev=.005)
+        initial = tf.constant(.001, shape=shape)
         return tf.Variable(initial)
 
     def conv2d(self, x, W):
         return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+    
+    def max_pool(self, x, k):
+        return tf.nn.max_pool(x, ksize=[1,k,k,1], strides=[1,k,k,1], padding='SAME')
 
     def log(self, message):
         print message
