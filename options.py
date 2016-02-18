@@ -25,6 +25,7 @@ class Options():
     images_dir = data_dir + 'images/'
     amt_dir = data_dir + 'amt/'
     record_amt_dir = amt_dir + "record_amt/"
+    nets_dir = '/media/1tb/Izzy/nets/'
 
     def __init__(self):
         self.test = False
@@ -53,6 +54,7 @@ class AMTOptions(Options):
     originals_dir = Options.amt_dir + "frames/"
     grayscales_dir = Options.amt_dir + "grayscales/"
     colors_dir = Options.amt_dir + "colors/"
+
 
     ROTATE_UPPER_BOUND = 4.03313
     ROTATE_LOWER_BOUND = 3.16954

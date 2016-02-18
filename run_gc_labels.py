@@ -18,6 +18,8 @@ class CircleTracker(object):
         self.first = True
         self.prev_pos = np.zeros(2)
         self.file_lbl = open('data/amt/labels.txt','w')
+        fourcc = cv2.cv.CV_FOURCC(*'mp4v')
+        self.writer = cv2.VideoWriter('gc_labels.mov', fourcc, 10.0, (420,420))
 
 
     def compileList(self,rng):
@@ -44,9 +46,7 @@ class CircleTracker(object):
 
     def lowPass(self, cur_pos):
         dist = LA.norm(cur_pos-self.prev_pos)
-        print self.prev_pos
-        print cur_pos
-        print dist
+        
         if(self.first): 
             self.first = False
             self.prev_pos = cur_pos
@@ -71,6 +71,7 @@ class CircleTracker(object):
             methods = ['cv2.TM_SQDIFF']
         else: 
             methods = ['cv2.TM_CCORR_NORMED']
+
 
         for meth in methods:
             img = img2.copy()
@@ -100,7 +101,7 @@ class CircleTracker(object):
 
                 cv2.rectangle(img,top_left, bottom_right, 255, 2)
 
-             
+                self.writer.write(img)
                 cv2.imshow("figue",img)
                 cv2.waitKey(30)
                
@@ -159,19 +160,20 @@ class CircleTracker(object):
             cv2.imshow("template_grip",self.gc)
             cv2.waitKey(30)
 
-           
             for img in self.frames:
                 # if(idx == 55):
                 #     IPython.embed()
                 #     self.debug = True
                 label = self.computeLabel(img)
+                print "LABEL ", label
                 self.writeLabel(label,self.img_name[idx])
                 idx += 1
+            self.writer.release()
 
 
 if __name__ == '__main__':
     print "running"
-    rng = [42,81]
+    rng = [60,100]
     ct = CircleTracker(rng,debug= True)
     ct.run()
     ct.file_lbl.close()

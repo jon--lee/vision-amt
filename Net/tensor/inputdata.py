@@ -123,5 +123,6 @@ class AMTData(InputData):
             im = cv2.imread(path,self.channels)
             im = im2tensor(im,self.channels)
             batch.append((im, labels))
+        random.shuffle(self.test_tups)
         batch = zip(*batch)
         return list(batch[0]), list(batch[1])

@@ -20,7 +20,7 @@ class NetTest(object):
         sm = 0.0
         for val in self.vals:
             sm += val
-        print "AVERAGE SQUARED EUCLIDEAN LOSS ",sm/len(self.vals)*0.25
+        print "AVERAGE SQUARED EUCLIDEAN LOSS ",sm/len(self.vals)#*0.25
 
     def scale(self,deltas):
         deltas[0] = float(deltas[0])/0.2
@@ -47,8 +47,10 @@ class NetTest(object):
             img = np.reshape(img, (250, 250, 3))
             net_v = np.array(self.getNetOutput(img),dtype=np.float32)
             true_v = np.array(self.scale(deltas_t),dtype=np.float32)
+            #print "NET ",net_v
+            #print "TRYE ",true_v
 
-            err = 0.5*LA.norm(net_v-true_v)**2
+            err = 0.5*LA.norm(net_v[0]-true_v[0])**2
             self.vals.append(err)
 
         self.computerER()
@@ -62,6 +64,6 @@ class NetTest(object):
 
 if __name__ == '__main__':
 
-    nt = NetTest(net_path ='/home/annal/Izzy/vision_amt/Netnet4_02-13-2016_18h44m24s.ckpt')
+    nt = NetTest(net_path ='/media/1tb/Izzy/nets/net4_02-17-2016_19h07m23s.ckpt')
     nt.rollCall()
 

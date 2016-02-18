@@ -164,9 +164,11 @@ class AMT():
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
                 recording.append((frame, current_state))
 
+
                 delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
                 #delta_state = net.output(sess, gray_frame,channels=3)
                 delta_state = self.deltaSafetyLimites(delta_state)
+                delta_state[0] = delta_state[0]
                 new_izzy, new_t = self.apply_deltas(delta_state)
 
                 # TODO: uncomment these to update izzy and t
@@ -401,8 +403,10 @@ if __name__ == "__main__":
     izzy._zeke.steady(False)
     t = DexRobotTurntable()
 
+    #options.tf_net = net5.NetFive()
+    #options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net5/net5_02-15-2016_11h58m56s.ckpt'
     options.tf_net = net4.NetFour()
-    options.tf_net_path = '/home/annal/Izzy/vision_amt/Netnet4_02-13-2016_18h44m24s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net4_02-17-2016_20h04m24s.ckpt'
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

@@ -30,9 +30,9 @@ class VideoMaker(object):
     def filmRollout(self,rollout):
         fourcc = cv2.cv.CV_FOURCC(*'mp4v')
 
-		writer = cv2.VideoWriter(self.addr+rollout, fourcc, 10.0, (Options.WIDTH,Options.HEIGHT))
+        writer = cv2.VideoWriter(self.addr+rollout+'.mov', fourcc, 10.0, (420,420))
         for i in range(0,100):
-            img = cv2.imread(self.addr+rollout+'/'+rollout+'_frame_'+str(i)+'.jpg',1))
+            img = cv2.imread(self.addr+rollout+'/'+rollout+'_frame_'+str(i)+'.jpg',1)
             writer.write(img)
 
         writer.release()
@@ -40,7 +40,8 @@ class VideoMaker(object):
     def run(self):
 
     	for rollout in self.rollouts:
-            self.getRollout(rollout)
+            print rollout
+            self.filmRollout(rollout)
             
 
 
@@ -48,20 +49,9 @@ class VideoMaker(object):
 
 if __name__ == '__main__':
     print "running"
-    rng = [81,82,83,84,85]
+    rng = [89,90,91,92]
     ct = VideoMaker(rng)
     ct.run()
-
-
-
-
-
-
-
-
-
-
-
 
 
 bc = BinaryCamera("./meta.txt")

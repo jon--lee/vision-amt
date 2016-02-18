@@ -14,6 +14,7 @@
 
     Try to close sessions after using them (i.e. sess.close()). If more than one is open at a time, exceptions are thrown
 
+    CHANGED save_path directory from self.dir to /media/1tb/Izzy/nets/
 """
 
 
@@ -42,7 +43,7 @@ class TensorNet():
         saver = tf.train.Saver()
         if not save_path:
             model_name = self.name + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + ".ckpt"
-            save_path = self.dir + model_name
+            save_path = '/media/1tb/Izzy/nets/' + model_name
         save_path = saver.save(sess, save_path)
         self.log( "Saved model to " + save_path )
         self.recent = save_path
@@ -114,7 +115,7 @@ class TensorNet():
         else:
             dir = options.Options.tf_dir + self.dir
         new_name = self.name + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + ".ckpt"
-        save_path = self.save(sess, save_path=dir + new_name)
+        save_path = self.save(sess, save_path='/media/1tb/Izzy/nets/' + new_name)
         sess.close()
         self.log( "Optimization done." )
         return save_path
@@ -157,13 +158,15 @@ class TensorNet():
 
 
     def weight_variable(self, shape):
-        initial = tf.random_normal(shape, stddev=.05)
+        initial = tf.random_normal(shape, stddev=.005)
+        #initial = tf.random_normal(shape)
         #initial = tf.truncated_normal(shape, stddev=0.1)
         return tf.Variable(initial)
 
     def bias_variable(self, shape):
-        #initial = tf.random_normal(shape, stddev=.005)
-        initial = tf.constant(.001, shape=shape)
+        initial = tf.random_normal(shape, stddev=.01)
+        #initial = tf.random_normal(shape)
+        #initial = tf.constant(.01, shape=shape)
         return tf.Variable(initial)
 
     def conv2d(self, x, W):
