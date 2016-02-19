@@ -13,9 +13,9 @@ writer = cv2.VideoWriter("testing123.mov", fourcc, 10.0, (Options.WIDTH,Options.
 try:
     while True:
 	    frame = bc.read_frame()
-#	    cv2.imshow("camera",frame)
+	    cv2.imshow("camera",frame)
 
-#	    cv2.waitKey(30)
+	    cv2.waitKey(30)
 
 	    
 	    frames.append(frame)

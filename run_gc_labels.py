@@ -136,8 +136,8 @@ class CircleTracker(object):
 
         d_vec = self.pixelstoMeters(d_vec)
 
-        label[0] = -d_vec[1]
-        label[1] = d_vec[0]
+        label[0] = 2*d_vec[1]
+        label[1] = -d_vec[0]
         
         return self.safetyLimits(label)
 
@@ -173,7 +173,7 @@ class CircleTracker(object):
 
 if __name__ == '__main__':
     print "running"
-    rng = [60,100]
+    rng = [30,60]
     ct = CircleTracker(rng,debug= True)
     ct.run()
     ct.file_lbl.close()

@@ -56,8 +56,8 @@ class AMTOptions(Options):
     colors_dir = Options.amt_dir + "colors/"
 
 
-    ROTATE_UPPER_BOUND = 4.03313
-    ROTATE_LOWER_BOUND = 3.16954
+    ROTATE_UPPER_BOUND = 3.82
+    ROTATE_LOWER_BOUND = 3.06954
     
     GRIP_UPPER_BOUND = .0375
     GRIP_LOWER_BOUND = .0023

@@ -177,7 +177,7 @@ class AMT():
                 self.turntable.gotoState(TurntableState(new_t), .25, .25)
 
                 
-                time.sleep(.03)
+                time.sleep(.005)
        
         except KeyboardInterrupt:
             pass
@@ -279,6 +279,8 @@ class AMT():
         return grayscale
     def color(self,frame): 
         color_frame = cv2.resize(frame.copy(), (250, 250))
+        cv2.imwrite('get_jp.jpg',color_frame)
+        color_frame= cv2.imread('get_jp.jpg')
         return color_frame
 
 
@@ -329,6 +331,7 @@ class AMT():
 
         print "Saving raw frames to " + self.options.originals_dir + "..."
         print "Saving binaries to " + self.options.binaries_dir + "..."
+        print "Saving colors to " + self.options.colors_dir + "..."
 
         raw_states_file = open(self.options.originals_dir + "states.txt", 'a+')
 
@@ -340,6 +343,7 @@ class AMT():
             cv2.imwrite(self.options.originals_dir + filename, frame)
             cv2.imwrite(self.options.grayscales_dir + filename, self.gray(frame))
             cv2.imwrite(self.options.binaries_dir + filename, self.segment(frame))
+            cv2.imwrite(self.options.colors_dir + filename, self.color(frame))
             cv2.imwrite(rollout_path + filename, frame)
             i += 1
         raw_states_file.close()
@@ -406,7 +410,7 @@ if __name__ == "__main__":
     #options.tf_net = net5.NetFive()
     #options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net5/net5_02-15-2016_11h58m56s.ckpt'
     options.tf_net = net4.NetFour()
-    options.tf_net_path = '/media/1tb/Izzy/nets/net4_02-17-2016_20h04m24s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net4_02-18-2016_16h18m23s.ckpt'
 
     amt = AMT(bincam, izzy, t, c, options=options)
 
