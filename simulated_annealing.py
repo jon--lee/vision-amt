@@ -52,10 +52,12 @@ class GenericNet(TensorNet):
 
     def append_output(self):
         num_nodes = abs(TensorNet.reduce_shape(self.last_layer.get_shape()))
+        flattened = tf.reshape(self.last_layer, [-1, num_nodes]) 
+
         self.w_fc_out = self.weight_variable([num_nodes, 4])
         self.b_fc_out = self.bias_variable([4])
 
-        self.y_out = tf.tanh(tf.matmul(self.last_layer, self.w_fc_out) + self.b_fc_out)
+        self.y_out = tf.tanh(tf.matmul(flattened, self.w_fc_out) + self.b_fc_out)
         self.loss = tf.reduce_mean(.5*tf.square(self.y_out - self.y_))
         self.train_step = tf.train.MomentumOptimizer(self.learning_rate, self.momentum)
         self.train = self.train_step.minimize(self.loss)
@@ -117,10 +119,11 @@ class SimAnneal():
         """
         vec = []
         for key in sorted(param.keys()):
-            val = param[key]
-            if SimAnneal._is_iterable(val):
-                val = sum(val)
-            vec.append(val)
+            if not (key == 'momentum' or key == 'weight_init' or key == 'bias_init'):
+                val = param[key]
+                if SimAnneal._is_iterable(val):
+                    val = sum(val)
+                vec.append(val)
         return np.array(vec)
     
     @staticmethod
@@ -170,8 +173,12 @@ class SimAnneal():
             Also returns nine overall nearest neighbors
         """
         print "hello world" 
-    
 
+    @staticmethod    
+    def merge(x, y):
+        z = x.copy()
+        z.update(y)
+        return z
 
 def generate_arch_permutations(hp):
     """
@@ -180,14 +187,10 @@ def generate_arch_permutations(hp):
         given net architectures
     """
     architectures = []
-    for r in itertools.product(hp['momentum'], hp['weight_init'],
-                                hp['bias_init'], hp['conv'], hp['fc']):
+    for r in itertools.product(hp['conv'], hp['fc']):
         params = {
-            'momentum': r[0],
-            'weight_init': r[1],
-            'bias_init': r[2],
-            'conv': r[3],
-            'fc': r[4]
+            'conv': r[0],
+            'fc': r[1]
         }
         for i in range(len(hp['channels']) - params['conv'] + 1):
             copy = params.copy()
@@ -247,7 +250,7 @@ if __name__ == '__main__':
         
 
 
-        example_arch = archs[100]
+        example_arch = SimAnneal.merge(archs[23], init_params[10])
         print example_arch
         sa.generate_net(example_arch)     
         sess = tf.Session()
