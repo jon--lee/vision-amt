@@ -29,7 +29,7 @@ class NetEight(TensorNet):
         self.y_ = tf.placeholder("float", shape=[None, 4])
 
 
-        self.w_conv1 = self.weight_variable([5, 5, channels, 5])
+        self.w_conv1 = self.weight_variable([11, 11, channels, 5])
         self.b_conv1 = self.bias_variable([5])
      
 

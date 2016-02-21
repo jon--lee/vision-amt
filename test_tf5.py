@@ -7,12 +7,12 @@ data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file,channels=3)
 #net.optimize(200, data=data, path=path, batch_size=100)
 
 #path = AMTOptions.tf_dir + 'net6/net6_02-15-2016_13h48m35s.ckpt' 
-net = net6.NetSix()
-net.optimize(400, data=data, batch_size=100)
+#net = net6.NetSix()
+#net.optimize(400, data=data, batch_size=100)
 
 #path = AMTOptions.tf_dir + 'net7/'
 #net = net7.NetSeven()
 #net.optimize(400, data=data, batch_size=150)
 
-#net = net8.NetEight()
-#net.optimize(400, data=data, batch_size=150)
+net = net8.NetEight()
+net.optimize(400, data=data, batch_size=100)

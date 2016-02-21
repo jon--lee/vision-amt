@@ -46,8 +46,10 @@ def euclidean_loss_color(net, model_path):
 
 
 if __name__ == '__main__':
-    net = net6.NetSix()
-    model_path = AMTOptions.nets_dir + 'net6_02-17-2016_22h57m55s.ckpt'
+    #net = net6.NetSix()
+    #model_path = AMTOptions.nets_dir + 'net6_02-19-2016_17h14m04s.ckpt'
+    net = net8.NetEight()
+    model_path = AMTOptions.nets_dir + 'net8_02-19-2016_23h49m00s.ckpt'
     euclidean_loss_color(net, model_path)
 
 

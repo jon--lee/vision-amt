@@ -101,6 +101,7 @@ class CircleTracker(object):
 
                 cv2.rectangle(img,top_left, bottom_right, 255, 2)
 
+
                 self.writer.write(img)
                 cv2.imshow("figue",img)
                 cv2.waitKey(30)
@@ -124,7 +125,11 @@ class CircleTracker(object):
         deltas[2] = np.sign(deltas[2])*np.min([0.005,np.abs(deltas[2])])
         deltas[3] = np.sign(deltas[3])*np.min([0.2,np.abs(deltas[3])])
         return deltas
-    def computeLabel(self,img):
+
+    def metersToPixels(self, val):
+        return 420/0.5461*val
+
+    def computeLabel(self,img,state):
 
         grip_pos = self.getPose(self.gripper,img,gripper=True)
         gc_pos = self.getPose(self.gc,img)
@@ -136,8 +141,40 @@ class CircleTracker(object):
 
         d_vec = self.pixelstoMeters(d_vec)
 
-        label[0] = 2*d_vec[1]
-        label[1] = -d_vec[0]
+        ### Test angles
+        L = 420 # hardcoded dimensions
+        ang_offset = np.pi + 0.26760734641
+        grip_ang = -(float(state[0]) - ang_offset)
+        grip_ext = self.metersToPixels(float(state[1]) +.2)
+        base = [grip_ext*np.cos(grip_ang) + grip_pos[0],grip_pos[1] + grip_ext*np.sin(grip_ang)]
+        gc_m = self.pixelstoMeters(gc_pos)
+        gc_ang = np.arctan2( base[1] - gc_pos[1],  base[0] - gc_pos[0])
+        # grip_ang = np.arctan2(d_vec[1]-base[0], d_vec[0]-base[1])
+
+
+
+        grip_L = (420,int(grip_pos[1] + (L-grip_pos[0])*np.tan(grip_ang)))
+        gc_L = (420, int(base[1]-np.tan(gc_ang)*(base[0]-L)))
+        gc_est = (int(gc_pos[0]), int(base[1]-np.tan(gc_ang)*(base[0]-gc_pos[0])))
+
+        grip_post = (int(grip_pos[0]), int(grip_pos[1]))
+
+
+        # gc_est = [gc_pos[0], gc_pos[0] * np.tan(gc_ang) + base[1]]
+        cv2.line(img, grip_L, grip_post, 255, 2)
+        cv2.line(img, gc_L, gc_est, 255, 2)
+
+        self.writer.write(img)
+        cv2.imshow("figue",img)
+        cv2.waitKey(30)
+
+
+        label[0] = gc_ang - grip_ang
+
+        print grip_L, grip_post, base, grip_ext, label[0], gc_ang, grip_ang
+        ### test code
+        # label[0] = -d_vec[1]
+        label[1] = d_vec[0]
         
         return self.safetyLimits(label)
 
@@ -164,20 +201,19 @@ class CircleTracker(object):
                 # if(idx == 55):
                 #     IPython.embed()
                 #     self.debug = True
-                label = self.computeLabel(img)
+                label = self.computeLabel(img, self.states[idx])
                 print "LABEL ", label
-                self.writeLabel(label,self.img_name[idx])
+                # self.writeLabel(label,self.img_name[idx])
                 idx += 1
             self.writer.release()
 
 
 if __name__ == '__main__':
     print "running"
-    rng = [30,60]
+    rng = [50,51]
     ct = CircleTracker(rng,debug= True)
     ct.run()
     ct.file_lbl.close()
-
 
 
 
