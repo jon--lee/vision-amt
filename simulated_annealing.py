@@ -9,7 +9,7 @@ from Net.tensor.inputdata import AMTData
 from options import AMTOptions
 import itertools
 import numpy as np
-
+import random
 class GenericNet(TensorNet):
     def __init__(self, params):
         self.learning_rate = .003
@@ -97,6 +97,18 @@ class SimAnneal():
         return net
 
     @staticmethod
+    def hamming_distance(vec1, vec2):
+        dist = 0
+        for x, y in zip(vec1, vec2):
+            try:
+                if not all(x == y):
+                    dist += 1
+            except:
+                if not x == y:
+                    dist += 1
+        return dist
+
+    @staticmethod
     def euclidean_distance(vec1, vec2):
         """
             computes the Euclidean distance between two vectors
@@ -140,7 +152,7 @@ class SimAnneal():
         vec1 = self.param2init_vec(curr)
         def euc_dist(param):
             vec2 = self.param2init_vec(param)
-            dist = self.euclidean_distance(vec1, vec2)
+            dist = self.hamming_distance(vec1, vec2)
             if abs(dist) < 1e-9:
                 return 1000.0       # make sure not getting same parameters back
             return dist
@@ -158,7 +170,7 @@ class SimAnneal():
         vec1 = self.param2vec(curr)
         def euc_dist(param):
             vec2 = self.param2vec(param)
-            dist = self.euclidean_distance(vec1, vec2)
+            dist = self.hamming_distance(vec1, vec2)
             if abs(dist) < 1e-3:
                 return 1000.0
             return dist
@@ -222,10 +234,45 @@ def generate_init_params_permutations(hp):
         init_params.append(param)
     return init_params
 
+def loss(param):
+    """
+        fake loss function
+    """
+    loss = 0.0
+    for key in param.keys():
+        val = param[key]
+        try:
+            loss += abs(sum([ abs(v) for v in val ]))         
+        except:
+            loss += val 
+    return loss 
 
+def test_simanneal(sa):
+    """
+        This is a super hacky test
+        but whatever
+    """
 
+    min_loss = 1000.0
+    max_loss = 0.0
+    for arch in sa.archs:
+        for ip in sa.init_params:
+            min_loss = min(min_loss, loss(sa.merge(arch, ip)))
+            max_loss = max(max_loss, loss(sa.merge(arch, ip)))
+    print "Min loss in testing set: " + str(min_loss)
+    print "Max loss in testing set: " + str(max_loss)
 
+    curr_arch = sa.archs[3]
+    curr_ip = sa.init_params[10]
+    curr_loss = loss(sa.merge(curr_arch, curr_ip))
+    print "Starting: " + str(sa.merge(curr_arch, curr_ip)) 
+    print "Starting loss: " + str(curr_loss)
 
+    for i in range(1):
+        nearest_archs = sa.nearest_archs(curr_arch)
+        nearest_ips = sa.nearest_init_params(curr_ip)
+        print "random arch: " + str(random.choice(nearest_archs))
+        print "random inits: " + str(random.choice(nearest_ips))
 
 if __name__ == '__main__':
 
@@ -250,7 +297,7 @@ if __name__ == '__main__':
         
 
 
-        example_arch = SimAnneal.merge(archs[23], init_params[10])
+        example_arch = SimAnneal.merge(archs[3], init_params[10])
         print example_arch
         sa.generate_net(example_arch)     
         sess = tf.Session()
@@ -259,15 +306,17 @@ if __name__ == '__main__':
             sess.run(init)
         sess.close()
         
-        print "Testing arch: " + str(example_arch)
-        similar_init_params= sa.nearest_init_params(example_arch)
-        similar_archs = sa.nearest_archs(example_arch)
-        print "resulting similar archs: "
-        for _ in similar_init_params:
-            print str(_)
+        test_simanneal(sa)
 
-        for _ in similar_archs:
-            print str(_)
+        #print "Testing arch: " + str(example_arch)
+        #similar_init_params= sa.nearest_init_params(example_arch)
+        #similar_archs = sa.nearest_archs(example_arch)
+        #print "resulting similar archs: "
+        #for _ in similar_init_params:
+        #    print str(_)
+
+        #for _ in similar_archs:
+        #    print str(_)
 
 
 
