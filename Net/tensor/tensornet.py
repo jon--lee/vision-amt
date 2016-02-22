@@ -68,7 +68,7 @@ class TensorNet():
         return sess
 
 
-    def optimize(self, iterations, data, path=None, batch_size=100, test_print=20):
+    def optimize(self, iterations, data, path=None, batch_size=100, test_print=20, save=True):
         """
             optimize net for [iterations]. path is either absolute or 
             relative to current working directory. data is InputData object (see class for details)
@@ -115,7 +115,10 @@ class TensorNet():
         else:
             dir = options.Options.tf_dir + self.dir
         new_name = self.name + "_" + datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss") + ".ckpt"
-        save_path = self.save(sess, save_path='/media/1tb/Izzy/nets/' + new_name)
+        if save:
+            save_path = self.save(sess, save_path='/media/1tb/Izzy/nets/' + new_name)
+        else:
+            save_path = None
         sess.close()
         self.log( "Optimization done." )
         return save_path
