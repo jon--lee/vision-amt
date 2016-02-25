@@ -8,7 +8,7 @@ from gripper.TurnTableControl import *
 from gripper.PyControl import *
 from gripper.xboxController import *
 from pipeline.bincam import BinaryCamera
-from Net.tensor import inputdata, net3,net4,net5
+from Net.tensor import inputdata, net3,net4,net5,net6
 import time
 import datetime
 import os
@@ -233,7 +233,7 @@ class AMT():
         izzy_state[0] += delta_state[0]
         izzy_state[1] = 0.00952
         izzy_state[2] += delta_state[1]
-        izzy_state[3] = 2.465
+        izzy_state[3] = 4.211
         izzy_state[4] += delta_state[2]
         t_state[0] += delta_state[3]
         izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND, izzy_state[0])
@@ -409,8 +409,8 @@ if __name__ == "__main__":
 
     #options.tf_net = net5.NetFive()
     #options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net5/net5_02-15-2016_11h58m56s.ckpt'
-    options.tf_net = net4.NetFour()
-    options.tf_net_path = '/media/1tb/Izzy/nets/net4_02-18-2016_16h18m23s.ckpt'
+    options.tf_net = net6.NetSix()
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-23-2016_14h01m15s.ckpt'
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

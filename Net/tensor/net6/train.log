@@ -1901,3 +1901,68 @@ DEBUG:root:Optimization done.
 DEBUG:root:Saving...
 DEBUG:root:Saved model to /media/1tb/Izzy/nets/net6_02-19-2016_17h14m58s.ckpt
 DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.0576365
+DEBUG:root:[ Iteration 0 ] Test loss: 0.0472741
+DEBUG:root:[ Iteration 3 ] Training loss: 0.0364056
+DEBUG:root:[ Iteration 6 ] Training loss: 0.0429522
+DEBUG:root:[ Iteration 9 ] Training loss: 0.0348002
+DEBUG:root:[ Iteration 12 ] Training loss: 0.0384946
+DEBUG:root:[ Iteration 15 ] Training loss: 0.0311575
+DEBUG:root:[ Iteration 18 ] Training loss: 0.0394328
+DEBUG:root:[ Iteration 20 ] Test loss: 0.0259902
+DEBUG:root:[ Iteration 21 ] Training loss: 0.0294466
+DEBUG:root:[ Iteration 24 ] Training loss: 0.0313237
+DEBUG:root:[ Iteration 27 ] Training loss: 0.0356545
+DEBUG:root:[ Iteration 30 ] Training loss: 0.0202175
+DEBUG:root:[ Iteration 33 ] Training loss: 0.0302544
+DEBUG:root:[ Iteration 36 ] Training loss: 0.0269293
+DEBUG:root:[ Iteration 39 ] Training loss: 0.0157561
+DEBUG:root:[ Iteration 40 ] Test loss: 0.0214102
+DEBUG:root:[ Iteration 42 ] Training loss: 0.0215714
+DEBUG:root:[ Iteration 45 ] Training loss: 0.0208625
+DEBUG:root:[ Iteration 48 ] Training loss: 0.0238228
+DEBUG:root:[ Iteration 51 ] Training loss: 0.0179663
+DEBUG:root:[ Iteration 54 ] Training loss: 0.0156944
+DEBUG:root:[ Iteration 57 ] Training loss: 0.0105545
+DEBUG:root:[ Iteration 60 ] Training loss: 0.0129288
+DEBUG:root:[ Iteration 60 ] Test loss: 0.0134741
+DEBUG:root:[ Iteration 63 ] Training loss: 0.0152124
+DEBUG:root:[ Iteration 66 ] Training loss: 0.0220556
+DEBUG:root:[ Iteration 69 ] Training loss: 0.012788
+DEBUG:root:[ Iteration 72 ] Training loss: 0.007716
+DEBUG:root:[ Iteration 75 ] Training loss: 0.00777118
+DEBUG:root:[ Iteration 78 ] Training loss: 0.0182865
+DEBUG:root:[ Iteration 80 ] Test loss: 0.0133059
+DEBUG:root:[ Iteration 81 ] Training loss: 0.0169941
+DEBUG:root:[ Iteration 84 ] Training loss: 0.0168169
+DEBUG:root:[ Iteration 87 ] Training loss: 0.0114406
+DEBUG:root:[ Iteration 90 ] Training loss: 0.013995
+DEBUG:root:[ Iteration 93 ] Training loss: 0.0108958
+DEBUG:root:[ Iteration 96 ] Training loss: 0.0105465
+DEBUG:root:[ Iteration 99 ] Training loss: 0.0146311
+DEBUG:root:[ Iteration 100 ] Test loss: 0.00876461
+DEBUG:root:[ Iteration 102 ] Training loss: 0.0109267
+DEBUG:root:[ Iteration 105 ] Training loss: 0.0066018
+DEBUG:root:[ Iteration 108 ] Training loss: 0.00651888
+DEBUG:root:[ Iteration 111 ] Training loss: 0.0106437
+DEBUG:root:[ Iteration 114 ] Training loss: 0.0094993
+DEBUG:root:[ Iteration 117 ] Training loss: 0.00726592
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /media/1tb/Izzy/nets/net6_02-23-2016_14h01m15s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training loss: 0.0415127
+DEBUG:root:[ Iteration 0 ] Test loss: 0.0472741
+DEBUG:root:[ Iteration 3 ] Training loss: 0.0424677
+DEBUG:root:[ Iteration 6 ] Training loss: 0.0459825
+DEBUG:root:[ Iteration 9 ] Training loss: 0.0448419
+DEBUG:root:[ Iteration 12 ] Training loss: 0.0373922
+DEBUG:root:[ Iteration 15 ] Training loss: 0.0480012
+DEBUG:root:[ Iteration 18 ] Training loss: 0.0243616
+DEBUG:root:[ Iteration 20 ] Test loss: 0.0249452
+DEBUG:root:[ Iteration 21 ] Training loss: 0.0276288
+DEBUG:root:[ Iteration 24 ] Training loss: 0.0275296
+DEBUG:root:[ Iteration 27 ] Training loss: 0.0327358
+DEBUG:root:[ Iteration 30 ] Training loss: 0.0360626
+DEBUG:root:[ Iteration 33 ] Training loss: 0.0216061
+DEBUG:root:[ Iteration 36 ] Training loss: 0.01539
+DEBUG:root:Saving...

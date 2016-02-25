@@ -268,11 +268,14 @@ def test_simanneal(sa):
     print "Starting: " + str(sa.merge(curr_arch, curr_ip)) 
     print "Starting loss: " + str(curr_loss)
 
-    for i in range(1):
+    for i in range(100):
         nearest_archs = sa.nearest_archs(curr_arch)
         nearest_ips = sa.nearest_init_params(curr_ip)
-        print "random arch: " + str(random.choice(nearest_archs))
-        print "random inits: " + str(random.choice(nearest_ips))
+        tmp_arch = random.choice(nearest_archs)
+        tmp_ip = random.choice(nearest_ips)
+        tmp_loss = loss(sa.merge(tmp_ip, tmp_loss)
+        if tmp_loss < curr_loss:
+            curr_arch, curr_ip, curr_loss = tmp_arch, tmp_ip, tmp_loss
 
 if __name__ == '__main__':
 
@@ -294,8 +297,6 @@ if __name__ == '__main__':
         init_params = generate_init_params_permutations(hp)
 
         sa = SimAnneal(archs, init_params)
-        
-
 
         example_arch = SimAnneal.merge(archs[3], init_params[10])
         print example_arch

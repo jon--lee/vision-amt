@@ -19,6 +19,12 @@ def mean(lst):
     print "AVERAGE SQUARED EUCLIDEAN LOSS ",loss
     return loss
 
+
+def euclidean_loss_sess(net, sess, channels):
+    deltas_file = open(AMTOptions.deltas_file, 'r')
+    
+
+
 def euclidean_loss(net, model_path, dir, channels):
     sess = net.load(var_path=model_path)
 

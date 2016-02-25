@@ -47,13 +47,16 @@ if __name__ == '__main__':
     #model_path = 'Netnet4_02-13-2016_18h44m24s.ckpt'
     #net = net4.NetFour()
 
-    model_path = '/media/1tb/Izzy/nets/net4_02-18-2016_16h18m23s.ckpt'
+    #model_path = '/media/1tb/Izzy/nets/net4_02-18-2016_16h18m23s.ckpt'
+    #net = net4.NetFour()
+
     net = net4.NetFour()
+    model_path = '/media/1tb/Izzy/nets/net4_02-23-2016_13h56m26s.ckpt'
 
     conv_layer = net.h_conv1
     filter_layer = net.w_conv1
     
-    test_image_path = opt.colors_dir + 'rollout28_frame_16.jpg'
+    test_image_path = '/home/annal/Izzy/vision_amt/data/amt/colors/rollout12_frame_4.jpg'
     test_image = cv2.imread(test_image_path)
     print "input image shape: " + str(test_image.shape)
     generate_inputs(net, model_path, conv_layer, test_image, preview=False)   
