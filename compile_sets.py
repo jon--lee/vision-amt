@@ -14,6 +14,8 @@ def compile():
     train_path = AMTOptions.train_file
     test_path = AMTOptions.test_file
     deltas_path = AMTOptions.deltas_file
+    #deltas_path = AMTOptions.data_dir + 'amt/labels_amt_exp_mrg.txt'    
+    #deltas_path = AMTOptions.data_dir + 'amt/deltas_0_60.txt'
 
     print "Moving deltas from " + deltas_path + " to train: " + train_path + " and test: " + test_path
 

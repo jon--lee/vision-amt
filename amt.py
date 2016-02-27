@@ -162,13 +162,14 @@ class AMT():
 
  
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
-                recording.append((frame, current_state))
+                
 
 
                 delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
                 #delta_state = net.output(sess, gray_frame,channels=3)
                 delta_state = self.deltaSafetyLimites(delta_state)
-                delta_state[0] = delta_state[0]
+              
+                recording.append((frame, current_state,delta_state))
                 new_izzy, new_t = self.apply_deltas(delta_state)
 
                 # TODO: uncomment these to update izzy and t
@@ -328,7 +329,7 @@ class AMT():
         print "Saving rollout to " + rollout_path + "..."
         os.makedirs(rollout_path)
         rollout_states_file = open(rollout_path + "states.txt", 'a+')
-
+        rollout_deltas_file = open(rollout_path + "net_deltas.txt", 'a+')
         print "Saving raw frames to " + self.options.originals_dir + "..."
         print "Saving binaries to " + self.options.binaries_dir + "..."
         print "Saving colors to " + self.options.colors_dir + "..."
@@ -336,10 +337,11 @@ class AMT():
         raw_states_file = open(self.options.originals_dir + "states.txt", 'a+')
 
         i = 0
-        for frame, state in recording:
+        for frame, state,deltas in recording:
             filename = rollout_name + "_frame_" + str(i) + ".jpg"
             raw_states_file.write(filename + self.lst2str(state) + "\n") 
             rollout_states_file.write(filename + self.lst2str(state) + "\n")
+            rollout_deltas_file.write(filename + self.lst2str(deltas) + "\n")
             cv2.imwrite(self.options.originals_dir + filename, frame)
             cv2.imwrite(self.options.grayscales_dir + filename, self.gray(frame))
             cv2.imwrite(self.options.binaries_dir + filename, self.segment(frame))
@@ -348,6 +350,7 @@ class AMT():
             i += 1
         raw_states_file.close()
         rollout_states_file.close()
+        rollout_deltas_file.close()
         recording = []
         print "Done saving."
 
@@ -410,8 +413,8 @@ if __name__ == "__main__":
     #options.tf_net = net5.NetFive()
     #options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net5/net5_02-15-2016_11h58m56s.ckpt'
     options.tf_net = net6.NetSix()
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-23-2016_14h01m15s.ckpt'
-
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-24-2016_18h50m20s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
     amt = AMT(bincam, izzy, t, c, options=options)
 
     while True:

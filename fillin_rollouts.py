@@ -1,73 +1,23 @@
 from options import AMTOptions as opt
 
-def get_analytical_dict():
 
-def get_states_dict():
-    """
-        Returns all recorded states as a dictionary
-        where the key is the filename and the value
-        is the state (list of floats)
-        That way you can query the dict with the expected
-        filename and get its state
-    """
-    states_file = open(opt.amt_dir + 'labels.txt', 'r')
-    states = {}
-    for line in states_file:
-        split = line.split(' ')
-        filename = split[0]
-        state = [ float(s) for s in split[1:] ]
-        states[filename] = state
-    states_file.close()
-    return states
-
-def to_filename(rollout, frame):
-    return "rollout" + str(rollout) + "_frame_" + str(frame) + ".jpg"
-
-def compute_delta(rollout, frame, states_dict):
-    """
-        Computes the delta by getting the state at current rollout and current frame
-        and substracting from next frame in rollout
-        How should we handle corner cases? (i.e. if the missing frame is the last frame)
-    """
-    curr_filename = to_filename(rollout, frame)
-    next_filename = to_filename(rollout, frame + 1)
-    curr_state = states_dict[curr_filename]
-    if next_filename in states_dict:
-    	next_state = states_dict[next_filename]
-    else:
-    	# if at the end, use the last delta (assumes that the end is invarient 
-    	# changes, which is generally true
-    	next_state = curr_state
-    	curr_state = states_dict[to_filename(rollout, frame - 1)]
-
-    delta = []
-    for curr, nxt in zip(curr_state, next_state):
-        delta.append(nxt - curr)
-
-    return delta
-
-def lst2string(lst):
-    s = ''
-    for el in lst:
-        s += ' ' + str(el)
-    return s + '\n'
 
 
 def fillin_missing_labels():
     exp_file = open(opt.amt_dir + 'labels_amt_exp.txt', 'r')
-    a_file = open(opt.amt_dir + 'labels.txt', 'r')    
+    a_file = open(opt.amt_dir + 'net_deltas_mrg.txt', 'r')    
     exp_labels = exp_file.readlines()
     exp_labels_filenames = [ exp_label.split(' ')[0] for exp_label in exp_labels ]
     analytical_labels = a_file.readlines()
     merged_labels = []
 
-    for a_label in analytical_labels():
+    for a_label in analytical_labels:
         a_label_split = a_label.split(' ')
         a_label_filename = a_label_split[0]
         
         # If turker labeled this file, add turker's labels to merged_labels
         if a_label_filename in exp_labels_filenames:
-            index = exp_labes_filenames.index(a_label_filename)
+            index = exp_labels_filenames.index(a_label_filename)
             exp_label = exp_labels[index]
             merged_labels.append(exp_label)
         # else, add analytical label to merged_labels
@@ -85,11 +35,9 @@ def fillin_missing_labels():
 
 """
 def fillin_missing_labels(rollout_range):
-    """
         Assumes that lables_amt_exp.txt has filenames
         and deltas sorted by rollout number and "subsorted"
         by frame number
-    """
     labels_amt_exp_file = open(opt.amt_dir + 'labels_amt_exp.txt', 'r')
     labels_amt_exp_file_mrg = open(opt.amt_dir + 'labels_amt_exp_mrg.txt', 'w')
 

@@ -1,4 +1,4 @@
-from Net.tensor import net5, net6, inputdata, net4, net7
+from Net.tensor import net5, net6, inputdata, net4, net7, net8
 import numpy as np
 from options import AMTOptions as opt
 import cv2
@@ -50,8 +50,11 @@ if __name__ == '__main__':
     #model_path = '/media/1tb/Izzy/nets/net4_02-18-2016_16h18m23s.ckpt'
     #net = net4.NetFour()
 
-    net = net4.NetFour()
-    model_path = '/media/1tb/Izzy/nets/net4_02-23-2016_13h56m26s.ckpt'
+    #net = net4.NetFour()
+    #model_path = '/media/1tb/Izzy/nets/net4_02-23-2016_13h56m26s.ckpt'
+    net = net8.NetEight()
+    model_path = '/media/1tb/Izzy/nets/net8_02-26-2016_00h24m41s.ckpt'
+
 
     conv_layer = net.h_conv1
     filter_layer = net.w_conv1
