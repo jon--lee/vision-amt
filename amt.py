@@ -413,8 +413,10 @@ if __name__ == "__main__":
     #options.tf_net = net5.NetFive()
     #options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net5/net5_02-15-2016_11h58m56s.ckpt'
     options.tf_net = net6.NetSix()
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-24-2016_18h50m20s.ckpt'
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
+
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-27-2016_15h30m01s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-01-2016_00h20m12s.ckpt'
     amt = AMT(bincam, izzy, t, c, options=options)
 
     while True:

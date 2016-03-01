@@ -169,7 +169,7 @@ class TensorNet():
     def bias_variable(self, shape, stddev=.01):
         initial = tf.random_normal(shape, stddev=stddev)
         #initial = tf.random_normal(shape)
-        #initial = tf.constant(.01, shape=shape)
+        #initial = tf.constant(stddev, shape=shape)
         return tf.Variable(initial)
 
     def conv2d(self, x, W):

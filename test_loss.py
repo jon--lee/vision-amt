@@ -1,5 +1,5 @@
 from options import AMTOptions
-from Net.tensor import inputdata, net5, net6, net7, net8, net9
+from Net.tensor import inputdata, net5, net6, net7, net8, net9, net10
 import numpy as np
 import cv2
 
@@ -53,9 +53,11 @@ def euclidean_loss_color(net, model_path):
 
 
 if __name__ == '__main__':
-    net = net8.NetEight()
+    net = net10.NetTen()
+    model_path = AMTOptions.nets_dir + 'net10_02-26-2016_11h24m51s.ckpt'
+    #net = net8.NetEight()
     #model_path = AMTOptions.nets_dir + 'net6_02-19-2016_17h14m04s.ckpt'
-    model_path = AMTOptions.nets_dir + 'net8_02-26-2016_12h45m28s.ckpt'
+    #model_path = AMTOptions.nets_dir + 'net8_02-26-2016_12h45m28s.ckpt'
     #model_path = AMTOptions.nets_dir + 'net8_02-26-2016_13h23m16s.ckpt'    
     #net = net8.NetEight()
     #model_path = AMTOptions.nets_dir + 'net8_02-19-2016_23h49m00s.ckpt'

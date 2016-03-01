@@ -119,7 +119,7 @@ class AMTData(InputData):
         :return: tuple with images in [0], labels in [1]
         """
         batch = []
-        for path, labels in self.test_tups:
+        for path, labels in self.test_tups[:200]:
             im = cv2.imread(path,self.channels)
             im = im2tensor(im,self.channels)
             batch.append((im, labels))

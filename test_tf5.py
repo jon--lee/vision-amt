@@ -1,4 +1,4 @@
-from Net.tensor import inputdata, net5, net6, net7, net8, net9, net10
+from Net.tensor import inputdata, net5, net6, net7, net8, net9, net10, net11
 from options import AMTOptions
 from tensorflow.python.framework import ops
 import transfer_weights
@@ -40,10 +40,12 @@ net.optimize(500, data=data, path=save_path, batch_size=100)
 #net = net10.NetTen()
 #net.optimize(900, data=data, batch_size=100)
 
-path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
-net = net6.NetSix()
-net.optimize(500, data=data, path=path, batch_size=100)
+#path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
+#net = net6.NetSix()
+#net.optimize(500, data=data, path=path, batch_size=100)
 
+net  = net11.NetEleven()
+net.optimize(2000, data=data, batch_size=150)
 
 
 

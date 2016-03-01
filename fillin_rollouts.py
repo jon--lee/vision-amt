@@ -4,8 +4,8 @@ from options import AMTOptions as opt
 
 
 def fillin_missing_labels():
-    exp_file = open(opt.amt_dir + 'labels_amt_exp.txt', 'r')
-    a_file = open(opt.amt_dir + 'net_deltas_mrg.txt', 'r')    
+    exp_file = open(opt.amt_dir + 'deltas.txt', 'r') #subset
+    a_file = open(opt.amt_dir + 'labels.txt', 'r')    #superset
     exp_labels = exp_file.readlines()
     exp_labels_filenames = [ exp_label.split(' ')[0] for exp_label in exp_labels ]
     analytical_labels = a_file.readlines()
