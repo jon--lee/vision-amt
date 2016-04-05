@@ -38,6 +38,7 @@ def generate_inputs(net, model_path, conv_layer, test_image, preview=False):
     sess.close()
 
 def generate_rollout_inputs(net, model_path, conv_layer, rollout, preview=False):
+    np.set_printoptions(threshold=np.nan)
     sess = net.load(var_path=model_path)
     with sess.as_default():    
         for j in range(0, 100):
@@ -50,8 +51,8 @@ def generate_rollout_inputs(net, model_path, conv_layer, rollout, preview=False)
             for i in range(filter.shape[-1]):
                 filter_image = filter[0,:,:,i] * 255.0
                 filter_path = net.name + '_frame' + str(j) + '_input' + str(i) + '.jpg'
-                cv2.imwrite('filters/rollout_an' + str(rollout) + '/' + filter_path, np.array(filter_image))
-
+                cv2.imwrite('filters/nrollout' + str(rollout) + '/' + filter_path, np.array(filter_image))
+            cv2.imwrite('filters/nrollout' + str(rollout) + '/' + net.name + '_frame' + str(j) + '.jpg', test_image)
     sess.close()
 
 if __name__ == '__main__':
@@ -70,13 +71,20 @@ if __name__ == '__main__':
     #model_path = '/media/1tb/Izzy/nets/net4_02-23-2016_13h56m26s.ckpt'
     #net = net8.NetEight()
     #model_path = '/media/1tb/Izzy/nets/net8_02-26-2016_00h24m41s.ckpt'
+    #net = net6.NetSix()
+    #model_path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
+    #model_path = '/media/1tb/Izzy/nets/net6_03-02-2016_19h37m17s.ckpt' # good net?
+    #model_path = '/media/1tb/Izzy/nets/net6_03-02-2016_19h37m17s.ckpt'
     net = net6.NetSix()
-    model_path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
-
+    #model_path = '/media/1tb/Izzy/nets/net8_03-08-2016_23h10m27s.ckpt'
+    #model_path = '/media/1tb/Izzy/nets/net6_03-12-2016_17h59m34s.ckpt'
+    model_path = '/media/1tb/Izzy/nets/net6_03-27-2016_12h04m13s.ckpt'
     conv_layer = net.h_conv1
     filter_layer = net.w_conv1
-    generate_rollout_inputs(net, model_path, conv_layer, 210)
-    #test_image_path = '/home/annal/Izzy/vision_amt/data/amt/colors/rollout12_frame_4.jpg'
+    generate_rollout_inputs(net, model_path, conv_layer, 831)
+    # do rollout 907 for ACE
+ 
+   #test_image_path = '/home/annal/Izzy/vision_amt/data/amt/colors/rollout12_frame_4.jpg'
     #test_image = cv2.imread(test_image_path)
     #print "input image shape: " + str(test_image.shape)
     #generate_inputs(net, model_path, conv_layer, test_image, preview=False)   

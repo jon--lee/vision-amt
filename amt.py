@@ -120,7 +120,7 @@ class AMT():
 
         deltas[0] = np.sign(deltas[0])*np.min([0.2,np.abs(deltas[0])])
         deltas[1] = np.sign(deltas[1])*np.min([0.01,np.abs(deltas[1])])
-        deltas[2] = np.sign(deltas[2])*np.min([0.005,np.abs(deltas[2])])
+        deltas[2] = 0.0#np.sign(deltas[2])*np.min([0.005,np.abs(deltas[2])])
         deltas[3] = np.sign(deltas[3])*np.min([0.2,np.abs(deltas[3])])
         return deltas
 
@@ -168,7 +168,7 @@ class AMT():
                 delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
                 #delta_state = net.output(sess, gray_frame,channels=3)
                 delta_state = self.deltaSafetyLimites(delta_state)
-              
+                delta_state[2] = 0.0
                 recording.append((frame, current_state,delta_state))
                 new_izzy, new_t = self.apply_deltas(delta_state)
 
@@ -235,7 +235,7 @@ class AMT():
         izzy_state[1] = 0.00952
         izzy_state[2] += delta_state[1]
         izzy_state[3] = 4.211
-        izzy_state[4] += delta_state[2]
+        izzy_state[4] =0.054# 0.0544 #delta_state[2]
         t_state[0] += delta_state[3]
         izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND, izzy_state[0])
         izzy_state[0] = max(self.options.ROTATE_LOWER_BOUND, izzy_state[0])
@@ -416,7 +416,8 @@ if __name__ == "__main__":
 
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-27-2016_15h30m01s.ckpt'
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-01-2016_00h20m12s.ckpt'
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-12-2016_15h03m44s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-28-2016_14h51m12s.ckpt'
     amt = AMT(bincam, izzy, t, c, options=options)
 
     while True:

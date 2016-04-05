@@ -51,5 +51,5 @@ class NetEleven(TensorNet):
         self.y_out = tf.tanh(tf.matmul(self.h_fc2, self.w_fc4) + self.b_fc4)
 
         self.loss = tf.reduce_mean(.5*tf.square(self.y_out - self.y_))
-        self.train_step = tf.train.MomentumOptimizer(.003, .9)
+        self.train_step = tf.train.MomentumOptimizer(.0001, .9)
         self.train = self.train_step.minimize(self.loss)

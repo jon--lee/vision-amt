@@ -5,7 +5,7 @@ import random
 def scale(deltas):
     deltas[0] = float(deltas[0])/0.2
     deltas[1] = float(deltas[1])/0.01
-    deltas[2] = float(deltas[2])/0.005
+    deltas[2] = 0.0#.0float(deltas[2])/0.005
     deltas[3] = float(deltas[3])/0.2
     return deltas
 
@@ -16,6 +16,8 @@ def compile():
     deltas_path = AMTOptions.deltas_file
     #deltas_path = AMTOptions.data_dir + 'amt/labels_amt_exp_mrg.txt'    
     #deltas_path = AMTOptions.data_dir + 'amt/deltas_0_60.txt'
+    #deltas_path = AMTOptions.data_dir + 'amt/amt__exp_me_full.txt'
+
 
     print "Moving deltas from " + deltas_path + " to train: " + train_path + " and test: " + test_path
 

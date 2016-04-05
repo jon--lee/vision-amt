@@ -49,30 +49,30 @@ class VideoMaker(object):
 
 if __name__ == '__main__':
     print "running"
-    rng = [89,90,91,92]
+    rng = [1130,1131,1132,1133,1134,1135,1145]
     ct = VideoMaker(rng)
     ct.run()
 
 
-bc = BinaryCamera("./meta.txt")
-bc.open()
-frame = bc.read_frame()
-frames = []
+# bc = BinaryCamera("./meta.txt")
+# bc.open()
+# frame = bc.read_frame()
+# frames = []
 
-try:
-    while True:
-	    frame = bc.read_frame()
-	    cv2.imshow("camera",frame)
+# try:
+#     while True:
+# 	    frame = bc.read_frame()
+# 	    cv2.imshow("camera",frame)
 
-	    cv2.waitKey(30)
+# 	    cv2.waitKey(30)
 
 	    
-	    frames.append(frame)
-	    #time.sleep(0.08)
+# 	    frames.append(frame)
+# 	    #time.sleep(0.08)
 	    
-except KeyboardInterrupt:
-    pass
+# except KeyboardInterrupt:
+#     pass
     
-#for frame in frames:
-#    writer.write(frame)
-#writer.release()
+# #for frame in frames:
+# #    writer.write(frame)
+# #writer.release()

@@ -16,3 +16,14 @@
 
 '/media/1tb/Izzy/nets/net6_02-29-2016_16h48m17s.ckpt' Trained on Aggresive Expert 
 
+'/media/1tb/Izzy/nets/net6_03-01-2016_12h16m19s.ckpt' Trained on Timid Expert
+
+/media/1tb/Izzy/nets/net6_03-02-2016_19h37m17s.ckpt' 100 an + 40 human regularized r544-585
+
+/media/1tb/Izzy/nets/net6_03-05-2016_18h11m08s.ckpt 100 an + 40 cs regularized r444-r585
+
+/media/1tb/Izzy/nets/net6_03-12-2016_17h59m34s.ckpt  ACE
+
+/media/1tb/Izzy/nets/net6_03-14-2016_21h31m24s.ckpt Aggr
+
+/media/1tb/Izzy/nets/net6_03-27-2016_12h04m13s.ckpt ACE++

@@ -40,7 +40,7 @@ class NetEight(TensorNet):
         self.h_conv2 = tf.nn.relu(self.conv2d(self.h_conv1, self.w_conv2) + self.b_conv2)
 
         conv1_num_nodes = self.reduce_shape(self.h_conv2.get_shape())
-        fc1_num_nodes = 128
+        fc1_num_nodes = 256
         
         self.w_fc1 = self.weight_variable([conv1_num_nodes, fc1_num_nodes])
         # self.w_fc1 = self.weight_variable([1000, fc1_num_nodes])
@@ -55,5 +55,5 @@ class NetEight(TensorNet):
         self.y_out = tf.tanh(tf.matmul(self.h_fc1, self.w_fc2) + self.b_fc2)
 
         self.loss = tf.reduce_mean(.5*tf.square(self.y_out - self.y_))
-        self.train_step = tf.train.MomentumOptimizer(.003, .9)
+        self.train_step = tf.train.MomentumOptimizer(.001, .9)
         self.train = self.train_step.minimize(self.loss)

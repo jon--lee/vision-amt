@@ -44,8 +44,13 @@ net.optimize(500, data=data, path=save_path, batch_size=100)
 #net = net6.NetSix()
 #net.optimize(500, data=data, path=path, batch_size=100)
 
-net  = net11.NetEleven()
-net.optimize(2000, data=data, batch_size=150)
+#net  = net11.NetEleven()
+#net.optimize(2000, data=data, batch_size=150)
 
-
+#path = '/media/1tb/Izzy/nets/net9_03-02-2016_23h30m33s.ckpt'
+#net = net9.NetNine()
+#net.optimize(600, data=data,  batch_size=150)
+net = net8.NetEight()
+path = '/media/1tb/Izzy/nets/net8_03-07-2016_17h12m57s.ckpt'
+net.optimize(600, data=data, path=path, batch_size=150)
 
