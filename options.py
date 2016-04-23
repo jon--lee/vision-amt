@@ -54,7 +54,7 @@ class AMTOptions(Options):
     originals_dir = Options.amt_dir + "frames/"
     grayscales_dir = Options.amt_dir + "grayscales/"
     colors_dir = Options.amt_dir + "colors/"
-
+    policies_dir = Options.amt_dir + "policies/"
 
     ROTATE_UPPER_BOUND = 3.82
     ROTATE_LOWER_BOUND = 3.06954

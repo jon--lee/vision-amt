@@ -1,12 +1,6 @@
-# TODO: rollout directories read and write
-# TODO: caffe train and rollout
-
 import sys
 import tty, termios
 from options import AMTOptions
-from gripper.TurnTableControl import *
-from gripper.PyControl import *
-from gripper.xboxController import *
 from pipeline.bincam import BinaryCamera
 from Net.tensor import inputdata, net3,net4,net5,net6
 import time
@@ -47,15 +41,13 @@ def getch():
 
 class AMT():
 
-    def __init__(self, bincam, izzy, turntable, controller, options=AMTOptions()):
+    def __init__(self, bincam, izzy, turntable, options=AMTOptions()):
         self.bc = bincam
         self.izzy = izzy
         self.turntable = turntable
-        self.c = controller
         self.options = options
         self.r = reset_rollout.reset(izzy, turntable)
 
-        # self.qc = query_cam(self.bc)
 
 
 
@@ -129,13 +121,7 @@ class AMT():
         path = self.options.tf_net_path
         sess = net.load(var_path=self.options.tf_net_path)
         recording = []
-        # self.qc = query_cam(self.bc)
-        # #Clear Buffer ... NEED TO TEST
-        # # self.qc.start()
-        # while(self.qc.read_frame() is None):
-        #     print self.qc.frame
-        #     pass # wait until images start coming through
-        #
+        
         for i in range(4):
             self.bc.vc.grab()
         try:
@@ -145,33 +131,19 @@ class AMT():
                 for i in range(4):
                     self.bc.vc.grab()
                 frame = self.bc.read_frame()
-                #frame = self.qc.read_frame()
                 # done reading
-                if(False):
-                    gray_frame = self.gray(frame) 
-                elif(False):
-                    gray_frame = self.segment(frame)
-                elif(True):
-                    gray_frame = self.color(frame)
 
+                gray_frame = self.color(frame)
                 gray_frame = np.reshape(gray_frame, (250, 250, 3))
             
-                test_frame = inputdata.im2tensor(gray_frame, channels=3)
-                print test_frame.shape
-
-                cv2.imshow('preview', test_frame)
-                #cv2.imshow("camera",gray_frame)
+                cv2.imshow("camera", frame)
                 cv2.waitKey(30)
 
- 
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
-                
-
-
                 delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
-                #delta_state = net.output(sess, gray_frame,channels=3)
                 delta_state = self.deltaSafetyLimites(delta_state)
                 delta_state[2] = 0.0
+                
                 recording.append((frame, current_state,delta_state))
                 new_izzy, new_t = self.apply_deltas(delta_state)
 
@@ -180,22 +152,13 @@ class AMT():
                 self.izzy._zeke._queueState(ZekeState(new_izzy))
                 self.turntable.gotoState(TurntableState(new_t), .25, .25)
 
-                
                 time.sleep(.005)
        
         except KeyboardInterrupt:
             pass
 
-        # stop querying the camera
-        # self.qc.terminate()
-        # terminated
-
-       
         sess.close()
-        # self.izzy._zeke.steady(True)
         self.prompt_save(recording)
-        # self.r.move_reset()
-        # self.izzy._zeke.steady(False)
     
     def test(self):
         try:
@@ -281,7 +244,8 @@ class AMT():
     def gray(self, frame):
         grayscale = self.bc.gray(np.copy(frame))
         return grayscale
-    def color(self,frame): 
+   
+     def color(self,frame): 
         color_frame = cv2.resize(frame.copy(), (250, 250))
         cv2.imwrite('get_jp.jpg',color_frame)
         color_frame= cv2.imread('get_jp.jpg')
@@ -383,8 +347,6 @@ class AMT():
         """
         returns a space separated string of all elements. A space
         also precedes the first element.
-        :param lst:
-        :return:
         """
         s = ""
         for el in lst:
@@ -406,23 +368,14 @@ if __name__ == "__main__":
 
     options = AMTOptions()
 
-    #t = TurnTableControl() # the com number may need to be changed. Default of com7 is used
-    #izzy = PyControl(115200, .04, [0,0,0,0,0],[0,0,0]) # same with this
-    c = None
-    #c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
     izzy = DexRobotZeke()
     izzy._zeke.steady(False)
     t = DexRobotTurntable()
 
-    #options.tf_net = net5.NetFive()
-    #options.tf_net_path = '/home/annal/Izzy/vision_amt/Net/tensor/net5/net5_02-15-2016_11h58m56s.ckpt'
     options.tf_net = net6.NetSix()
 
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-27-2016_15h30m01s.ckpt'
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-12-2016_15h03m44s.ckpt'
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-27-2016_12h04m13s.ckpt'
-    amt = AMT(bincam, izzy, t, c, options=options)
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-28-2016_14h51m12s.ckpt'
+    amt = AMT(bincam, izzy, t, options=options)
 
     while True:
         print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 't' -> test, 'd' -> demonstrate, 'c' -> compile train/test sets): "
