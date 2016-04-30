@@ -5,8 +5,12 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import subprocess
 import re
+import sys
+sys.path.insert(0, 'Net/tensor/')
+from inputdata import im2tensor
+import cv2
 
-root_dir = os.path.expanduser("~/Desktop/research/vision_amt/")
+root_dir = os.path.expanduser("~/Desktop/research/grasping_dataset/")
 rollout_dir = os.path.join(root_dir, 'rollouts/')
 templates_dir  = os.path.join(root_dir, 'dataset/templates/')
 test_dir  = os.path.join(root_dir, 'dataset/test/')
@@ -29,15 +33,25 @@ def extract_rollouts(dataset='train', n_folders=20, n_images=1):
 					for im in images[:n_images]:
 						src = os.path.join(rollout_dir, rollout_folder, im)
 						dst = os.path.join(templates_dir, im)
-						shutil.copy(src, dst)
+						copy_processed_image(src, dst)
 				elif dataset == 'test':
 					im = sorted(images)[-1]
 					print "Image: {}".format(im)
 					src = os.path.join(rollout_dir, rollout_folder, im)
 					dst, new_im_name = label_image(src, im, test_dir)
-					shutil.copy(src, dst)
+					copy_processed_image(src, dst)
 					copy_state_label(rollout_dir, rollout_folder, im, new_im_name)
 		break
+
+def copy_processed_image(src, dst):
+	im = cv2.imread(src, 1)
+	print im.shape
+	processed = im2tensor(im)
+	cv2.imshow("original", im)
+	cv2.waitKey(10)
+	cv2.imshow("filtered", processed)
+	cv2.waitKey(10)
+	cv2.imwrite(dst, processed)
 
 def copy_state_label(rollout_dir, rollout_folder, old_im_name, new_im_name):
 	im_file = os.path.join(rollout_dir, rollout_folder, old_im_name)

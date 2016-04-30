@@ -16,7 +16,7 @@ import re
 class RL_reward():
 	def __init__(self):
 		# Locations of dataset
-		self.dataset_addr = os.path.expanduser("~/Desktop/research/vision_amt/dataset/")
+		self.dataset_addr = os.path.expanduser("~/Desktop/research/grasping_dataset/dataset/")
 		self.test_scenes = os.path.join(self.dataset_addr, 'test')
 		self.test_scene_states = os.path.join(self.test_scenes, 'states.txt')
 		self.circle_templates_dir = os.path.join(self.dataset_addr, 'templates/circle/')
@@ -249,6 +249,7 @@ class RL_reward():
 			Accuracy of point label.
 		"""
 		
+		# Loading data
 		for root, dirs, files in os.walk(self.test_scenes):
 			success_files = [x for x in files if x.startswith('success') and x.endswith('.jpg')]
 			fail_files = [x for x in files if x.startswith('fail') and x.endswith('.jpg')]
@@ -269,6 +270,8 @@ class RL_reward():
 			success_images = [cv2.imread(os.path.join(self.test_scenes, im_file), 1) for im_file in success_files]
 			fail_images = [cv2.imread(os.path.join(self.test_scenes, im_file), 1) for im_file in fail_files]
 			success_labels = []
+
+			# Process images
 			for i in range(len(success_images)):
 				im = success_images[i]
 				state = success_states[i]
