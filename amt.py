@@ -176,10 +176,15 @@ class AMT():
                 cv2.waitKey(30)
 
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
-                
+            
+
                 im = bc.read_frame()
                 reward = reward_obj.reward_function(im, current_state)
                 delta_state = learner.get_action(new_state)
+
+                if i != (num_frames-1):
+                    traj_stats.append(current_state)
+                    rewards.append(reward)
 
                 #delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
                 #delta_state = net.output(sess, gray_frame,channels=3)
