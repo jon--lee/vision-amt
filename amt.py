@@ -135,15 +135,9 @@ class AMT():
         recording = []
 
         policy_net = None # Placeholder
-        learner = PolicyGradient(net_dims = policy_net)
+        learner = PolicyGradient(net_dims = policy_net, 'tanh')
         reward_obj = RL_reward()
-        
-        #
-        # Initialize learner here.
-        # net dims are placeholders for now
-        # I guess train from scratch?
-        # learner = PolicyGradient(net_dims, 'tanh')
-        #
+
 
         # self.qc = query_cam(self.bc)
         # #Clear Buffer ... NEED TO TEST
@@ -181,7 +175,6 @@ class AMT():
                 cv2.imshow("camera",gray_frame)
                 cv2.waitKey(30)
 
- 
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
                 
                 im = bc.read_frame()
