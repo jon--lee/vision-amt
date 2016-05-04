@@ -180,10 +180,11 @@ class AMT():
 
                 im = bc.read_frame()
                 reward = reward_obj.reward_function(im, current_state)
-                delta_state = learner.get_action(new_state)
+                delta_state = learner.get_action(current_state)
 
                 if i != (num_frames-1):
-                    traj_stats.append(current_state)
+                    traj_states.append(current_state)
+                    traj_actions.append(delta_state)
                     rewards.append(reward)
 
                 #delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
@@ -202,7 +203,7 @@ class AMT():
                 
                 time.sleep(.005)
 
-        #gradient_update(self, traj_states, traj_actions, rewards, update_method)
+            learner.gradient_update(traj_states, traj_actions, rewards, 'sgd')
        
         except KeyboardInterrupt:
             pass

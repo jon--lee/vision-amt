@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import subprocess
 import re
+import sys
+sys.path.insert(0, 'Net/tensor/')
+from inputdata import im2tensor
 
 
 class RL_reward():
@@ -67,11 +70,14 @@ class RL_reward():
 
 
 		for meth in methods:
+			#img = im2tensor(img2.copy(), channels=3)
 			img = img2.copy()
+			plt.imshow(img)
 			method = eval(meth)
 
 			# Create convolutional maps
 			# print self.circle_templates
+			print [x.shape for x in templates]
 			conv_maps = [cv2.matchTemplate(img,temp,method) for temp in templates]
 			loc_maps = [cv2.minMaxLoc(res) for res in conv_maps]
 
@@ -205,15 +211,15 @@ class RL_reward():
 		Parameters:
 		im: image
 			Input image of the state.
+			Assumes image is already filtered.
 		state: numpy array
 			Internal state of the gripper.
 		dist: boolean
 			Whether to reward for distance.
 		"""
-
 		gc_pos = self.get_pos(self.circle_templates, im, gripper=False)
 		gripper_pos = self.get_pos(self.gripper_templates, im, gripper=True)
-		bounding_box = self.compute_bounding_box(-state[0], gripper_pos, w=100.0, h=50.0)
+		bounding_box = self.compute_bounding_box(-state[0], gripper_pos, w=125.0, h=50.0)
 		point_label = self.compute_point_label(gc_pos, bounding_box)
 
 		grip_reward = int(point_label) * self.success_reward

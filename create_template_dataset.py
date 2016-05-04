@@ -44,14 +44,9 @@ def extract_rollouts(dataset='train', n_folders=20, n_images=1):
 		break
 
 def copy_processed_image(src, dst):
-	im = cv2.imread(src, 1)
-	print im.shape
-	processed = im2tensor(im)
-	cv2.imshow("original", im)
-	cv2.waitKey(10)
-	cv2.imshow("filtered", processed)
-	cv2.waitKey(10)
-	cv2.imwrite(dst, processed)
+	im = plt.imread(src)
+	processed = im2tensor(im, channels=3)
+	plt.imsave(dst, processed)
 
 def copy_state_label(rollout_dir, rollout_folder, old_im_name, new_im_name):
 	im_file = os.path.join(rollout_dir, rollout_folder, old_im_name)
