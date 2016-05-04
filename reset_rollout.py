@@ -1,4 +1,5 @@
 import time
+from serial import Serial
 import random
 import numpy as np
 import IPython
@@ -43,23 +44,66 @@ class reset():
         time.sleep(1*val)
         DexRobotZeke.PHI += 0.3
         ZekeState([])
-        self.izzy.reset(tra_speed = .25)
+        
         originalPHI = DexRobotZeke.PHI
-        self.izzy.gotoState(ZekeState([None, .1, None, None, None, None]), tra_speed = .25)
-        self.izzy.gotoState(ZekeState([None, None, .3, None, None, None]), tra_speed = .25)
-        self.izzy.gotoState(ZekeState([1.25 * pi + DexRobotZeke.PHI, None, .3, None, None, None]))
-        self.izzy.gotoState(ZekeState([None, .026, None, None, None, None]), tra_speed = .25)
-        self.izzy.gotoState(ZekeState([1.05 * pi + DexRobotZeke.PHI, None, None, None, None, None]))
-        self.izzy.gotoState(ZekeState([None, .1, None, None, None, None]), tra_speed = .25)
-        self.izzy.gotoState(ZekeState([.75 * pi + DexRobotZeke.PHI, None, None, None, None, None]))
-        self.izzy.gotoState(ZekeState([None, .026, None, None, None, None]), tra_speed = .25)
-        self.izzy.gotoState(ZekeState([.95 * pi + DexRobotZeke.PHI, None, None, None, None, None]))
-        self.izzy.gotoState(ZekeState([None, .1, None, None, None, None]), tra_speed = .25)
-        self.izzy.reset(tra_speed = .25)
-        while not self.izzy.is_action_complete():
-            pass # busy waiting
-        self.turn.gotoState(TurntableState([(.5-val) * pi]),  .1, .1)
-        DexRobotZeke.PHI = originalPHI
+        serial = self.turn._turntable._dex_serial
+        serial.ser = Serial(serial._comm, serial._baudrate)
+        serial.ser.setTimeout(serial._timeout)
+
+
+        # keep between -255 and 255
+       
+        #for i in range(100):
+       # while not self.turn.is_action_complete():
+       #     pass
+       # if(i % 2 == 0):
+       #     self.turn.gotoState(TurntableState([5.2259]),  pi/180 * 150, .3)
+       # else:
+       #     self.turn.gotoState(TurntableState([5.2259 + 0.48132]), pi/180 * 150, .3)
+        for i in range(2):
+            self.izzy.gotoState(ZekeState([None, .1, 0.01, None, None, None]), tra_speed = .04)
+            self.izzy.gotoState(ZekeState([3.46, None, None, None, None, None]), tra_speed = .04)
+            
+            self.izzy.gotoState(ZekeState([None, None, .3, None, None, None]), tra_speed = .04)
+            self.izzy.gotoState(ZekeState([4.08, None, .3, None, None, None]), tra_speed = .04)
+            self.izzy.gotoState(ZekeState([None, .026, None, None, None, None]), tra_speed = .04)
+            self.izzy.gotoState(ZekeState([3.65, None, None, None, None, None]),rot_speed = pi/8, tra_speed = .01)
+            self.izzy.gotoState(ZekeState([None, .1, None, None, None, None]), tra_speed = .04)
+            self.izzy.gotoState(ZekeState([2.9, None, None, None, None, None]),tra_speed = .04)
+            self.izzy.gotoState(ZekeState([None, .026, None, None, None, None]), tra_speed = .04)
+            self.izzy.gotoState(ZekeState([3.25, None, None, None, None, None]), rot_speed = pi/8, tra_speed = .01)
+            self.izzy.gotoState(ZekeState([None, .1, 0.01, None, None, None]), tra_speed = .04)
+            self.izzy.gotoState(ZekeState([3.46, 0.02, None, None, .0681, None]), tra_speed = .04)
+            
+           
+
+            while not self.izzy.is_action_complete():
+                pass # busy waiting
+
+            self.turn.gotoState(TurntableState([2.0*(.5-val) * pi]),  .1, .1)
+            DexRobotZeke.PHI = originalPHI
+
+            while not self.turn.is_action_complete():
+                pass
+            
+            mag = 200
+            sleep = .15
+
+            for i in range(40):
+                if i % 2 == 0:
+                    serial._control([mag * -1])
+                else:
+                    serial._control([mag])
+                time.sleep(sleep)
+            serial._control([0])
+
+            print "sleeping"
+            time.sleep(5)
+            print "done sleeping"
+      
+        
+
+
         return
         
         
