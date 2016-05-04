@@ -134,9 +134,9 @@ class AMT():
         sess = net.load(var_path=self.options.tf_net_path)
         recording = []
 
-        policy_net = None # Placeholder
-        learner = PolicyGradient(net_dims = policy_net, 'tanh')
-        reward_obj = RL_reward()
+        # policy_net = None # Placeholder
+        # learner = PolicyGradient(net_dims = policy_net, 'tanh')
+        # reward_obj = RL_reward()
 
 
         # self.qc = query_cam(self.bc)
@@ -152,9 +152,9 @@ class AMT():
 
 
             for i in range(num_frames):
-                traj_states = []
-                traj_actions = []
-                rewards = []
+                # traj_states = []
+                # traj_actions = []
+                # rewards = []
 
                 # Read from the most updated frame
                 for i in range(4):
@@ -179,15 +179,15 @@ class AMT():
             
 
                 im = bc.read_frame()
-                reward = reward_obj.reward_function(im, current_state)
-                delta_state = learner.get_action(current_state)
+                # reward = reward_obj.reward_function(im, current_state)
+                # delta_state = learner.get_action(current_state)
 
-                if i != (num_frames-1):
-                    traj_states.append(current_state)
-                    traj_actions.append(delta_state)
-                    rewards.append(reward)
+                # if i != (num_frames-1):
+                #     traj_states.append(current_state)
+                #     traj_actions.append(delta_state)
+                #     rewards.append(reward)
 
-                #delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
+                delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
                 #delta_state = net.output(sess, gray_frame,channels=3)
                 delta_state = self.deltaSafetyLimites(delta_state)
                 delta_state[2] = 0.0
@@ -203,7 +203,7 @@ class AMT():
                 
                 time.sleep(.005)
 
-            learner.gradient_update(traj_states, traj_actions, rewards, 'sgd')
+            # learner.gradient_update(traj_states, traj_actions, rewards, 'sgd')
        
         except KeyboardInterrupt:
             pass
