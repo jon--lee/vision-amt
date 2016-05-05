@@ -75,8 +75,11 @@ def im2tensor(im,channels=1):
     h, w = shape[0], shape[1]
     zeros = np.zeros((h, w, channels))
     for i in range(channels):
+        # Greyscale
+        zeros[:,:,i] = (im[:,:,0]*0.21 + im[:,:,1]*0.72 + im[:,:,2]*0.07) / 255.0
+
         #Binary Mask
-        zeros[:,:,i] = np.round(im[:,:,i] / 255.0 - .25, 0)
+        #zeros[:,:,i] = np.round(im[:,:,i] / 255.0 - .25, 0)
         #zeros[:,:,i] = np.round(im[:,:,i] / 255.0, 0)
 
         #Nomarlized RGB
