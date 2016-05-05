@@ -40,10 +40,10 @@ class RL_reward():
 		Loads the datasets.
 		"""
 		for root, dirs, files in os.walk(self.circle_templates_dir):
-			self.circle_templates = [cv2.imread(os.path.join(self.circle_templates_dir, x), 1) for x in files if x.endswith('.jpg')]
+			self.circle_templates = [im2tensor(cv2.imread(os.path.join(self.circle_templates_dir, x), 1), channels=3) for x in files if x.endswith('.jpg')]
 			break
 		for root, dirs, files in os.walk(self.gripper_templates_dir):
-			self.gripper_templates = [cv2.imread(os.path.join(self.gripper_templates_dir, x), 1) for x in files if x.endswith('.jpg')]
+			self.gripper_templates = [im2tensor(cv2.imread(os.path.join(self.gripper_templates_dir, x), 1), channels=3) for x in files if x.endswith('.jpg')]
 			break
 
 	def get_pos(self, templates, img, gripper=False):
@@ -203,7 +203,7 @@ class RL_reward():
 		else:
 			return False
 
-	def reward_function(self, im, state, dist=False, success=False):
+	def reward_function(self, im, state, dist=True, success=False):
 		"""
 		Reward function for the current state, given an input 
 		image and state.
@@ -217,6 +217,7 @@ class RL_reward():
 		dist: boolean
 			Whether to reward for distance.
 		"""
+		im = im2tensor(im, channels=3)
 		gc_pos = self.get_pos(self.circle_templates, im, gripper=False)
 		gripper_pos = self.get_pos(self.gripper_templates, im, gripper=True)
 		bounding_box = self.compute_bounding_box(-state[0], gripper_pos, w=125.0, h=50.0)

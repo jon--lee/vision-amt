@@ -29,10 +29,10 @@ from ZekeState import ZekeState
 from DexRobotTurntable import DexRobotTurntable
 from TurntableState import TurntableState
 
-#
-# from rl_reward import RL_reward
-# from policy_gradient import PolicyGradient
-#
+
+from rl_reward import RL_reward
+#from policy_gradient import PolicyGradient
+
 
 def getch():
     """
@@ -60,6 +60,7 @@ class AMT():
         self.r = reset_rollout.reset(izzy, turntable)
 
         # self.qc = query_cam(self.bc)
+        self.reward_obj = RL_reward()
 
 
 
@@ -108,10 +109,10 @@ class AMT():
 
     def rescale(self,deltas):
 
-        deltas[0] = deltas[0]*0.2
+        deltas[0] = deltas[0]*0.15
         deltas[1] = deltas[1]*0.01
-        deltas[2] = deltas[2]*0.005
-        deltas[3] = deltas[3]*0.2
+        deltas[2] = deltas[2]*0.0005
+        deltas[3] = deltas[3]*0.02
         return deltas
 
 
@@ -149,6 +150,8 @@ class AMT():
         for i in range(4):
             self.bc.vc.grab()
         try:
+            target_state_i = self.state(self.izzy.getState())
+            target_state_t = self.state(self.turntable.getState())
 
 
             for i in range(num_frames):
@@ -178,12 +181,15 @@ class AMT():
                 #cv2.imshow("camera",gray_frame)
                 cv2.waitKey(30)
 
-                current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
-            
+                target_state_i = self.state(self.izzy.getState())
+                target_state_t = self.state(self.turntable.getState())
+ 
+                current_state = self.long2short_state(target_state_i, target_state_t)
 
                 #im = self.bc.read_frame()
                 # reward = reward_obj.reward_function(im, current_state)
                 # delta_state = learner.get_action(current_state)
+
 
                 # if i != (num_frames-1):
                 #     traj_states.append(current_state)
@@ -195,7 +201,7 @@ class AMT():
                 delta_state = self.deltaSafetyLimites(delta_state)
                 delta_state[2] = 0.0
                 recording.append((frame, current_state,delta_state))
-                new_izzy, new_t = self.apply_deltas(delta_state)
+                new_izzy, new_t = self.apply_deltas(delta_state,target_state_i,target_state_t)
 
                 # TODO: uncomment these to update izzy and t
                 print "DELTA STATE ",delta_state
@@ -203,6 +209,8 @@ class AMT():
                 self.izzy._zeke._queueState(ZekeState(new_izzy))
                 self.turntable.gotoState(TurntableState(new_t), .25, .25)
 
+                if i == num_frames - 1:
+                    self.save_reward(recording[-1], current_state, savefile='280_experiment.txt')
                 
                 time.sleep(.005)
 
@@ -215,9 +223,10 @@ class AMT():
         # self.qc.terminate()
         # terminated
 
-       
+        self.save_reward(recording, )
         sess.close()
         # self.izzy._zeke.steady(True)
+
         self.prompt_save(recording)
         # self.r.move_reset()
         # self.izzy._zeke.steady(False)
@@ -231,6 +240,14 @@ class AMT():
                 time.sleep(.03)    
         except KeyboardInterrupt:
             pass
+
+    def save_reward(self, recording, state, savefile):
+        final_frame, final_state, final_action = recording[-1]
+        reward = self.reward_obj.reward_function(final_frame, final_state, dist=True)
+        f = open(savefile, 'a')
+        f.write(reward)
+        f.write('\n')
+        f.close()
             
     @staticmethod
     def state(state):
@@ -252,27 +269,26 @@ class AMT():
             return None
         self.prompt_save()
 
-    def apply_deltas(self, delta_state):
+    def apply_deltas(self, delta_state,t_i,t_t):
         """
             Get current states and apply given deltas
             Handle max and min states as well
         """
-        izzy_state = self.state(self.izzy.getState())
-        t_state = self.state(self.turntable.getState())
-        izzy_state[0] += delta_state[0]
-        izzy_state[1] = 0.00952
-        izzy_state[2] += delta_state[1]
-        izzy_state[3] = 4.211
-        izzy_state[4] =0.054# 0.0544 #delta_state[2]
-        t_state[0] += delta_state[3]
-        izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND, izzy_state[0])
-        izzy_state[0] = max(self.options.ROTATE_LOWER_BOUND, izzy_state[0])
-        izzy_state[4] = min(self.options.GRIP_UPPER_BOUND, izzy_state[4])
-        izzy_state[4] = max(self.options.GRIP_LOWER_BOUND, izzy_state[4])
-        t_state[0] = min(self.options.TABLE_UPPER_BOUND, t_state[0])
-        t_state[0] = max(self.options.TABLE_LOWER_BOUND, t_state[0])
+        
+        t_i[0] += delta_state[0]
+        t_i[1] = 0.00952
+        t_i[2] += delta_state[1]
+        t_i[3] = 4.211
+        t_i[4] =0.054# 0.0544 #delta_state[2]
+        t_t[0] += delta_state[3]
+        t_i[0] = min(self.options.ROTATE_UPPER_BOUND, t_i[0])
+        t_i[0] = max(self.options.ROTATE_LOWER_BOUND, t_i[0])
+        t_i[4] = min(self.options.GRIP_UPPER_BOUND, t_i[4])
+        t_i[4] = max(self.options.GRIP_LOWER_BOUND, t_i[4])
+        t_t[0] = min(self.options.TABLE_UPPER_BOUND, t_t[0])
+        t_t[0] = max(self.options.TABLE_LOWER_BOUND, t_t[0])
  
-        return izzy_state, t_state
+        return t_i, t_t
 
 
     @staticmethod
@@ -446,14 +462,20 @@ if __name__ == "__main__":
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-27-2016_15h30m01s.ckpt'
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-12-2016_15h03m44s.ckpt'
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-27-2016_12h04m13s.ckpt'
+    
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_12h05m01s.ckpt'
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_17h33m51s.ckpt'
 
-    # 280: Binary Mask including Previous experts orig Architecture
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h29m06s.ckpt'
+    # 280: Normalized RGB 100 rollouts
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_17h56m50s.ckpt'
+    # More trials
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h10m03s.ckpt'
 
-    # 280: Normalized RGB including Previous experts orig Architecture
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h38m56s.ckpt'
 
+    # 280: Binary Mask 100 rollouts
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h15m48s.ckpt'
+    # More trials
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h53m51s.ckpt'
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

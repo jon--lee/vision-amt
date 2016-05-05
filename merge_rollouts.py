@@ -11,8 +11,8 @@ def merge_rollouts(lower, upper):
     merge_file.close()
 
 def merge_rollouts_deltas():
-    merge_file = open(AMTOptions.data_dir + 'amt/expert_net.txt', 'w')
-    deltas_file = open(AMTOptions.data_dir + 'amt/labels_amt_me_1108_1127.txt', 'r')
+    merge_file = open(AMTOptions.data_dir + 'amt/expert_net_it4.txt', 'w')
+    deltas_file = open(AMTOptions.data_dir + 'amt/labels_amt_me_1272_1286.txt', 'r')
 
     expert_at = deltas_file.readline()
     r = find_rollout_no(expert_at)
