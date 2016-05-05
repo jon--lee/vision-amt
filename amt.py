@@ -29,6 +29,10 @@ from ZekeState import ZekeState
 from DexRobotTurntable import DexRobotTurntable
 from TurntableState import TurntableState
 
+#
+from rl_reward import RL_reward
+from policy_gradient import PolicyGradient
+#
 
 def getch():
     """
@@ -129,6 +133,12 @@ class AMT():
         path = self.options.tf_net_path
         sess = net.load(var_path=self.options.tf_net_path)
         recording = []
+
+        # policy_net = None # Placeholder
+        # learner = PolicyGradient(net_dims = policy_net, 'tanh')
+        # reward_obj = RL_reward()
+
+
         # self.qc = query_cam(self.bc)
         # #Clear Buffer ... NEED TO TEST
         # # self.qc.start()
@@ -142,7 +152,12 @@ class AMT():
             target_state_i = self.state(self.izzy.getState())
             target_state_t = self.state(self.turntable.getState())
 
+
             for i in range(num_frames):
+                # traj_states = []
+                # traj_actions = []
+                # rewards = []
+
                 # Read from the most updated frame
                 for i in range(4):
                     self.bc.vc.grab()
@@ -169,8 +184,16 @@ class AMT():
                 target_state_t = self.state(self.turntable.getState())
  
                 current_state = self.long2short_state(target_state_i, target_state_t)
-                
 
+                im = bc.read_frame()
+                # reward = reward_obj.reward_function(im, current_state)
+                # delta_state = learner.get_action(current_state)
+
+
+                # if i != (num_frames-1):
+                #     traj_states.append(current_state)
+                #     traj_actions.append(delta_state)
+                #     rewards.append(reward)
 
                 delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
                 #delta_state = net.output(sess, gray_frame,channels=3)
@@ -181,11 +204,14 @@ class AMT():
 
                 # TODO: uncomment these to update izzy and t
                 print "DELTA STATE ",delta_state
+
                 self.izzy._zeke._queueState(ZekeState(new_izzy))
                 self.turntable.gotoState(TurntableState(new_t), .25, .25)
 
                 
                 time.sleep(.005)
+
+            # learner.gradient_update(traj_states, traj_actions, rewards, 'sgd')
        
         except KeyboardInterrupt:
             pass
