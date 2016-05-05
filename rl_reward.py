@@ -54,9 +54,9 @@ class RL_reward():
 
 	def read_filter_img(self, im_path):
 		im = plt.imread(im_path)
-		filtered = 255.0 * self.im2tensor_binary(im, channels=3)
-		#filtered = cv2.cvtColor(filtered, cv2.COLOR_RGB2BGR)
-		return filtered.astype(np.uint8)
+		filtered = (255.0 * self.im2tensor_binary(im, channels=3)).astype(np.uint8)
+		filtered = cv2.cvtColor(filtered, cv2.COLOR_RGB2BGR)
+		return filtered
 
 	def get_pos(self, templates, img, gripper=False):
 		"""
