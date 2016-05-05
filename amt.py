@@ -30,8 +30,8 @@ from DexRobotTurntable import DexRobotTurntable
 from TurntableState import TurntableState
 
 #
-from rl_reward import RL_reward
-from policy_gradient import PolicyGradient
+# from rl_reward import RL_reward
+# from policy_gradient import PolicyGradient
 #
 
 def getch():
@@ -181,7 +181,7 @@ class AMT():
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
             
 
-                im = bc.read_frame()
+                #im = self.bc.read_frame()
                 # reward = reward_obj.reward_function(im, current_state)
                 # delta_state = learner.get_action(current_state)
 
@@ -446,7 +446,15 @@ if __name__ == "__main__":
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt'
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-27-2016_15h30m01s.ckpt'
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-12-2016_15h03m44s.ckpt'
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-27-2016_12h04m13s.ckpt'
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-27-2016_12h04m13s.ckpt'
+
+    # 280: Binary Mask including Previous experts orig Architecture
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h29m06s.ckpt'
+
+    # 280: Normalized RGB including Previous experts orig Architecture
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h38m56s.ckpt'
+
+
     amt = AMT(bincam, izzy, t, c, options=options)
 
     while True:
