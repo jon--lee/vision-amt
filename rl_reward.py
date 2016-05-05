@@ -19,7 +19,7 @@ from inputdata import im2tensor
 class RL_reward():
 	def __init__(self):
 		# Locations of dataset
-		self.dataset_addr = os.path.expanduser("~/Desktop/research/grasping_dataset/dataset/")
+		self.dataset_addr = os.path.expanduser("~/Izzy/vision_amt/template_dataset/dataset")
 		self.test_scenes = os.path.join(self.dataset_addr, 'test')
 		self.test_scene_states = os.path.join(self.test_scenes, 'states.txt')
 		self.circle_templates_dir = os.path.join(self.dataset_addr, 'templates/circle/')
