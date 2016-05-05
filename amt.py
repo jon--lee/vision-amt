@@ -31,7 +31,7 @@ from TurntableState import TurntableState
 
 #
 from rl_reward import RL_reward
-from policy_gradient import PolicyGradient
+#from policy_gradient import PolicyGradient
 #
 
 def getch():
@@ -60,6 +60,7 @@ class AMT():
         self.r = reset_rollout.reset(izzy, turntable)
 
         # self.qc = query_cam(self.bc)
+        self.reward_obj = RL_reward()
 
 
 
@@ -203,6 +204,8 @@ class AMT():
                 self.izzy._zeke._queueState(ZekeState(new_izzy))
                 self.turntable.gotoState(TurntableState(new_t), .25, .25)
 
+                if i == num_frames - 1:
+                    self.save_reward(recording[-1], current_state, savefile='280_experiment.txt')
                 
                 time.sleep(.005)
 
@@ -215,9 +218,10 @@ class AMT():
         # self.qc.terminate()
         # terminated
 
-       
+        self.save_reward(recording, )
         sess.close()
         # self.izzy._zeke.steady(True)
+
         self.prompt_save(recording)
         # self.r.move_reset()
         # self.izzy._zeke.steady(False)
@@ -231,6 +235,14 @@ class AMT():
                 time.sleep(.03)    
         except KeyboardInterrupt:
             pass
+
+    def save_reward(self, recording, state, savefile):
+        final_frame, final_state, final_action = recording[-1]
+        reward = self.reward_obj.reward_function(final_frame, final_state, dist=True)
+        f = open(savefile, 'a')
+        f.write(reward)
+        f.write('\n')
+        f.close()
             
     @staticmethod
     def state(state):

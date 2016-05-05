@@ -45,8 +45,10 @@ def extract_rollouts(dataset='train', n_folders=20, n_images=1):
 
 def copy_processed_image(src, dst):
 	im = plt.imread(src)
-	processed = im2tensor(im, channels=3)
-	plt.imsave(dst, processed)
+	# processed = im2tensor(im, channels=3)
+	# plt.imsave(dst, processed)
+	plt.imsave(dst, im)
+
 
 def copy_state_label(rollout_dir, rollout_folder, old_im_name, new_im_name):
 	im_file = os.path.join(rollout_dir, rollout_folder, old_im_name)
@@ -88,6 +90,6 @@ def check_dirs():
 
 if __name__ == '__main__':
 	check_dirs()
-	#extract_rollouts(dataset='templates', n_folders=20, n_images=1)
-	extract_rollouts(dataset='test', n_folders=50, n_images=1)
+	extract_rollouts(dataset='templates', n_folders=20, n_images=1)
+	#extract_rollouts(dataset='test', n_folders=50, n_images=1)
 
