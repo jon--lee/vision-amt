@@ -12,8 +12,6 @@ from PIL import Image
 import subprocess
 import re
 import sys
-sys.path.insert(0, 'Net/tensor/')
-from inputdata import im2tensor
 
 
 class RL_reward():
@@ -40,11 +38,25 @@ class RL_reward():
 		Loads the datasets.
 		"""
 		for root, dirs, files in os.walk(self.circle_templates_dir):
-			self.circle_templates = [im2tensor(cv2.imread(os.path.join(self.circle_templates_dir, x), 1), channels=3) for x in files if x.endswith('.jpg')]
+			self.circle_templates = [self.read_filter_img(os.path.join(self.circle_templates_dir, x)) for x in files if x.endswith('.jpg')]
+			#self.circle_templates = [cv2.imread(os.path.join(self.circle_templates_dir, x), 1) for x in files if x.endswith('.jpg')]
+			print "Circle Templates Shapes: "
+			print [x.shape for x in self.circle_templates]
 			break
 		for root, dirs, files in os.walk(self.gripper_templates_dir):
-			self.gripper_templates = [im2tensor(cv2.imread(os.path.join(self.gripper_templates_dir, x), 1), channels=3) for x in files if x.endswith('.jpg')]
+			#x = files[0]
+			#print cv2.imread(os.path.join(self.gripper_templates_dir, x), 1)
+			self.gripper_templates = [self.read_filter_img(os.path.join(self.gripper_templates_dir, x)) for x in files if x.endswith('.jpg')]
+			#self.gripper_templates = [cv2.imread(os.path.join(self.gripper_templates_dir, x), 1) for x in files if x.endswith('.jpg')]
+			print "Gripper Templates Shapes: "
+			print [x.shape for x in self.gripper_templates]
 			break
+
+	def read_filter_img(self, im_path):
+		im = plt.imread(im_path)
+		filtered = 255.0 * self.im2tensor_binary(im, channels=3)
+		#filtered = cv2.cvtColor(filtered, cv2.COLOR_RGB2BGR)
+		return filtered.astype(np.uint8)
 
 	def get_pos(self, templates, img, gripper=False):
 		"""
@@ -70,7 +82,7 @@ class RL_reward():
 
 
 		for meth in methods:
-			#img = im2tensor(img2.copy(), channels=3)
+			#img = self.im2tensor_binary(img2.copy(), channels=3)
 			img = img2.copy()
 			plt.imshow(img)
 			method = eval(meth)
@@ -132,6 +144,21 @@ class RL_reward():
 		else: 
 			self.prev_pos = cur_pos
 			return cur_pos
+
+	def im2tensor_binary(self, im, channels=3):
+	    """
+	        convert 3d image (height, width, 3-channel) where values range [0,255]
+	        to appropriate pipeline shape and values of either 0 or 1
+	        cv2 --> tf
+	    """
+	    shape = np.shape(im)
+	    print "shape", shape
+	    h, w = shape[0], shape[1]
+	    zeros = np.zeros((h, w, channels))
+	    for i in range(channels):
+	        #Binary Mask
+	        zeros[:,:,i] = np.round(im[:,:,i] / 255.0 - .25, 0)
+	    return zeros
 
 	def compute_bounding_box(self, angle, base_coords, w=1.0, h=1.0):
 		"""
@@ -217,7 +244,8 @@ class RL_reward():
 		dist: boolean
 			Whether to reward for distance.
 		"""
-		im = im2tensor(im, channels=3)
+
+		im = (255.0 * self.im2tensor_binary(im, channels=3)).astype(np.uint8)
 		gc_pos = self.get_pos(self.circle_templates, im, gripper=False)
 		gripper_pos = self.get_pos(self.gripper_templates, im, gripper=True)
 		bounding_box = self.compute_bounding_box(-state[0], gripper_pos, w=125.0, h=50.0)
@@ -274,8 +302,8 @@ class RL_reward():
 				state = [float(x) for x in state_line.split()[1:5]]
 				fail_states.append(state)
 				states.close()
-			success_images = [cv2.imread(os.path.join(self.test_scenes, im_file), 1) for im_file in success_files]
-			fail_images = [cv2.imread(os.path.join(self.test_scenes, im_file), 1) for im_file in fail_files]
+			success_images = [plt.imread(os.path.join(self.test_scenes, im_file)) for im_file in success_files]
+			fail_images = [plt.imread(os.path.join(self.test_scenes, im_file)) for im_file in fail_files]
 			success_labels = []
 
 			# Process images
