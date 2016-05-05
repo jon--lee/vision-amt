@@ -29,10 +29,10 @@ from ZekeState import ZekeState
 from DexRobotTurntable import DexRobotTurntable
 from TurntableState import TurntableState
 
-#
-from rl_reward import RL_reward
-from policy_gradient import PolicyGradient
-#
+# #
+# from rl_reward import RL_reward
+# from policy_gradient import PolicyGradient
+# #
 
 def getch():
     """
@@ -457,13 +457,14 @@ if __name__ == "__main__":
     # 280: Normalized RGB 100 rollouts
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_17h56m50s.ckpt'
     # More trials
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h10m03s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h10m03s.ckpt'
 
 
     # 280: Binary Mask 100 rollouts
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h15m48s.ckpt'
     # More trials
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h53m51s.ckpt'
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h53m51s.ckpt'
+
     amt = AMT(bincam, izzy, t, c, options=options)
 
     while True:
