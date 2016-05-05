@@ -162,7 +162,7 @@ class AMT():
                 # rewards = []
 
                 # Read from the most updated frame
-                for i in range(4):
+                for j in range(4):
                     self.bc.vc.grab()
                 frame = self.bc.read_frame()
                 #frame = self.qc.read_frame()
@@ -188,7 +188,7 @@ class AMT():
  
                 current_state = self.long2short_state(target_state_i, target_state_t)
 
-                im = bc.read_frame()
+                im = self.bc.read_frame()
                 # reward = reward_obj.reward_function(im, current_state)
                 # delta_state = learner.get_action(current_state)
 
@@ -208,10 +208,17 @@ class AMT():
                 # TODO: uncomment these to update izzy and t
                 print "DELTA STATE ",delta_state
 
+                print "i", i
                 self.izzy._zeke._queueState(ZekeState(new_izzy))
                 self.turntable.gotoState(TurntableState(new_t), .25, .25)
 
                 if i == num_frames - 1:
+                    print "FINAL FRAME"
+                    print "Recording"
+                    print len(recording[-1])
+                    print recording[-1][1]
+                    print recording[-1][2]
+                    #print recording
                     self.save_reward(recording[-1], current_state, savefile='280_experiment.txt')
                 
                 time.sleep(.005)
@@ -225,7 +232,6 @@ class AMT():
         # self.qc.terminate()
         # terminated
 
-        self.save_reward(recording, )
         sess.close()
         # self.izzy._zeke.steady(True)
 
@@ -244,8 +250,14 @@ class AMT():
             pass
 
     def save_reward(self, recording, state, savefile):
-        final_frame, final_state, final_action = recording[-1]
+        final_frame, final_state, final_action = recording
+        print "Final Frame Shape: "
+        print final_frame.shape
         reward = self.reward_obj.reward_function(final_frame, final_state, dist=True)
+        print "State: "
+        print state
+        print "Reward: "
+        print reward
         f = open(savefile, 'a')
         f.write(reward)
         f.write('\n')
@@ -470,13 +482,16 @@ if __name__ == "__main__":
 
     # 280: Normalized RGB 100 rollouts
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_17h56m50s.ckpt'
-    # More trials
+    # More trials ***
     options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h10m03s.ckpt'
+    # 280: Normalized RGB w/ conv
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-05-2016_12h48m00s.ckpt'
+
 
 
     # 280: Binary Mask 100 rollouts
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h15m48s.ckpt'
-    # More trials
+    # More trials ***
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h53m51s.ckpt'
 
     amt = AMT(bincam, izzy, t, c, options=options)
