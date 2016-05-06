@@ -219,7 +219,7 @@ class AMT():
                     print recording[-1][1]
                     print recording[-1][2]
                     #print recording
-                    self.save_reward(recording[-1], current_state, savefile='280_experiment.txt')
+                    self.save_reward(recording[-1], current_state, savefile='280_experiment_binary_1.txt')
                 
                 time.sleep(.005)
 
@@ -259,7 +259,7 @@ class AMT():
         print "Reward: "
         print reward
         f = open(savefile, 'a')
-        f.write(reward)
+        f.write(str(reward))
         f.write('\n')
         f.close()
             
@@ -480,19 +480,38 @@ if __name__ == "__main__":
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_12h05m01s.ckpt'
     #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_17h33m51s.ckpt'
 
-    # 280: Normalized RGB 100 rollouts
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_17h56m50s.ckpt'
-    # More trials ***
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h10m03s.ckpt'
-    # 280: Normalized RGB w/ conv
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-05-2016_12h48m00s.ckpt'
+    #########################
 
+    # 280: Normalized RGB 100 rollouts
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_17h56m50s.ckpt' 
+    # More trials ***
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h10m03s.ckpt' #~ 200
+    # 280: Normalized RGB w/ max pool
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-05-2016_13h27m53s.ckpt' #~ 300
+    # 280: Normalized RGB w/ conv
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-05-2016_13h40m36s.ckpt' #~ 400
 
 
     # 280: Binary Mask 100 rollouts
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h15m48s.ckpt'
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h15m48s.ckpt' #~ 200
     # More trials ***
-    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h53m51s.ckpt'
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_18h53m51s.ckpt' #~ 200
+    # Binary Mask w/ max pooling
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-05-2016_13h18m57s.ckpt' #~ 300
+    # 280: Binary Mask w/ conv - ( really bad)
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-05-2016_17h51m00s.ckpt' # ~ 500
+    # Binay max + conv ~ 500 
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-05-2016_18h23m07s.ckpt'
+
+
+    # 280: Greyscale Original Architecture
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-05-2016_13h53m14s.ckpt' #~ 300
+    # Greyscale w/ max pooling
+    #options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-05-2016_14h02m52s.ckpt' #~ 300 
+    # Greyscale w/ conv
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-05-2016_14h16m45s.ckpt' #~ 300
+
+    ##########################
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

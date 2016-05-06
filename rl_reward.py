@@ -270,7 +270,7 @@ class RL_reward():
 		cv2.waitKey(100)
 		if dist:
 			dist_reward = -la.norm(gc_pos - gripper_pos)
-			return dist_reward + grip_reward
+			return dist_reward, grip_reward
 		else:
 			return grip_reward
 
