@@ -24,7 +24,7 @@ class NetSix(TensorNet):
         self.channels = 3
 
         self.x = tf.placeholder('float', shape=[None, 250, 250, self.channels])
-        self.y_ = tf.placeholder("float", shape=[None, 4])
+        self.y_ = tf.placeholder("float", shape=[5, 4])
 
 
         self.w_conv1 = self.weight_variable([11, 11, self.channels, 5])
@@ -68,6 +68,9 @@ class NetSix(TensorNet):
         self.y_out = tf.tanh(tf.matmul(self.h_fc1, self.w_fc2) + self.b_fc2)
 
         self.loss = tf.reduce_mean(.5*tf.square(self.y_out - self.y_))
+
+
+
         self.train_step = tf.train.MomentumOptimizer(.003, .9)
         self.train = self.train_step.minimize(self.loss)
 
