@@ -21,11 +21,12 @@ class NetSix_C(TensorNet):
 
 
     def sf_max_many(self,h_2):
-        y_0 = tf.nn.softmax(h_2[0:4])
-        y_1 = tf.nn.softmax(h_2[5:9])
-        y_2 = tf.nn.softmax(h_2[10:14]) 
-        y_3 = tf.nn.softmax(h_2[15:19])
-        self.y_ = [y_0,y_1,y_2,y_3]
+        y_0 = tf.nn.softmax(h_2[:,0:5])
+        y_1 = tf.nn.softmax(h_2[:,5:10])
+        y_2 = tf.nn.softmax(h_2[:,10:15]) 
+        y_3 = tf.nn.softmax(h_2[:,15:20])
+
+        return tf.concat(1,[y_0,y_1,y_2,y_3])
 
     def __init__(self):
         self.dir = "./net6/"
@@ -77,7 +78,7 @@ class NetSix_C(TensorNet):
         self.h_2 = tf.matmul(self.h_fc1, self.w_fc2) + self.b_fc2
         self.y_out = self.sf_max_many(self.h_2)
         
-        self.loss = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y_out), reduction_indices=[1]))
+        self.loss = tf.reduce_mean(-tf.reduce_sum(self.y_ * tf.log(self.y_out), reduction_indices=[1]))
 
 
         self.train_step = tf.train.MomentumOptimizer(.003, .9)
