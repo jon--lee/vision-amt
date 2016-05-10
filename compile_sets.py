@@ -1,4 +1,5 @@
 from options import AMTOptions
+import numpy as np
 import random
 
 
@@ -10,7 +11,7 @@ def scale(deltas):
     return deltas
 
 def reg_to_class(deltas):
-    cls = np.array([20])
+    cls = np.zeros([20])
     idx_0 = np.round(2*deltas[0]+2)
     idx_1 = np.round(2*deltas[1]+2)+5
     idx_2 = np.round(2*deltas[2]+2)+10
@@ -20,6 +21,7 @@ def reg_to_class(deltas):
     cls[idx_1] = 1.0
     cls[idx_2] = 1.0
     cls[idx_3] = 1.0
+    return cls
 
 def compile():
     train_path = AMTOptions.train_file
@@ -41,7 +43,13 @@ def compile():
         path = AMTOptions.colors_dir 
         labels = line.split()
         deltas = scale(labels[1:5])
-        line = labels[0]+" "+str(deltas[0])+" "+str(deltas[1])+" "+str(deltas[2])+" "+str(deltas[3])+"\n"
+        deltas_c = reg_to_class(deltas)
+
+        line = labels[0]#+" "+str(deltas[0])+" "+str(deltas[1])+" "+str(deltas[2])+" "+str(deltas[3])+"\n"
+        for i in range(20):
+            line += " "+str(deltas_c[i])
+
+        line += "\n"
         if random.random() > .2:
             train_file.write(path + line)
         else:
