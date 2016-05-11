@@ -42,18 +42,18 @@ class NetTest(object):
             path = AMTOptions.colors_dir
             labels = line.split()
             img_name = path+labels[0]
-            deltas_t = labels[1:5]
+            #deltas_t = labels[1:5]
             img = cv2.imread(img_name,1)
             img = np.reshape(img, (250, 250, 3))
             net_v = np.array(self.getNetOutput(img),dtype=np.float32)
-            true_v = np.array(self.scale(deltas_t),dtype=np.float32)
+            #true_v = np.array(self.scale(deltas_t),dtype=np.float32)
             print "NET ",net_v
-            print "TRYE ",true_v
+            #print "TRYE ",true_v
 
-            err = 0.5*LA.norm(net_v[0]-true_v[0])**2
-            self.vals.append(err)
+            #err = 0.5*LA.norm(net_v[0]-true_v[0])**2
+            #self.vals.append(err)
 
-        self.computerER()
+        #self.computerER()
 
 
             
