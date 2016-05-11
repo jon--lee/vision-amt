@@ -9,7 +9,7 @@ import math as m
 class PyControl:
     def __init__(self, baudrate=115200,timeout=.04, offsets=[.505, .2601, .234-.0043, 0.0164,-.2996], gripperParams=[.12, 0, -.08]):
         # initialize Serial Connection
-        comm = "/dev/ttyACM0"
+        comm = "/dev/ttyACM1"
         self.ser = serial.Serial(comm,baudrate)
         self.ser.setTimeout(timeout)
         time.sleep(1)

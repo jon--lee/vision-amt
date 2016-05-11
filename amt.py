@@ -19,6 +19,7 @@ import IPython
 import reset_rollout
 import numpy as np
 import compile_sets
+import matplotlib.pyplot as plt
 
 from query_cam import query_cam
 
@@ -188,6 +189,17 @@ class AMT():
 
               
                 delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
+                dists =  net.class_dist(sess, gray_frame)
+                plt.clf()
+                plt.subplot(2,1,1)
+                plt.plot(dists[0,:])
+
+                plt.subplot(2,1,2)
+                plt.plot(dists[1,:])
+                plt.draw()
+                plt.show(block=False)
+               
+                
                 #delta_state = net.output(sess, gray_frame,channels=3)
                 delta_state = self.deltaSafetyLimites(delta_state)
                 delta_state[2] = 0.0
@@ -211,7 +223,7 @@ class AMT():
         # self.qc.terminate()
         # terminated
 
-        self.save_reward(recording, )
+    
         sess.close()
         # self.izzy._zeke.steady(True)
 
@@ -445,7 +457,7 @@ if __name__ == "__main__":
  
     options.tf_net = net6_c.NetSix_C()
 
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h10m03s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-11-2016_12h09m12s.ckpt'
 
 
     amt = AMT(bincam, izzy, t, c, options=options)

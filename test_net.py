@@ -17,6 +17,7 @@ class NetTest(object):
         self.sess = self.tf_net.load(var_path=self.tf_net_path)
         self.vals = []
 
+
     def computerER(self):
         sm = 0.0
         for val in self.vals:
@@ -48,11 +49,13 @@ class NetTest(object):
             img = np.reshape(img, (250, 250, 3))
             net_v = np.array(self.getNetOutput(img),dtype=np.float32)
             dists =  self.tf_net.class_dist(self.sess, img)
-            plt.fig(1)
+            plt.subplot(2,1,1)
             plt.plot(dists[0,:])
-            plt.fig(2)
+            
+            plt.subplot(2,1,2)
             plt.plot(dists[1,:])
-            plt.show()
+            plt.show(block=False)
+            
 
             #true_v = np.array(self.scale(deltas_t),dtype=np.float32)
             print "NET ",net_v

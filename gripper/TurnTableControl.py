@@ -12,7 +12,7 @@ import math as m
 
 
 class TurnTableControl:
-    def __init__(self, comm = "/dev/ttyACM1",baudrate=115200,timeout=.04, offset = .5):
+    def __init__(self, comm = "/dev/ttyACM0",baudrate=115200,timeout=.04, offset = .5):
         # initialize Serial Connection
         self.ser = serial.Serial(comm,baudrate)
         self.ser.setTimeout(timeout)

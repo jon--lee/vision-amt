@@ -153,7 +153,7 @@ class TensorNet():
                 return sess.run(self.y_out, feed_dict={self.x:im}) [0]
 
 
-    def class_dist(self,sess,im):
+    def class_dist(self,sess,im,channels=3):
         """
         accepts batch of 3d images, converts to tensor
         and returns four element list of controls
