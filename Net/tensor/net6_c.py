@@ -41,25 +41,7 @@ class NetSix_C(TensorNet):
 
         self.h_conv1 = tf.nn.relu(self.conv2d(self.x, self.w_conv1) + self.b_conv1)
 
-        # 280: Max Pooling
-        #self.h_conv1 = self.max_pool(self.h_conv1, 4)
-
-        # 280: Add 2nd convolutional layer
-        #self.w_conv2 = self.weight_variable([5, 5, 5, 3])
-        #self.b_conv2 = self.bias_variable([3])
-
-        #self.h_conv2 = tf.nn.relu(self.conv2d(self.h_conv1, self.w_conv2) + self.b_conv2)
-        #self.h_conv2 = self.max_pool(self.h_conv2, 4)
-
-        # print self.h_conv1.get_shape()
-        # conv_num_nodes = self.reduce_shape(self.h_conv2.get_shape())
-        # fc1_num_nodes = 128
-        
-        # self.w_fc1 = self.weight_variable([conv_num_nodes, fc1_num_nodes])
-        # # self.w_fc1 = self.weight_variable([1000, fc1_num_nodes])
-        # self.b_fc1 = self.bias_variable([fc1_num_nodes])
-
-        # self.h_conv_flat = tf.reshape(self.h_conv2, [-1, conv_num_nodes])
+     
 
         conv_num_nodes = self.reduce_shape(self.h_conv1.get_shape())
         fc1_num_nodes = 128
