@@ -20,6 +20,30 @@ class NetSix_C(TensorNet):
 
 
 
+
+    def get_acc(self,y_,y_out):
+        y_0 = tf.nn.softmax(y_[:,0:5])
+        y_1 = tf.nn.softmax(y_[:,5:10])
+        y_2 = tf.nn.softmax(y_[:,10:15]) 
+        y_3 = tf.nn.softmax(y_[:,15:20])
+
+        y_o_0 = tf.nn.softmax(y_out[:,0:5])
+        y_o_1 = tf.nn.softmax(y_out[:,5:10])
+        y_o_2 = tf.nn.softmax(y_out[:,10:15]) 
+        y_o_3 = tf.nn.softmax(y_out[:,15:20])
+
+        cp_0 = tf.equal(tf.argmax(y_o_0,1), tf.argmax(y_0,1))
+        cp_1 = tf.equal(tf.argmax(y_o_1,1), tf.argmax(y_1,1))
+        cp_2 = tf.equal(tf.argmax(y_o_2,1), tf.argmax(y_2,1))
+        cp_3 = tf.equal(tf.argmax(y_o_3,1), tf.argmax(y_3,1))
+
+        ac_0 = tf.reduce_mean(tf.cast(cp_0, tf.float32))
+        ac_1 = tf.reduce_mean(tf.cast(cp_1, tf.float32))
+        ac_2 = tf.reduce_mean(tf.cast(cp_2, tf.float32))
+        ac_3 = tf.reduce_mean(tf.cast(cp_3, tf.float32))
+
+        return (ac_0+ac_1+ac_2+ac_3)/5.0
+
     def sf_max_many(self,h_2):
         y_0 = tf.nn.softmax(h_2[:,0:5])
         y_1 = tf.nn.softmax(h_2[:,5:10])
@@ -62,7 +86,7 @@ class NetSix_C(TensorNet):
         
         self.loss = tf.reduce_mean(-tf.reduce_sum(self.y_ * tf.log(self.y_out), reduction_indices=[1]))
 
-
+        self.acc = self.get_acc(self.y_,self.y_out)
         self.train_step = tf.train.MomentumOptimizer(.003, .9)
         self.train = self.train_step.minimize(self.loss)
 
