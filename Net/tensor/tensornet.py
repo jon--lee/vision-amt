@@ -155,15 +155,15 @@ class TensorNet():
 
 
     def class_dist(self,sess,im):
-         """
-            accepts batch of 3d images, converts to tensor
-            and returns four element list of controls
+        """
+        accepts batch of 3d images, converts to tensor
+        and returns four element list of controls
         """
         im = inputdata.im2tensor(im,channels)
         shape = np.shape(im)
         im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
         with sess.as_default():            
-                return sess.run(self.y_out, feed_dict={self.x:im}) [0]
+            return sess.run(self.y_out, feed_dict={self.x:im}) [0]
 
     @staticmethod
     def reduce_shape(shape):

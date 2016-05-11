@@ -2,7 +2,7 @@ from options import AMTOptions
 import random
 import tensorflow as tf
 import cv2
-from Net.tensor import inputdata, net3,net4,net6
+from Net.tensor import inputdata, net3,net4,net6,net6_c
 import IPython
 import numpy as np
 import numpy.linalg as LA
@@ -11,7 +11,7 @@ import numpy.linalg as LA
 class NetTest(object):
 
     def __init__(self,net_path):
-        self.tf_net = net6.NetSix()
+        self.tf_net = net6_c.NetSix_C()
         self.tf_net_path = net_path
         self.sess = self.tf_net.load(var_path=self.tf_net_path)
         self.vals = []
@@ -64,6 +64,6 @@ class NetTest(object):
 
 if __name__ == '__main__':
 
-    nt = NetTest(net_path ='/media/1tb/Izzy/nets/net6_02-26-2016_18h08m10s.ckpt')
+    nt = NetTest(net_path ='/media/1tb/Izzy/nets/net6_05-11-2016_12h09m12s.ckpt')
     nt.rollCall()
 
