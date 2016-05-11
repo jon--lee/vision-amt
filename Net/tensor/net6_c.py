@@ -42,7 +42,7 @@ class NetSix_C(TensorNet):
         ac_2 = tf.reduce_mean(tf.cast(cp_2, tf.float32))
         ac_3 = tf.reduce_mean(tf.cast(cp_3, tf.float32))
 
-        return (ac_0+ac_1+ac_2+ac_3)/5.0
+        return (ac_0+ac_1+ac_2+ac_3)/4.0
 
     def sf_max_many(self,h_2):
         y_0 = tf.nn.softmax(h_2[:,0:5])

@@ -6,6 +6,7 @@ from Net.tensor import inputdata, net3,net4,net6,net6_c
 import IPython
 import numpy as np
 import numpy.linalg as LA
+import matplotlib.pyplot as plt
 
 
 class NetTest(object):
@@ -46,6 +47,13 @@ class NetTest(object):
             img = cv2.imread(img_name,1)
             img = np.reshape(img, (250, 250, 3))
             net_v = np.array(self.getNetOutput(img),dtype=np.float32)
+            dists =  self.tf_net.class_dist(self.sess, img)
+            plt.fig(1)
+            plt.plot(dists[0,:])
+            plt.fig(2)
+            plt.plot(dists[1,:])
+            plt.show()
+
             #true_v = np.array(self.scale(deltas_t),dtype=np.float32)
             print "NET ",net_v
             #print "TRYE ",true_v

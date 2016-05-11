@@ -162,12 +162,9 @@ class TensorNet():
         shape = np.shape(im)
         im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
         with sess.as_default():            
-<<<<<<< HEAD
-                dists = sess.run(self.y_out, feed_dict={self.x:im}) [0]
-                return np.reshape(dists, [5,4])
-=======
-            return sess.run(self.y_out, feed_dict={self.x:im}) [0]
->>>>>>> 75ed868dace4592576a1fe2c1804ce9e8955e568
+            dists = sess.run(self.y_out, feed_dict={self.x:im}) [0]
+            return np.reshape(dists, [5,4])
+
 
     @staticmethod
     def reduce_shape(shape):
