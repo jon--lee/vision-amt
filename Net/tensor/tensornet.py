@@ -163,7 +163,7 @@ class TensorNet():
         im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
         with sess.as_default():            
             dists = sess.run(self.y_out, feed_dict={self.x:im}) [0]
-            return np.reshape(dists, [5,4])
+            return np.reshape(dists, [4,5])
 
 
     @staticmethod

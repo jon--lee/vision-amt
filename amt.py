@@ -191,11 +191,14 @@ class AMT():
                 delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
                 dists =  net.class_dist(sess, gray_frame)
                 plt.clf()
+                x = np.array([-1,-0.5,0,0.5,1])
                 plt.subplot(2,1,1)
-                plt.plot(dists[0,:])
-
+                
+                plt.plot(x,dists[0,:])
+                plt.xlabel('Rotation')
                 plt.subplot(2,1,2)
-                plt.plot(dists[1,:])
+                plt.plot(x,dists[1,:])
+                plt.xlabel('Extension')
                 plt.draw()
                 plt.show(block=False)
                
