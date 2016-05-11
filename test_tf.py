@@ -6,7 +6,7 @@ from options import AMTOptions
 
 data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file,channels=3)
 net = net6_c.NetSix_C()
-path = '/media/1tb/Izzy/nets/net6_05-04-2016_15h59m29s.ckpt'
+path = '/media/1tb/Izzy/nets/net6_05-10-2016_16h51m48s.ckpt'
 #path = '/media/1tb/Izzy/nets/net6_05-04-2016_14h10m59s.ckpt'
 # net.optimize(200,data,path = path, batch_size=200)
 net.optimize(500,data, batch_size=200)

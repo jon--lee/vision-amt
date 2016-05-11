@@ -42,33 +42,6 @@ class InputData():
         return list(batch[0]), list(batch[1])
 
 
-    def process_out(self,n):
-        out = np.zeros([4])
-        n_0 = np.argmax(n[0:5])
-        n_1 = np.argmax(n[5:10])
-        n_2 = np.argmax(n[10:14])
-        n_3 = np.argmax(n[15:20])
-
-        out[0] = (n_0 - 2)/2.0
-        out[1] = (n_1 - 2)/2.0
-        out[2] = (n_2 - 2)/2.0
-        out[3] = (n_3 - 2)/2.0
-
-        return out
-
-    def process_out(self,n):
-        out = np.zeros([4])
-        n_0 = np.argmax(n[0:5])
-        n_1 = np.argmax(n[5:10])
-        n_2 = np.argmax(n[10:14])
-        n_3 = np.argmax(n[15:20])
-
-        out[0] = (n_0 - 2)/2.0
-        out[1] = (n_1 - 2)/2.0
-        out[2] = (n_2 - 2)/2.0
-        out[3] = (n_3 - 2)/2.0
-
-        return out
     
 def parse(filepath, stop=-1):
     """
@@ -113,6 +86,21 @@ def im2tensor(im,channels=1):
 
         #zeros[:,:,i] = im[:,:,i]
     return zeros
+
+def process_out(n):
+    print n
+    out = np.zeros([4])
+    n_0 = np.argmax(n[0:5])
+    n_1 = np.argmax(n[5:10])
+    n_2 = np.argmax(n[10:14])
+    n_3 = np.argmax(n[15:20])
+
+    out[0] = (n_0 - 2)/2.0
+    out[1] = (n_1 - 2)/2.0
+    out[2] = (n_2 - 2)/2.0
+    out[3] = (n_3 - 2)/2.0
+
+    return out
 
 
 class AMTData(InputData):
