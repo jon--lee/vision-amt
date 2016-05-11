@@ -43,11 +43,11 @@ class InputData():
 
 
     def process_out(self,n):
-        out = np.array([4])
-        n_0 = np.argmax(n[0:4])
-        n_1 = np.argmax(n[5:9])
+        out = np.zeros([4])
+        n_0 = np.argmax(n[0:5])
+        n_1 = np.argmax(n[5:10])
         n_2 = np.argmax(n[10:14])
-        n_3 = np.argmax(n[15:19])
+        n_3 = np.argmax(n[15:20])
 
         out[0] = (n_0 - 2)/2.0
         out[1] = (n_1 - 2)/2.0

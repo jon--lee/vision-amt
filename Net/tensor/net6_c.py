@@ -87,7 +87,7 @@ class NetSix_C(TensorNet):
         self.loss = tf.reduce_mean(-tf.reduce_sum(self.y_ * tf.log(self.y_out), reduction_indices=[1]))
 
         self.acc = self.get_acc(self.y_,self.y_out)
-        self.train_step = tf.train.MomentumOptimizer(.003, .9)
+        self.train_step = tf.train.AdamOptimizer(1e-4)
         self.train = self.train_step.minimize(self.loss)
 
 

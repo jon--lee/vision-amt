@@ -8,7 +8,7 @@ from gripper.TurnTableControl import *
 from gripper.PyControl import *
 from gripper.xboxController import *
 from pipeline.bincam import BinaryCamera
-from Net.tensor import inputdata, net3,net4,net5,net6
+from Net.tensor import inputdata, net3,net4,net5,net6,net6_c
 import time
 import datetime
 import os
@@ -443,7 +443,7 @@ if __name__ == "__main__":
     t = DexRobotTurntable()
 
  
-    options.tf_net = net6.NetSix()
+    options.tf_net = net6_c.NetSix_C()
 
     options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-04-2016_19h10m03s.ckpt'
 
