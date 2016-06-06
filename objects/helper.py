@@ -40,3 +40,5 @@ sine = lambda theta: math.sin(math.radians(theta))
 w = lambda img: img.size[0]
 h = lambda img: img.size[1]
 getRot = lambda rotLimit: int(np.random.normal(0, rotLimit/3))
+def pasteOn(back, add, x, y):
+    back.paste(add, (int(x), int(y)), add.convert('RGBA'))

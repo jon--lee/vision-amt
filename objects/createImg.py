@@ -1,4 +1,4 @@
-from helper import Rectangle, sign, cosine, sine, w, h, getRot
+from helper import Rectangle, sign, cosine, sine, w, h, getRot, pasteOn
 from PIL import Image
 import numpy as np
 import math
@@ -7,9 +7,11 @@ import random
 # Program parameters
 # number of images to output
 numArrangements = 30
-# increase to make goal positions closer to center
+# increase to make goal positions closer to center of circle
 # do not decrease below 1.0
-goalVariance = 2.0
+lowGV = 10.0
+highGV = 2.0
+goalVariance = highGV
 
 if (goalVariance < 1.0):
     goalVariance = 1.0
@@ -21,14 +23,14 @@ for k in range(0, numArrangements):
     # radius for positioning UL corner of goal
     radius = 155
     # radius for checking if objects are inside circle
-    trueRadius = 185
+    trueRadius = 180
     # x from 0 to 310; y from 155 - sqrt(-(x-310)x) to 155 + sqrt(-(x-310)x)
-    x = int(np.random.normal(radius, (radius/goalVariance)/3))
+    x = np.random.normal(radius, (radius/goalVariance)/3)
     yRadius = math.sqrt(-1 * x * (x - radius * 2))
-    y = int(np.random.normal(radius, (yRadius)/3))
+    y = np.random.normal(radius, (yRadius)/3)
     gObj = Rectangle(x, goal.size[0], y, goal.size[1])
     obstacles.append(gObj)
-    background.paste(goal, (x, y), goal.convert('RGBA'))
+    pasteOn(background, goal, x, y)
     # starting angle relative to goal
     theta = random.randrange(0, 360)
     # angle increment between objects
@@ -62,15 +64,15 @@ for k in range(0, numArrangements):
             radialD = w(goal)/2
             # iterates distance from goal to find valid placement at current angle
             while (not foundLoc and hasSpace):
-                objx = int(gObj.cenX + radialD * cosine(theta))
-                objy = int(gObj.cenY + radialD * sine(theta))
+                objx = gObj.cenX + radialD * cosine(theta)
+                objy = gObj.cenY + radialD * sine(theta)
                 z = Rectangle(objx, w(rObj), objy, h(rObj))
                 foundLoc = not z.hasCollision(obstacles)
                 hasSpace = z.insideCircle(trueRadius, trueRadius, trueRadius)
                 foundLoc = foundLoc and hasSpace
                 radialD += 5
                 if (foundLoc):
-                    background.paste(rObj, (objx, objy), rObj.convert('RGBA'))
+                    pasteOn(background, rObj, objx, objy)
                     obstacles.append(z)
                 # change angle if no valid placement is available at current angle
                 elif (not hasSpace):
