@@ -1,3 +1,5 @@
+import sys
+sys.path.append('/usr/lib/python2.7/dist-packages/PIL')
 from helper import Rectangle, sign, cosine, sine, w, h, getRot, pasteOn
 from PIL import Image
 import numpy as np
