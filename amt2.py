@@ -1,4 +1,6 @@
 import sys
+sys.path.append('/home/annal/Izzy/vision_amt/scripts')
+
 import tty, termios
 from options import AMTOptions
 from pipeline.bincam import BinaryCamera
@@ -14,7 +16,7 @@ import reset_rollout
 import numpy as np
 import compile_sets
 
-from query_cam import query_cam
+# from query_cam import query_cam
 
 sys.path[0] = sys.path[0] + '/../../GPIS/src/grasp_selection/control/DexControls'
         
@@ -125,7 +127,6 @@ class AMT():
         for i in range(4):
             self.bc.vc.grab()
         try:
-
             for i in range(num_frames):
                 # Read from the most updated frame
                 for i in range(4):
@@ -143,6 +144,7 @@ class AMT():
                 delta_state = self.rescale(net.output(sess, gray_frame,channels=3))
                 delta_state = self.deltaSafetyLimites(delta_state)
                 delta_state[2] = 0.0
+                delta_state[3] = 0.0
                 
                 recording.append((frame, current_state,delta_state))
                 new_izzy, new_t = self.apply_deltas(delta_state)
@@ -245,7 +247,7 @@ class AMT():
         grayscale = self.bc.gray(np.copy(frame))
         return grayscale
    
-     def color(self,frame): 
+    def color(self,frame): 
         color_frame = cv2.resize(frame.copy(), (250, 250))
         cv2.imwrite('get_jp.jpg',color_frame)
         color_frame= cv2.imread('get_jp.jpg')
@@ -374,7 +376,8 @@ if __name__ == "__main__":
 
     options.tf_net = net6.NetSix()
 
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_03-28-2016_14h51m12s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_06-06-2016_16h00m43s.ckpt'
+
     amt = AMT(bincam, izzy, t, options=options)
 
     while True:
@@ -385,6 +388,7 @@ if __name__ == "__main__":
             break
         
         elif char == 'r':
+            izzy.gotoState(ZekeState([None, None, .05, None, None, None]), tra_speed = .04)
             print "Rolling out..."
             ro = amt.rollout_tf()
             print "Done rolling out."

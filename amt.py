@@ -18,10 +18,10 @@ import imp
 import IPython
 import reset_rollout
 import numpy as np
-import compile_sets
+from scripts import compile_sets
 import matplotlib.pyplot as plt
 
-from query_cam import query_cam
+#from scripts.query_cam import query_cam
 
 sys.path[0] = sys.path[0] + '/../../GPIS/src/grasp_selection/control/DexControls'
         
@@ -31,7 +31,7 @@ from DexRobotTurntable import DexRobotTurntable
 from TurntableState import TurntableState
 
 
-from rl_reward import RL_reward
+#from rl_reward import RL_reward
 #from policy_gradient import PolicyGradient
 
 
@@ -61,7 +61,7 @@ class AMT():
         self.r = reset_rollout.reset(izzy, turntable)
 
         # self.qc = query_cam(self.bc)
-        self.reward_obj = RL_reward()
+        #self.reward_obj = RL_reward()
 
 
 
@@ -281,7 +281,7 @@ class AMT():
         t_i[0] += delta_state[0]
         t_i[1] = 0.00952
         t_i[2] += delta_state[1]
-        t_i[3] = 4.211
+        t_i[3] = 4.2609
         t_i[4] =0.054# 0.0544 #delta_state[2]
         t_t[0] += delta_state[3]
         t_i[0] = min(self.options.ROTATE_UPPER_BOUND, t_i[0])
@@ -458,10 +458,9 @@ if __name__ == "__main__":
     t = DexRobotTurntable()
 
  
-    options.tf_net = net6_c.NetSix_C()
+    options.tf_net = net6.NetSix()
 
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_05-11-2016_12h09m12s.ckpt'
-
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_06-06-2016_16h00m43s.ckpt'
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

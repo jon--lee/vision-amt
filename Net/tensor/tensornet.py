@@ -95,13 +95,15 @@ class TensorNet():
 
                     feed_dict = { self.x: ims, self.y_: labels }
                     if i % 3 == 0:
-                        batch_loss = self.acc.eval(feed_dict=feed_dict)
+                        # batch_loss = self.acc.eval(feed_dict=feed_dict) # classification
+                        batch_loss = self.loss.eval(feed_dict=feed_dict) # regression
                         self.log("[ Iteration " + str(i) + " ] Training loss: " + str(batch_loss))
                     if i % test_print == 0:
                         test_batch = data.next_test_batch()
                         test_ims, test_labels = test_batch
                         test_dict = { self.x: test_ims, self.y_: test_labels }
-                        test_loss = self.acc.eval(feed_dict=test_dict)
+                        # test_loss = self.acc.eval(feed_dict=test_dict) # classification
+                        test_loss = self.loss.eval(feed_dict=test_dict) # regression
                         self.log("[ Iteration " + str(i) + " ] Test loss: " + str(test_loss))
                     self.train.run(feed_dict=feed_dict)
                 
@@ -137,7 +139,7 @@ class TensorNet():
             return sess.run(self.y_out, feed_dict={self.x:im})
         
 
-    def output(self, sess, im,channels,clasfc = True):
+    def output(self, sess, im,channels,clasfc = False):
         """
             accepts batch of 3d images, converts to tensor
             and returns four element list of controls

@@ -24,7 +24,7 @@ class NetSix(TensorNet):
         self.channels = 3
 
         self.x = tf.placeholder('float', shape=[None, 250, 250, self.channels])
-        self.y_ = tf.placeholder("float", shape=[5, 4])
+        self.y_ = tf.placeholder("float", shape=[None, 4])
 
 
         self.w_conv1 = self.weight_variable([11, 11, self.channels, 5])
