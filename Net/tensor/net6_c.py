@@ -54,7 +54,7 @@ class NetSix_C(TensorNet):
 
     def __init__(self):
         self.dir = "./net6/"
-        self.name = "net6"
+        self.name = "net6_c"
         self.channels = 3
 
         self.x = tf.placeholder('float', shape=[None, 250, 250, self.channels])
