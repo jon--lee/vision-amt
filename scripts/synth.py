@@ -35,7 +35,9 @@ class AnalysisReg():
             deltas_real = np.array(rescale(self.net.output(self.sess, real, 3, False))[:2])
             deltas_synth = np.array(rescale(self.net.output(self.sess, synth, 3, False))[:2])
             print str(deltas_real) + "  |  " + str(deltas_synth)
+
             differences[i] = deltas_real - deltas_synth
+            
         self.diff_mean = np.mean(differences, axis=0)
         self.diff_var = np.var(differences, axis=0)
 
@@ -69,6 +71,13 @@ class AnalysisClass():
             real_rot_dist, real_ext_dist = real_dist[0], real_dist[1]
             synth_dist = self.net.class_dist(self.sess, real, 3)[:2]
             synth_rot_dist, synth_ext_dist = synth_dist[0], synth_dist[1]
+            
+            max_real_rot, max_synth_rot = np.argmax(real_rot_dist), np.argmax(synth_rot_dist)
+            max_real_ext, max_synth_ext = np.argmax(real_ext_dist), np.argmax(synth_ext_dist)
+
+            print "rot: " + str(np.array([max_real_rot, max_synth_rot]))
+            print "ext: " + str(np.array([max_real_ext, max_synth_ext]))
+
 
             if np.argmax(real_rot_dist) == np.argmax(synth_rot_dist):
                 rot_agree += 1
