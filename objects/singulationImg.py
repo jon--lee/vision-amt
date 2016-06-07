@@ -13,11 +13,25 @@ lowGV = 10.0
 highGV = 1.0
 goalVariance = lowGV
 # set variance of which objects to use
-# improvement: take 9 equally spaced points on normal distribution, then normalize
-# easier to adjust variance, etc.
-lowVP = [0.2, 0.2, 0.2, 0.2, 0.04, 0.04, 0.04, 0.04, 0.04]
-highVP = [0.12, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11]
-objP = highVP
+lowSD = 1
+highSD = 5
+stddev = highSD
+
+# probabilities of objects using normalized gaussian values
+# index 5 most common, then 4 and 6, etc.
+mean = 5
+def pd(x, var, mean):
+    res = 1/(math.sqrt(2*math.pi*(var)**2))
+    res = res * (math.e)**(-(x-mean)**2/(2*var**2))
+    return res
+objP = []
+total = 0
+for i in range(1, 9):
+    val = pd(i, stddev, mean)
+    total += val
+    objP.append(val)
+#normalizing
+objP = [x/total for x in objP]
 
 imageNames = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 """takes array of probabilities adding to 1 and returns index of chosen event"""
