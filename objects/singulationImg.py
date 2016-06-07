@@ -1,0 +1,80 @@
+from helper import Rectangle, sign, cosine, sine, w, h, getRot, pasteOn
+from PIL import Image
+import numpy as np
+import math
+import random
+
+# Program parameters
+# number of images to output
+numArrangements = 10
+# increase to make object cluster centered closer to center of circle
+# do not decrease below 1.0
+lowGV = 10.0
+highGV = 1.0
+goalVariance = lowGV
+# set variance of which objects to use
+# improvement: take 9 equally spaced points on normal distribution, then normalize
+# easier to adjust variance, etc.
+lowVP = [0.2, 0.2, 0.2, 0.2, 0.04, 0.04, 0.04, 0.04, 0.04]
+highVP = [0.12, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11, 0.11]
+objP = highVP
+
+imageNames = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+"""takes array of probabilities adding to 1 and returns index of chosen event"""
+def probIndex(probs):
+    choice = random.random()
+    curr = 0
+    ind = -1
+    while (curr < choice):
+        ind += 1
+        curr += probs[ind]
+    return ind
+
+"""Returns image with objects arranged close together"""
+def makeImg(images):
+    obstacles = []
+    background = Image.open("back.png")
+    # radius for checking if objects are inside circle and positioning center
+    radius = 180
+    # x from 0 to 310; y from 155 - sqrt(-(x-310)x) to 155 + sqrt(-(x-310)x)
+    x = np.random.normal(radius, (radius/goalVariance)/3)
+    yRadius = math.sqrt(-1 * x * (x - radius * 2))
+    y = np.random.normal(radius, (yRadius)/3)
+    for i in range(1, 5):
+        # selects objects in random order
+        j = random.randrange(0, len(images))
+        name = "obj" + str(images[j]) + ".png"
+        images.pop(j)
+        obj = Image.open(name)
+        objX = x
+        objY = y
+        # splits objects into four quadrants around point
+        if (i % 2 == 0):
+            objX -= w(obj)
+        if (i > 2):
+            objY -= h(obj)
+        z = Rectangle(objX, w(obj), objY, h(obj))
+        foundLoc = (not z.hasCollision(obstacles)) and z.insideCircle(radius, radius, radius)
+        if not foundLoc:
+            return None
+        else:
+            pasteOn(background, obj, objX, objY)
+        obstacles.append(z)
+    return background
+
+if (goalVariance < 1.0):
+    goalVariance = 1.0
+for k in range(0, numArrangements):
+    cont = True
+    while (cont):
+        images = []
+        while (len(images) < 4):
+            img = imageNames[probIndex(objP)]
+            if (img not in images):
+                images.append(img)
+        model = makeImg(images)
+        if (model is not None):
+            cont = False
+    # save arrangements as numbered png files
+    fileout = str(k) + ".png"
+    model.save(fileout)
