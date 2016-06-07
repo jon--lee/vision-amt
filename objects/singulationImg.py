@@ -6,7 +6,7 @@ import random
 
 # Program parameters
 # number of images to output
-numArrangements = 10
+numArrangements = 1
 # increase to make object cluster centered closer to center of circle
 # do not decrease below 1.0
 lowGV = 10.0
@@ -16,6 +16,8 @@ goalVariance = lowGV
 lowSD = 1
 highSD = 5
 stddev = highSD
+# set to true if background should be transparent
+whiteBackground = True
 
 # probabilities of objects using normalized gaussian values
 # index 5 most common, then 4 and 6, etc.
@@ -89,6 +91,17 @@ for k in range(0, numArrangements):
         model = makeImg(images)
         if (model is not None):
             cont = False
+    # make background transparent
+    if (whiteBackground):
+        model = model.convert('RGBA')
+        datas = model.getdata()
+        newData = []
+        for item in datas:
+            if item[0] == 255 and item[1] == 255 and item[2] == 255:
+                newData.append((255, 255, 255, 0))
+            else:
+                newData.append(item)
+        model.putdata(newData)
     # save arrangements as numbered png files
     fileout = str(k) + ".png"
     model.save(fileout)
