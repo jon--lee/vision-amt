@@ -1,0 +1,31 @@
+'/media/1tb/Izzy/nets/net6_02-26-2016_17h58m15s.ckpt' Net 6 100 Analytical
+
+'/media/1tb/Izzy/nets/net6_02-27-2016_14h27m35s.ckpt' Net 6 100 Analytical -> 20 Human
+
+/media/1tb/Izzy/nets/net6_02-27-2016_15h30m01s.ckpt 100 Analytical -> 40 Human Loss: 0.009
+
+/media/1tb/Izzy/nets/net6_02-27-2016_16h23m55s.ckpt 100 Analytical -> 40 Human+Analytical Loss: 0.013
+
+/media/1tb/Izzy/nets/net6_02-27-2016_17h28m48s.ckpt 40 Human+Analytical Loss: 0.035
+
+/media/1tb/Izzy/nets/net6_02-28-2016_12h22m03s.ckpt 80 Human+Analytical+Human Loss 0.014
+
+/media/1tb/Izzy/nets/net6_02-28-2016_14h16m01s.ckpt 110 Human+Analytical+Human+Human Loss 0.015
+
+/media/1tb/Izzy/nets/net6_02-29-2016_11h25m33s.ckpt Random Loss 0.19
+
+'/media/1tb/Izzy/nets/net6_02-29-2016_16h48m17s.ckpt' Trained on Aggresive Expert 
+
+'/media/1tb/Izzy/nets/net6_03-01-2016_12h16m19s.ckpt' Trained on Timid Expert
+
+/media/1tb/Izzy/nets/net6_03-02-2016_19h37m17s.ckpt' 100 an + 40 human regularized r544-585
+
+/media/1tb/Izzy/nets/net6_03-05-2016_18h11m08s.ckpt 100 an + 40 cs regularized r444-r585
+
+/media/1tb/Izzy/nets/net6_03-12-2016_17h59m34s.ckpt  ACE
+
+/media/1tb/Izzy/nets/net6_03-14-2016_21h31m24s.ckpt Aggr
+
+/media/1tb/Izzy/nets/net6_03-27-2016_12h04m13s.ckpt ACE++
+
+/media/1tb/Izzy/nets/net6_03-28-2016_14h51m12s.ckpt ACE++ b/w

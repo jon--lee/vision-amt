@@ -18,8 +18,6 @@ goalVariance = lowGV
 lowSD = 1
 highSD = 5
 stddev = highSD
-# set to true if background should be transparent
-whiteBackground = True
 # set background to use
 transpBack = "back"
 actualBack = "back1"
@@ -95,7 +93,7 @@ def makeImg(images):
         else:
             pasteOn(clusterBack, obj, objX, objY)
         obstacles.append(z)
-    # Random angle from -45 to 45; noise
+    # Random angle from -30 to 30; noise
     theta = (random.random() * 60) - 30
     clusterBack = clusterBack.rotate(theta)
     clusterBack = makeTransparent(clusterBack)
