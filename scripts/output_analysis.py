@@ -168,41 +168,6 @@ def dummy_data():
     oa = OutputAnalysis(samples)
     oa.print_outputs()
 
-def run_samples(n):
-    net = net6_c.NetSix_C()
-    path = '/media/1tb/Izzy/nets/net6_05-11-2016_12h09m12s.ckpt'
-    sess = net.load(path)
-
-    bc = BinaryCamera('./meta.txt')
-    bc.open()
-    for i in range(4):
-        bc.read_frame()    
-
-
-    num_samples = n
-    samples = []
-    images = []
-    for i in range(num_samples):
-        print i
-        try:
-            while True:
-                frame = bc.read_frame()
-                frame = inputdata.im2tensor(frame, channels=3)
-                cv2.imshow('preview', frame)
-                cv2.waitKey(30)            
-        except:
-            pass
-        frame = bc.read_frame()
-        frame = similarity.color(frame)
-        dists = net.class_dist(sess, frame, 3)
-        dists = dists[:2]
-        images.append(frame)
-        samples.append(dists)
-        print "Saved sample"    
-	#np.save('samples.npy', samples)
-	#np.save('samples_images.npy', images)
-    oa = OutputAnalysis(samples)
-    oa.print_outputs()
 
 def analyze():
     images = np.load('samples_images.npy')
