@@ -1,9 +1,13 @@
+import sys
+sys.path.append('/home/annal/Izzy/vision_amt/scripts')
 from Net.tensor import net6, net6_c
 from Net.tensor import inputdata
 from pipeline.bincam import BinaryCamera
 import cv2
 import tensorflow as tf
+import overlay
 import numpy as np
+import time
 
 def rescale(deltas):
     deltas[0] = deltas[0]*0.15
@@ -12,7 +16,7 @@ def rescale(deltas):
     deltas[3] = deltas[3]*0.02
     return deltas
 
-
+T = 10
 
 def color(frame): 
     color_frame = cv2.resize(frame.copy(), (250, 250))
@@ -24,7 +28,7 @@ class AnalysisReg():
     def __init__(self):
         self.net = net6.NetSix()
         self.path = '/media/1tb/Izzy/nets/net6_06-06-2016_11h27m25s.ckpt'
-        self.sess = net.load(path) 
+        self.sess = self.net.load(self.path) 
 
     def compare_batches(self, reals, synths):
         differences = np.zeros((len(reals), 2))
@@ -34,6 +38,7 @@ class AnalysisReg():
             synth = synths[i]
             deltas_real = np.array(rescale(self.net.output(self.sess, real, 3, False))[:2])
             deltas_synth = np.array(rescale(self.net.output(self.sess, synth, 3, False))[:2])
+            
             print str(deltas_real) + "  |  " + str(deltas_synth)
 
             differences[i] = deltas_real - deltas_synth
@@ -42,19 +47,19 @@ class AnalysisReg():
         self.diff_var = np.var(differences, axis=0)
 
 
-    def print_results():
+    def print_results(self):
         print "REGRESSION"
         print "Differences"
         print "rot   |   ext"
-        print "mean: " + self.diff_mean
-        print "var:  " + self.diff_var
+        print "mean: " + str(self.diff_mean)
+        print "var:  " + str(self.diff_var)
 
 
 class AnalysisClass():
     def __init__(self):
         self.net = net6_c.NetSix_C()
         self.path = '/media/1tb/Izzy/nets/net6_05-11-2016_12h09m12s.ckpt'
-        self.sess = net.load(path)
+        self.sess = self.net.load(self.path)
 
     def compare_batches(self, reals, synths):
         N = len(reals)
@@ -65,13 +70,17 @@ class AnalysisClass():
         ext_diffs = []
 
         for i in range(N):
+            print "\n"
             real = reals[i]
             synth = synths[i]
             real_dist = self.net.class_dist(self.sess, real, 3)[:2]
             real_rot_dist, real_ext_dist = real_dist[0], real_dist[1]
-            synth_dist = self.net.class_dist(self.sess, real, 3)[:2]
+            synth_dist = self.net.class_dist(self.sess, synth, 3)[:2]
             synth_rot_dist, synth_ext_dist = synth_dist[0], synth_dist[1]
             
+            print real_dist
+            print synth_dist
+
             max_real_rot, max_synth_rot = np.argmax(real_rot_dist), np.argmax(synth_rot_dist)
             max_real_ext, max_synth_ext = np.argmax(real_ext_dist), np.argmax(synth_ext_dist)
 
@@ -81,36 +90,39 @@ class AnalysisClass():
 
             if np.argmax(real_rot_dist) == np.argmax(synth_rot_dist):
                 rot_agree += 1
-            if np.argmax(real_rot_dist) == np.argmax(synth_rot_dist):
+                print "up2"
+            if np.argmax(real_ext_dist) == np.argmax(synth_ext_dist):
                 ext_agree += 1
+                print "up"
             
             # is this informative?
             rot_arg_diff = abs(np.argmax(real_rot_dist) - np.argmax(synth_rot_dist))
             ext_arg_diff = abs(np.argmax(real_ext_dist) - np.argmax(synth_ext_dist))
             
-            rot_diffs.append(rot_diffs)
-            ext_diffs.append(ext_diffs)
+            rot_diffs.append(rot_arg_diff)
+            ext_diffs.append(ext_arg_diff)
 
-        
+        #print "done looping"
+        #print rot_diffs
         self.diff_rot_mean = np.mean(rot_diffs)
         self.diff_rot_var = np.var(rot_diffs)
         self.diff_ext_mean = np.mean(ext_diffs)
         self.diff_ext_var = np.var(ext_diffs)
-        
-            
-        self.perc_rot_agree = float(rot_agree) / N
-        self.perc_ext_agree = float(ext_agree) / N
+        #print "adsf"
+        self.perc_rot_agree = float(rot_agree) / float(N)
+        self.perc_ext_agree = float(ext_agree) / float(N)
         
 
-    def print_results():
+
+    def print_results(self):
         print "CLASSIFICATION"
         print "Agreement Percentage"
         print "rot   |   ext"
         print np.array([self.perc_rot_agree, self.perc_ext_agree])
         print "Differences"
         print "rot   |   ext"
-        print "mean: " + np.array([self.diff_rot_mean, self.diff_ext_mean])
-        print "var:  " + np.array([self.diff_rot_var, self.diff_ext_var])
+        print "mean: " + str(np.array([self.diff_rot_mean, self.diff_ext_mean]))
+        print "var:  " + str(np.array([self.diff_rot_var, self.diff_ext_var]))
     
 
 def compare_batches(reals, synths):
@@ -130,47 +142,64 @@ def load_batches():
     return reals, synths
 
 
-def sample_real(load = False):
-    bc = BinaryCamera('./meta.txt')
-    bc.open()
+def sample_real(bc, load = False):
+
+
+    direct = 'scripts/objects/synth/'
+    overlays = []
+    for i in range(T):
+        image = color(cv2.imread(direct + str(i) + '.png'))
+        overlays.append(image)
+
+
     reals = []
     if load:
         reals = np.load('real_samples.npy')
-    for i in range(30):
+    for i in range(T):
         try:
             while True:
                 frame = bc.read_frame()
-                process_image(frame)
-                cv2.imshow('preview', frame)
-                cv2.waitKey(30)
+                frame = process_image(frame)
+                final = overlay.overlay(frame, overlays[i])
 
-            frame = bc.read_frame()
-            frame = process_image(frame)
-            reals.append(frame)
-            np.save('real_samples.npy', reals)            
+                cv2.imshow('preview', final)
+                cv2.waitKey(30)
+                time.sleep(.005)
+                        
         except KeyboardInterrupt:
             pass
+        print i
+        frame = bc.read_frame()
+        frame = color(frame)
+        reals.append(frame)
+        np.save('real_samples.npy', reals)
     np.save('real_samples.npy', reals)
 
 
 def sample_synth():
-    direct = 'objects/'
+    direct = 'scripts/objects/synth/'
     synths = []
-    for i in range(30):
+    for i in range(T):
         im_path = direct + str(i) + '.png'
         im = cv2.imread(im_path)
-        im = process_image(im)
+        im = color(im)
         synths.append(im)
     np.save('synth_samples.npy', synths)
         
 
 
 if __name__ == '__main__':
-    sample_synth()
-    sample_real()
+    #sample_synth()
+    #bc = BinaryCamera("./meta.txt")
+    #bc.open()
+    #time.sleep(1)
+    #sample_real(bc)
     reals, synths = load_batches()
-    ar = AnalysisReg()
-    ar.compare_batches(reals, synths)
-    ar.print_results()
-    #ac = AnalysisClass()
-
+    with tf.Graph().as_default():
+        ar = AnalysisReg()
+        ar.compare_batches(reals, synths)
+        ar.print_results()
+    with tf.Graph().as_default():
+        ac = AnalysisClass()
+        ac.compare_batches(reals, synths)
+        ac.print_results()

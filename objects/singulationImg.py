@@ -8,7 +8,7 @@ import random
 
 # Program parameters
 # number of images to output
-numArrangements = 1
+numArrangements = 30
 # increase to make object cluster centered closer to center of circle
 # do not decrease below 1.0
 lowGV = 10.0

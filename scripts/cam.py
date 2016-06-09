@@ -40,7 +40,7 @@ try:
 	    # cv2.imshow("camera", overlay)
 	    cv2.imshow("camera",frame)
 	    cv2.waitKey(30)
-	    frames.append(frame)
+	    #frames.append(frame)
 	    #time.sleep(0.08)
 
 except KeyboardInterrupt:
