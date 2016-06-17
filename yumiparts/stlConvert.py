@@ -1,13 +1,13 @@
 import numpy as np
-from stl import mesh
+#from stl import mesh
 import math
 from PIL import Image
 from quadtree import quadtree
 from geometry import isInside, avgD, getZ
-from meshPCA import getPC, getRod, getCenteredPoints
+#from meshPCA import getPC, getRod, getCenteredPoints
 
 """Generates png of mesh in binary, and optionally fully rendered also"""
-def makeRaster(partNum, centeredMesh, pAxis, sAxis, cog, fullRender, num, outputName, wid):
+def makeRaster(partNum, sides, pAxis, sAxis, cog, fullRender, num, outputName, wid):
     #vision axis is perpendicular to both basis vectors
     vAxis = np.cross(pAxis, sAxis)
     #origin at some distance along vAxis from cog of object, f = further distance to camera
@@ -19,7 +19,7 @@ def makeRaster(partNum, centeredMesh, pAxis, sAxis, cog, fullRender, num, output
     im = Image.new("RGB", (w, h), "white")
     mInv = np.linalg.inv(np.array([pAxis, sAxis, vAxis]).T)
     #Each side consists of three triplets specifying the vertexes of a triangle in R3
-    sides = centeredMesh.points
+    #sides = centeredMesh.points
     #Convert sides to faces in camera reference frame
     faces = []
     minZ, maxZ = 100000, -1
@@ -97,18 +97,57 @@ outputName-1.png - fully rendered from view angle (w x h)
 outputName-2.png - binary image from view angle (shrunk and placed onto backdrop)
 """
 def generatePose(partNum, tilt1, tilt2, outputName, wid):
-    m = mesh.Mesh.from_file("/Users/chrispowers/Desktop/research/vision-amt/yumiparts/STL/Part" + str(partNum) + ".STL")
-    points, centeredMesh = getCenteredPoints(m)
-    volume, cog, inertia = centeredMesh.get_mass_properties()
+    # m = mesh.Mesh.from_file("/Users/chrispowers/Desktop/research/vision-amt/yumiparts/STL/Part" + str(partNum) + ".STL")
+    # points, centeredMesh = getCenteredPoints(m)
+    # volume, cog, inertia = centeredMesh.get_mass_properties()
     # first 2 principal components are basis vectors of image plane
-    pAxis, sAxis = getPC(points)
-    pAxis, sAxis = pAxis/np.linalg.norm(pAxis), sAxis/np.linalg.norm(sAxis)
+    # pAxis, sAxis = getPC(points)
+    # pAxis, sAxis = pAxis/np.linalg.norm(pAxis), sAxis/np.linalg.norm(sAxis)
     #rod1, rod2 = getRod(pAxis, cog), getRod(sAxis, cog)
     #final = mesh.Mesh(np.concatenate([centeredMesh.data.copy(), rod1.data.copy(),rod2.data.copy()]))
     #final.save("final" + str(partNum) + ".stl")
-    centeredMesh.rotate(pAxis, math.radians(tilt1))
-    centeredMesh.rotate(sAxis, math.radians(tilt2))
-    makeRaster(partNum, centeredMesh, pAxis, sAxis, cog, True, 1, outputName, wid)
+    # centeredMesh.rotate(pAxis, math.radians(tilt1))
+    # centeredMesh.rotate(sAxis, math.radians(tilt2))
+    """input file format:
+    cog
+    pAxis
+    sAxis
+    points
+    """
+    filename = "/Users/chrispowers/Desktop/research/vision-amt/yumiparts/obj" + str(partNum) + ".txt"
+    inputFile = open(filename, "r")
+    def readVector():
+        currStr = ""
+        cont = True
+        vector = []
+        while (cont):
+            c = inputFile.read(1)
+            if c == ' ' or c == ']' or c == '\n':
+                vector.append(float(currStr))
+                currStr = ""
+                if c == ']':
+                    cont = False
+            else:
+                currStr += c
+        return vector
+    inputFile.read(1) #read [
+    cog = readVector()
+    inputFile.read(1) #read \n
+    inputFile.read(1) #read [
+    pAxis = readVector()
+    inputFile.read(1) #read \n
+    inputFile.read(1) #read [
+    sAxis = readVector()
+    sides = []
+    inputFile.read(1) #read \n
+    endChar = inputFile.read(1) #read [ or EOF
+    while (endChar != ''):
+        v = readVector()
+        sides.append(v)
+        inputFile.read(1) #read \n
+        endChar = inputFile.read(1) #read [ or EOF
+    print("read successfully")
+    makeRaster(partNum, sides, pAxis, sAxis, cog, True, 1, outputName, wid)
     #Gets view from different aaxis
     # centeredMesh.rotate(sAxis, math.radians(90))
     # makeRaster(partNum, centeredMesh, pAxis, sAxis, cog, False, 3, outputName, wid)
