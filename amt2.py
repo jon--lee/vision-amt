@@ -1,10 +1,12 @@
 import sys
 sys.path.append('/home/annal/Izzy/vision_amt/scripts')
-
+sys.path.append('/home/annal/Izzy/vision_amt/scripts/objects/')
 import tty, termios
 from options import AMTOptions
 from pipeline.bincam import BinaryCamera
 from Net.tensor import inputdata, net3,net4,net5,net6
+from scripts.objects import singulationImg
+from scripts import overlay, click_centers
 import time
 import datetime
 import os
@@ -15,6 +17,7 @@ import IPython
 import reset_rollout
 import numpy as np
 import compile_sets
+
 
 # from query_cam import query_cam
 
@@ -49,6 +52,8 @@ class AMT():
         self.turntable = turntable
         self.options = options
         self.r = reset_rollout.reset(izzy, turntable)
+        self.succeed = 0.0
+        self.total = 0
 
 
 
@@ -135,9 +140,14 @@ class AMT():
                 # done reading
 
                 gray_frame = self.color(frame)
+
                 gray_frame = np.reshape(gray_frame, (250, 250, 3))
-            
-                cv2.imshow("camera", frame)
+                h, w = frame.shape[0], frame.shape[1]
+                disp_frame = np.zeros((h, w, frame.shape[2]))
+                for i in range(frame.shape[2]):
+                    #Binary Mask
+                    disp_frame[:,:,i] = np.round(frame[:,:,i] / 255.0 - .25, 0)
+                cv2.imshow("camera", disp_frame)
                 cv2.waitKey(30)
 
                 current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
@@ -158,7 +168,7 @@ class AMT():
        
         except KeyboardInterrupt:
             pass
-
+        cv2.destroyAllWindows()
         sess.close()
         self.prompt_save(recording)
     
@@ -186,6 +196,13 @@ class AMT():
         print "There are " + str(num_rollouts) + " rollouts. Save this one? (y/n): "
         char = getch()
         if char == 'y':
+            self.total += 1
+            print "Click the centers to determine success"
+            distance = click_centers.max_distance(click_centers.centers(self.bc))
+            print "Did the task succeed? (y/n), max distance was: " + str(distance) + " assumed success: " + str(distance>=100.0) 
+            char = getch()
+            if char == 'y':
+                self.succeed += 1
             return self.save_recording(recording)
         elif char == 'n':
             recording = []   # erase recordings and states
@@ -293,6 +310,11 @@ class AMT():
             Clear recordings and states from memory when done writing
             :return:
         """
+        print "saving statistics to: " + self.options.rollouts_dir + "../statistics_singulation.txt"
+        statistics_file = open(self.options.rollouts_dir + "../statistics_singulation.txt", 'w')
+        statistics_file.write("total: " + str(self.total) + "\n")
+        statistics_file.write("success rate: " + str(self.succeed/self.total))
+        statistics_file.close()
         rollout_name = self.next_rollout()
         rollout_path = self.options.rollouts_dir + rollout_name + '/'
         print "Saving rollout to " + rollout_path + "..."
@@ -322,6 +344,24 @@ class AMT():
         rollout_deltas_file.close()
         recording = []
         print "Done saving."
+
+    def display_template(self):
+        singulationImg.generate_template()
+        template = cv2.imread("/home/annal/Izzy/vision_amt/scripts/objects/template.png")
+        template[:,:,1] = template[:,:,2]
+        template[:,:,0] = np.zeros((420, 420))
+        # template[:,:,2] = np.zeros((420, 420))
+        # template = cv2.resize(template, (250, 250))
+        while 1:
+            frame = self.bc.read_frame()
+            frame = inputdata.im2tensor(frame, channels = 3)
+            final = np.abs(-frame + template/255.0)
+            cv2.imshow('preview', final)
+            a = cv2.waitKey(30)
+            if a == 27:
+                cv2.destroyWindow('preview')
+                break
+            time.sleep(.005)
 
     @staticmethod
     def rollout_dirs():
@@ -376,7 +416,8 @@ if __name__ == "__main__":
 
     options.tf_net = net6.NetSix()
 
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_06-06-2016_16h00m43s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_02-29-2016_11h25m33s.ckpt'
+
 
     amt = AMT(bincam, izzy, t, options=options)
 
@@ -388,7 +429,9 @@ if __name__ == "__main__":
             break
         
         elif char == 'r':
-            izzy.gotoState(ZekeState([None, None, .05, None, None, None]), tra_speed = .04)
+            #izzy.gotoState(ZekeState([None, None, .05, None, None, None]), tra_speed = .04)
+            print "Displaying template"
+            amt.display_template()
             print "Rolling out..."
             ro = amt.rollout_tf()
             print "Done rolling out."

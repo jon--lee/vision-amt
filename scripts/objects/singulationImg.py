@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/usr/lib/python2.7/dist-packages/PIL')
+sys.path.append('/home/annal/Izzy/vision_amt/scripts/objects/')
 from helper import Rectangle, sign, cosine, sine, w, h, getRot, pasteOn
 from PIL import Image
 import numpy as np
@@ -8,16 +8,16 @@ import random
 
 # Program parameters
 # number of images to output
-numArrangements = 5
+numArrangements = 1
 # increase to make object cluster centered closer to center of circle
 # do not decrease below 1.0
 lowGV = 10.0
 highGV = 1.0
 goalVariance = lowGV
 # set variance of which objects to use
-lowSD = 1
+lowSD = 0
 highSD = 5
-stddev = highSD
+stddev = lowSD
 # set background to use
 transpBack = "back"
 actualBack = "back1"
@@ -31,10 +31,14 @@ def pd(x, var, mean):
     return res
 objP = []
 total = 0
-for i in range(1, 9):
-    val = pd(i, stddev, mean)
-    total += val
-    objP.append(val)
+if stddev == 0:
+    total = 4.0
+    objP = [0, 0, 0, 1, 1, 1, 1, 0, 0]
+else:    
+    for i in range(1, 9):
+        val = pd(i, stddev, mean)
+        total += val
+        objP.append(val)
 #normalizing
 objP = [x/total for x in objP]
 
@@ -64,9 +68,9 @@ def probIndex(probs):
 def makeImg(images):
     obstacles = []
     # white background
-    clusterBack = Image.open("back.png")
+    clusterBack = Image.open("scripts/objects/back.png")
     # background of result
-    background = Image.open(backName + ".png")
+    background = Image.open("scripts/objects/" + backName + ".png")
     # radius for checking if objects are inside circle and positioning center
     radius = 180
     # x from 0 to 310; y from 155 - sqrt(-(x-310)x) to 155 + sqrt(-(x-310)x)
@@ -76,7 +80,7 @@ def makeImg(images):
     for i in range(1, 5):
         # selects objects in random order
         j = random.randrange(0, len(images))
-        name = "obj" + str(images[j]) + ".png"
+        name = "scripts/objects/" + "obj" + str(images[j]) + ".png"
         images.pop(j)
         obj = Image.open(name)
         objX = x
@@ -100,9 +104,7 @@ def makeImg(images):
     pasteOn(background, clusterBack, 0, 0)
     return background
 
-if (goalVariance < 1.0):
-    goalVariance = 1.0
-for k in range(0, numArrangements):
+def generate_template():
     cont = True
     while (cont):
         images = []
@@ -117,5 +119,27 @@ for k in range(0, numArrangements):
     if (backName == "back"):
         model = makeTransparent(model)
     # save arrangements as numbered png files
-    fileout = str(k) + ".png"
+    fileout = "/home/annal/Izzy/vision_amt/scripts/objects/template.png"
     model.save(fileout)
+generate_template()
+
+
+# if (goalVariance < 1.0):
+#     goalVariance = 1.0
+# for k in range(0, numArrangements):
+#     cont = True
+#     while (cont):
+#         images = []
+#         while (len(images) < 4):
+#             img = imageNames[probIndex(objP)]
+#             if (img not in images):
+#                 images.append(img)
+#         model = makeImg(images)
+#         if (model is not None):
+#             cont = False
+#     # make background transparent
+#     if (backName == "back"):
+#         model = makeTransparent(model)
+#     # save arrangements as numbered png files
+#     fileout = str(k) + ".png"
+#     model.save(fileout)
