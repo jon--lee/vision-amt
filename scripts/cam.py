@@ -12,32 +12,21 @@ frames = []
 fourcc = cv2.cv.CV_FOURCC(*'mp4v')
 
 # open with transparency
-overlay = cv2.imread("scripts/0.png", -1)
-overlay[:,:,2] = overlay[:,:,2] - overlay[:,:,0]
-overlay[:,:,1] = np.zeros((420,420))
-overlay[:,:,0] = np.zeros((420,420))
-overlay[:,:,0] = overlay[:,:,2]
-overlay[:,:,2] = np.zeros((420,420))
+i = 1
+overlay = cv2.imread("yumiparts/" + str(i) + "-2.png", -1)
+ref3d = cv2.imread("yumiparts/" + str(i) + "-1.png", -1)
+cv2.imshow("reference",ref3d)
+#convert red of overlay to yellow (b = 0, g = 255, r = 255)
+overlay[:,:,1] = overlay[:,:,2]
 
 writer = cv2.VideoWriter("hardware_reset4.mov", fourcc, 10.0, (420,420))
 try:
 	while True:
 	    frame = bc.read_frame()
 	    frame = inputdata.im2tensor(frame, channels=3)
-	    frame = np.concatenate((frame, np.ones((420, 420, 1))), axis = 2)
-	    # for x in range(0, 420):
-	    #     for y in range(0, 420):
-	    #         overPix = overlay[x, y]
-	    #         backPix = frame[x, y]
-	    #         if (overPix[3] != 0 and backPix[2] != 0):
-	    #             frame[x, y] = [255, 0, 255]
-	    #         elif (overPix[3] != 0):
-	    #             frame[x, y] = [255, 0, 0, 1]    
-	    # overlay = overlay
-
-	    frame = frame + overlay
-
-	    # cv2.imshow("camera", overlay)
+	    #frame = np.concatenate((frame, np.ones((420, 420, 1))), axis = 2)
+		#yellow - red = green
+	    frame = overlay - frame
 	    cv2.imshow("camera",frame)
 	    cv2.waitKey(30)
 	    frames.append(frame)
