@@ -15,7 +15,7 @@ from template_finder import TemplateGUI
 
 class VideoMaker(object):
     def __init__(self,rng =[]):
-        self.addr = "data/amt/rollouts/"
+        self.addr = "data/amt/supervised_rollouts/"
         self.rollouts = self.compileList(rng)
      
 
@@ -23,7 +23,7 @@ class VideoMaker(object):
     def compileList(self,rng):
         rollouts = []
         for r in rng:
-            rollouts.append("rollout"+str(r))
+            rollouts.append("supervised"+str(r))
         return rollouts
 
 
@@ -31,17 +31,44 @@ class VideoMaker(object):
         fourcc = cv2.cv.CV_FOURCC(*'mp4v')
 
         writer = cv2.VideoWriter(self.addr+rollout+'.mov', fourcc, 10.0, (420,420))
+
         for i in range(0,100):
             img = cv2.imread(self.addr+rollout+'/'+rollout+'_frame_'+str(i)+'.jpg',1)
             writer.write(img)
 
         writer.release()
 
-    def run(self):
+    def filmRollouts(self,rollouts):
+        fourcc = cv2.cv.CV_FOURCC(*'mp4v')
 
+        writer = cv2.VideoWriter(self.addr+'rollouts'+'.mov', fourcc, 10.0, (420,420))
+        
+        for rollout in self.rollouts:
+            for i in range(0,100):
+                img = cv2.imread(self.addr+rollout+'/'+rollout+'_frame_'+str(i)+'.jpg',1)
+                writer.write(img)
+
+        writer.release()
+
+    def filmSupervised(self,rollouts):
+        fourcc = cv2.cv.CV_FOURCC(*'mp4v')
+
+        writer = cv2.VideoWriter(self.addr+'supervised'+'.mov', fourcc, 10.0, (420,420))
+        
+        for rollout in self.rollouts:
+            for i in range(0,100):
+                img = cv2.imread(self.addr+rollout+'/'+rollout+'_frame_'+str(i)+'.jpg',1)
+                writer.write(img)
+
+        writer.release()
+
+    def run(self):
     	for rollout in self.rollouts:
             print rollout
             self.filmRollout(rollout)
+
+    def run_many(self):
+        self.filmSupervised(self.rollouts)
             
 
 
@@ -49,9 +76,9 @@ class VideoMaker(object):
 
 if __name__ == '__main__':
     print "running"
-    rng = [1130,1131,1132,1133,1134,1135,1145]
+    rng = [i for i in range(455, 456)]
     ct = VideoMaker(rng)
-    ct.run()
+    ct.run_many()
 
 
 # bc = BinaryCamera("./meta.txt")

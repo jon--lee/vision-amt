@@ -5,8 +5,12 @@ from options import Options
 import numpy as np
 from Net.tensor import inputdata
 
-
 def overlay(frame, o):
+    o = o.copy()
+    o[:, :, 1] = o[:, :, 2]
+    final = np.abs(-frame + o / 255.0)
+    return final
+def overlay2(frame, o):
     o = o.copy()
     o[:,:,0] = o[:,:,2]
     o[:,:,1] = np.zeros((250, 250))

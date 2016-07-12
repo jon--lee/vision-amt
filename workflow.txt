@@ -1,0 +1,28 @@
+workflow:
+
+gather supervised rollouts:
+open terminal, cd Izzy/vision-amt
+run sudo xboxdrv --silent
+open new tab, 
+run tpython TeleOp/ZekeTeleOp.py
+When prompted, press r and place blocks at AR markers
+press [esc] and use xbox controller to run. If center light is blinking, press [ctrl-c], run 5, restrat at 7
+
+gather net test rollouts:
+open terminal, cd Izzy/vision-amt
+open saved_template_paths, and confirm that the paths are the test set (in ~/Izzy/vision-amt/data/amt/new_test_set.txt)
+run tpython izzy_trainer.py
+when prompted, press ['l']
+set up and run
+at end, click centers and press [esc] (possibly multiple times)
+when prompted, press ['y'], ['n'] for success or failure
+continue until no more data points
+
+train a new net on supervised data:
+open terminal, cd Izzy/vision-amt
+run python scripts/merge_supervised.py [first training rollout number] [last training rollout number] -1
+open Izzy/vision-amt/supervised_deltas.txt and move to Izzy/vision-amt/data/amt/deltas.txt
+run python scripts/compile_supervised.py
+open scripts/test_tf.py and confirm that net.optimize(300,data, batch_size=200) is uncommented (no path input)
+run tpython scripts/test_tf.py
+if more iterations are needed, enter in the path output at the end, and change the path variable, comment net.optimize(300,data, batch_size=200) and uncomment net.optimize(200,data,path = path, batch_size=200)

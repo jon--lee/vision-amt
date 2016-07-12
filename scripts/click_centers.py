@@ -23,19 +23,19 @@ def centers(bc=None):
 		fourcc = cv2.cv.CV_FOURCC(*'mp4v')
 		writer = cv2.VideoWriter("hardware_reset4.mov", fourcc, 10.0, (420,420))
 	frame = bc.read_frame()
-	cv2.imshow("image",frame)
+	cv2.imshow("camera",frame)
 	cv2.waitKey(30)
 
 
 	centroid = (-1, -1)
 	centroids = []
-	cv2.setMouseCallback("image", get_center)
+	cv2.setMouseCallback("camera", get_center)
 
 	while True:
 		frame = bc.read_frame()
 		for center in centroids:
 			cv2.circle(frame,center, 10, (0,255,0), -1)
-		cv2.imshow("image",frame)
+		cv2.imshow("camera",frame)
 		cv2.waitKey(30)
 
 
@@ -44,7 +44,7 @@ def centers(bc=None):
 			centroid = (-1, -1)
 		a = cv2.waitKey(30)
 		if a == 27:
-			cv2.destroyWindow('image')
+			cv2.destroyAllWindows()
 			break
 
 	return centroids
@@ -60,6 +60,8 @@ def max_distance(centroids):
 			if mind > curd:
 				mind = curd
 		values.append(mind)
+	if len(values) == 0:
+		return 0
 	return np.max(values)
 
 # print max_distance(centers())

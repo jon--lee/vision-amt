@@ -41,6 +41,15 @@ class InputData():
         batch = zip(*batch)
         return list(batch[0]), list(batch[1])
 
+    def all_train_batch(self):
+        if self.i + n > len(self.train_data):
+            self.i = 0
+            random.shuffle(self.train_data)
+        batch = self.train_data[self.i:]
+        batch = zip(*batch)
+        self.i = self.i + n
+        return list(batch[0]), list(batch[1])
+
 
     
 def parse(filepath, stop=-1):
@@ -88,17 +97,18 @@ def im2tensor(im,channels=1):
     return zeros
 
 def process_out(n):
-    print n
+    # print "n: ", n
     out = np.zeros([4])
     n_0 = np.argmax(n[0:5])
     n_1 = np.argmax(n[5:10])
-    n_2 = np.argmax(n[10:14])
-    n_3 = np.argmax(n[15:20])
-
-    out[0] = (n_0 - 2)/2.0
-    out[1] = (n_1 - 2)/2.0
-    out[2] = (n_2 - 2)/2.0
-    out[3] = (n_3 - 2)/2.0
+    # n_2 = np.argmax(n[10:14])
+    # n_3 = np.argmax(n[15:20])    
+    # print n_0
+    # print n_1
+    out[0] = -(n_0 - 2)/2.0
+    out[1] = (4-n_1)/4.0
+    # out[2] = (n_2 - 2)/2.0
+    # out[3] = (n_3 - 2)/2.0
 
     return out
 

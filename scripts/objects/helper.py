@@ -33,6 +33,14 @@ class Rectangle(object):
         for v in vertices:
             isInside = isInside and self.within(radius, center, v)
         return isInside
+
+    def insideRectangle(self, topL, bottomR):
+        """returns true if no area of rectangle is outside of bounding circle"""
+        vertices = ((self.left, self.bot), (self.left, self.top), (self.right, self.bot), (self.right, self.top))
+        isInside = True
+        for v in vertices:
+            isInside = isInside and v[0] < bottomR[0] and v[0] > topL[0] and v[1] > bottomR[1] and v[1] < topL[1] 
+        return isInside
 # Helper functions
 sign = lambda x: math.copysign(1, x)
 cosine = lambda theta: math.cos(math.radians(theta))

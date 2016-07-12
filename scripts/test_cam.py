@@ -17,8 +17,9 @@ sess = tf_net.load(var_path=tf_net_path)
 while True:
 	frame = bc.read_frame()
 
-	img = cv2.resize(frame.copy(), (250, 250))
-	img = np.reshape(img, (250, 250, 3))
+	# img = cv2.resize(frame.copy(), (250, 250))
+	img = frame
+	# img = np.reshape(img, (250, 250, 3))
 	cv2.imwrite("test.jpg",img.copy())
 	img_jpg = cv2.imread("test.jpg",1)
 

@@ -5,24 +5,30 @@ import numpy as np
 import random
 
 
+def norm_forward(f_val):
+    return float(f_val)/0.006 
+
+def norm_ang(ang):
+    # return float(ang)/0.02
+    return float(ang)/0.02666666666667 
+
 def scale(deltas):
-    deltas[0] = float(deltas[0])/0.2
-    deltas[1] = float(deltas[1])/0.01
+    deltas[0] = norm_ang(deltas[0])
+    deltas[1] = norm_forward(deltas[1])
     # deltas[2] = 0.0#.0float(deltas[2])/0.005
     # deltas[3] = float(deltas[3])/0.2
     return deltas
 
 def reg_to_class(deltas):
-    cls = np.zeros([20])
-    idx_0 = np.round(2*deltas[0]+2)
-    idx_1 = np.round(2*deltas[1]+2)+5
-    # idx_2 = np.round(2*deltas[2]+2)+10
-    # idx_3 = np.round(2*deltas[3]+2)+15
+    cls = np.zeros([10])
+    angles = np.array(AMTOptions.CLASS_ANGLES)/.026666666666667
+    idx_0 = np.argmin (np.abs(angles - deltas[0]))
+    # print deltas[0], angles, idx_0
+    forward = np.array(AMTOptions.CLASS_FORWARD)/.006
+    idx_1 = np.argmin(np.abs(forward - deltas[1]))
 
     cls[idx_0] = 1.0
-    cls[idx_1] = 1.0
-    # cls[idx_2] = 1.0
-    # cls[idx_3] = 1.0
+    cls[idx_1 + 5] = 1.0
     return cls
 
 def compile_reg():
@@ -38,8 +44,14 @@ def compile_reg():
     for line in deltas_file:
         path = AMTOptions.colors_dir
         labels = line.split()
+        # print line
         deltas = scale(labels[1:3])
-        line = labels[0] + " " + str(deltas[0]) + " " + str(deltas[1]) + "\n"#" " + str(deltas[2]) + " " + str(deltas[3]) + "\n"
+        # line = labels[0] + " " + str(deltas[0]) + " " + str(deltas[1]) + " " + str(deltas[2]) + " " + str(deltas[3]) + "\n
+        line = labels[0] + " " 
+        for bit in deltas:
+            line += str(bit) + " "
+        line = line[:-1] + '\n'
+        # train_file.write(line)
         if random.random() > .2:
             train_file.write(path + line)
         else:
@@ -65,7 +77,7 @@ def compile():
         #path = AMTOptions.originals_dir
         path = AMTOptions.colors_dir 
         labels = line.split()
-        deltas = scale(labels[1:5])
+        deltas = scale(labels[1:3])
         deltas_c = reg_to_class(deltas)
 
         line = labels[0]#+" "+str(deltas[0])+" "+str(deltas[1])+" "+str(deltas[2])+" "+str(deltas[3])+"\n"

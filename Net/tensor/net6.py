@@ -18,13 +18,19 @@ import datetime
 
 class NetSix(TensorNet):
 
+    def get_forward_err(self,y_,y_out):
+        return tf.reduce_mean(tf.sqrt(tf.square((self.y_out[:,1] - self.y_[:,1])*.006)))
+
+    def get_rotation_err(self,y_,y_out):
+        return tf.reduce_mean(tf.sqrt(tf.square((self.y_out[:,0] - self.y_[:,0])*.02)))
+
     def __init__(self):
         self.dir = "./net6/"
         self.name = "net6"
         self.channels = 3
 
         self.x = tf.placeholder('float', shape=[None, 250, 250, self.channels])
-        self.y_ = tf.placeholder("float", shape=[None, 4])
+        self.y_ = tf.placeholder("float", shape=[None, 2])
 
 
         self.w_conv1 = self.weight_variable([11, 11, self.channels, 5])
@@ -62,12 +68,14 @@ class NetSix(TensorNet):
         self.h_conv_flat = tf.reshape(self.h_conv1, [-1, conv_num_nodes])
         self.h_fc1 = tf.nn.relu(tf.matmul(self.h_conv_flat, self.w_fc1) + self.b_fc1)
 
-        self.w_fc2 = self.weight_variable([fc1_num_nodes, 4])
-        self.b_fc2 = self.bias_variable([4])
+        self.w_fc2 = self.weight_variable([fc1_num_nodes, 2])
+        self.b_fc2 = self.bias_variable([2])
 
         self.y_out = tf.tanh(tf.matmul(self.h_fc1, self.w_fc2) + self.b_fc2)
 
         self.loss = tf.reduce_mean(.5*tf.square(self.y_out - self.y_))
+        self.fore = self.get_forward_err(self.y_,self.y_out)
+        self.rot = self.get_rotation_err(self.y_,self.y_out)
 
 
 
