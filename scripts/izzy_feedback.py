@@ -5,7 +5,7 @@ import time
 from options import AMTOptions
 import numpy as np
 from PIL import Image
-import sys
+import sys, argparse
 sys.path.append('/home/annal/Izzy/vision_amt/scripts/objects/')
 from helper import pasteOn
 import tty, termios
@@ -39,13 +39,13 @@ def draw_circle(event,x,y,flags,param):
         drawing = True
         ix,iy = x,y
         tx, ty = ix, iy
-        print "hello world"
+        # print "hello world"
 
     elif event == cv2.EVENT_MOUSEMOVE:
         if drawing == True:
-            print "held down"
+            # print "held down"
             tx, ty = x,y
-            print tx, ty
+            # print tx, ty
             # if mode == True:
             #     cv2.rectangle(img,(ix,iy),(x,y),(0,255,0),-1)
             # else:
@@ -88,7 +88,7 @@ def state_to_pixel(state):
     # print grip_ang, grip_ext
 
     grip_post = np.array([metersToPixels(grip_ext*np.sin(grip_ang)),metersToPixels(grip_ext*np.cos(grip_ang))])
-    print grip_ang
+    # print grip_ang
     grip_L = np.array([by*np.sin(grip_ang),by]) #the start position of the gripper
 
     translation = np.array([bx, by + 420])
@@ -129,11 +129,14 @@ def convert_locations(state, ix, iy, tx, ty):
     rotation = ix - tx
     extension = iy - ty 
     delta = []
-    delta.append(np.sign(rotation) * min(np.abs(pixelstoMeters(rotation)), .0266))
-    delta.append(np.sign(extension) * min(np.abs(pixelstoMeters(extension)), .006))
-    state[0] += delta[0]
-    state[2] += delta[1]
-    return state, delta
+    appear_delta = []
+    delta.append(np.sign(rotation) * min(np.abs(pixelstoMeters(rotation))/2, .0266))
+    delta.append(np.sign(extension) * min(np.abs(pixelstoMeters(extension))/2, .006))
+    appear_delta.append(np.sign(rotation) * min(np.abs(pixelstoMeters(rotation)), .0266 * 4))
+    appear_delta.append(np.sign(extension) * min(np.abs(pixelstoMeters(extension)), .006 * 4))
+    state[0] += appear_delta[0]
+    state[2] += appear_delta[1]
+    return state, delta 
 
 
 def convert_state(state):
@@ -166,48 +169,68 @@ def convert_base_pixel(loc):
 def make_pixels(loc):
     return (int(loc[0]), int(loc[1]))
 
-def base_frame(rot, arm, state):
+def base_frame(rot, arm, state, dist=.03):
     c, s = np.cos(rot), np.sin(rot)
     rot_mat = np.array([[c,s], [-s,c]])
-    trans = np.dot(rot_mat, np.array([0, metersToPixels(.03+float(state[2]))]))
+    trans = np.dot(rot_mat, np.array([0, metersToPixels(dist+float(state[2]))]))
 
     
     newarm = arm.rotate(rot * 180/np.pi, expand = True)
     center = np.array((newarm.size[0]/2, newarm.size[1]/2))
     paste = convert_base_pixel(trans + center)
+
     return paste, newarm
+
+def base_finger(rot, finger, state, offset, dist=.38):
+    c, s = np.cos(rot), np.sin(rot)
+    rot_mat = np.array([[c,s], [-s,c]])
+    trans = np.dot(rot_mat, offset + np.array([0, metersToPixels(dist+float(state[2]))]))
+    # trans = trans + offset
+
+    
+    newfinger = finger.rotate(rot * 180/np.pi, expand = True)
+    # center = np.array((newarm.size[0]/2, newarm.size[1]/2))
+    f_center = np.array((newfinger.size[0]/2, newfinger.size[1]/2))
+    paste = convert_base_pixel(trans+f_center)
+
+    return paste, newfinger
 
 def save_data(feedback, write_path):
     write_file = open(write_path, 'a+')
     for line in feedback:
-        print line
+        # print line
         write_file.write(str(line[0]) + ' ' + str(line[1]) + ' ' + str(line[2]) + '\n')
     write_file.close()
 
 options = AMTOptions()
 def draw_rollouts(r_lst, name):
 
-    write_path = AMTOptions.amt_dir + 
     if name is not None:
-        write_path = self.options.rollouts_dir + self.name + "_rollouts/retroactive_feedback" + str(r_lst[0]) + '_' + str(r_lst[1]) +'.txt'
+        write_path = AMTOptions.rollouts_dir + name + "_rollouts/retroactive_feedback" + str(r_lst[0]) + '_' + str(r_lst[-1]) +'.txt'
     else:
-        write_path = self.options.rollouts_dir + "retroactive_feedback" + str(r_lst[0]) + '_' + str(r_lst[-1]) +'.txt'
+        write_path = AMTOptions.rollouts_dir + "retroactive_feedback" + str(r_lst[0]) + '_' + str(r_lst[-1]) +'.txt'
 
     if name is not None:
-        start_path = options.rollouts_dir + name + "_rollouts/"
+        start_path = AMTOptions.rollouts_dir + name + "_rollouts/"
     else:
-        start_path = options.rollouts_dir
-    
+        start_path = AMTOptions.rollouts_dir
+    write_file = open(write_path, 'w')
+    write_file.close()
     cv2.namedWindow('image')
     arm = Image.open("scripts/Arm_lbl_prv.png").rotate(90)
     finger_L = Image.open("scripts/Gripper_t_lbl.png").rotate(90)
     finger_R = Image.open("scripts/Gripper_lbl.png").rotate(90)
+    # arm = Image.open("scripts/objects/back.png")
+    # pasteOn(arm, full_arm, arm.size[0]/2, 0)
+    # pasteOn(finger_L, full_arm, arm.size[0]/2, 100)
+    # pasteOn(finger_R, full_arm, arm.size[0]/2, 100)
     global img, drawing
     for rollout_num in r_lst:
         feedback = []
-        image_path = start_path + 'rollout'+str(rollout_num) +'/rollout'+str(rollout_num) +'_frame_'
-        colors_path = options.colors_dir + name + '_' + rollout_name + '_frame_'
-        state_path = start_path + 'rollout'+str(rollout_num) +'/states.txt'
+        rollout_name = 'rollout' + str(rollout_num)
+        image_path = start_path + rollout_name +'/' + name + '_' + 'rollout'+str(rollout_num) +'_frame_'
+        colors_path = name + '_' + rollout_name + '_frame_'
+        state_path = start_path + rollout_name +'/states.txt'
         states = open(state_path, 'r')
 
         img = np.zeros((420,420,3), np.uint8)
@@ -217,6 +240,7 @@ def draw_rollouts(r_lst, name):
         for i in range(80):
             state = convert_state(states.next())
             image_frame = image_path + str(i) + '.jpg'
+            # print image_frame
             img = cv2.imread(image_frame)
             rows,cols,colour = img.shape
             M = cv2.getRotationMatrix2D((cols/2,rows/2),270,1)
@@ -226,16 +250,22 @@ def draw_rollouts(r_lst, name):
                 # cv2.line(img,start,end,(0,255,0),2)
                 # start,end, base = state_to_pixel(convert_locations(state, ix, iy, tx, ty))
                 newstate, delta = convert_locations(state, ix, iy, tx, ty)
-                paste = state_to_value(newstate)
+                stv = state_to_value(newstate)
                 feedback.append([colors_path + str(i) + '.jpg'] + delta)
                 # cv2.circle(img,paste,10,(0,0,255),4)
                 rot = (state[0]- np.pi - .42)
-                cv2.circle(img, paste, 10, (255,0,0), 4)
+                cv2.circle(img, stv, 10, (255,0,0), 4)
 
                 paste, newarm = base_frame(rot, arm, state)
 
+                paste_L, f_L = base_finger(rot, finger_L, state, np.array([16,0]))
+                paste_R, f_R = base_finger(rot, finger_R, state, np.array([-16,0]))
+
                 pil_img = Image.fromarray(img)
                 pasteOn(pil_img, newarm, paste[0], paste[1])
+                print paste_R
+                pasteOn(pil_img, f_R, paste_R[0], paste_R[1])
+                pasteOn(pil_img, f_L, paste_L[0], paste_L[1])
 
                 img = np.array(pil_img)
                 # cv2.rectangle(img,(ix,iy),(tx,ty),(0,255,0),-1)
@@ -255,7 +285,7 @@ def draw_rollouts(r_lst, name):
                 if time.time() - start > .1:
                     break
             print "next frame: ", i
-        print "do you want to continue and save?"
+        print "do you want to continue and save? enter (y/n)"
         char = getch()
         if char == 'y':
             save_data(feedback, write_path)
@@ -263,7 +293,7 @@ def draw_rollouts(r_lst, name):
         if char == 'n':
             save_data(feedback, write_path)
             break
-    print feedback
+    # print feedback
     
 
 

@@ -7,7 +7,7 @@ from pipeline.bincam import BinaryCamera
 from Net.tensor import inputdata, net3,net4,net5,net6, net6_c
 from scripts.objects import singulationImg
 from scripts import overlay, click_centers, transfer_weights
-import time
+import time, datetime, os, random, argparse
 import datetime
 import os
 import random
@@ -43,13 +43,15 @@ def getch():
 
 class AMT():
 
-    def __init__(self, bincam, izzy, options=AMTOptions()):
+    def __init__(self, bincam, izzy, options=AMTOptions(), name = None):
         self.bc = bincam
         self.izzy = izzy
         self.options = options
         self.succeed = 0.0
         self.total = 0
         self.graphs = []
+        self.name = name
+        self.current_template = None
 
     def rescale_sup(self, deltas):
         deltas[0] = deltas[0]*0.026666666666667
@@ -74,6 +76,7 @@ class AMT():
             self.bc.vc.grab()
         try:
             for i in range(num_frames):
+                print i
                 # Read from the most updated frame
                 start = time.time()
                 for i in range(4):
@@ -86,9 +89,9 @@ class AMT():
                 gray_frame = np.reshape(gray_frame, (250, 250, 3))
                 h, w = frame.shape[0], frame.shape[1]
                 disp_frame = np.zeros((h, w, frame.shape[2]))
-                for i in range(frame.shape[2]):
+                for j in range(frame.shape[2]):
                     #Binary Mask
-                    disp_frame[:,:,i] = np.round(frame[:,:,i] / 255.0 - .25, 0)
+                    disp_frame[:,:,j] = np.round(frame[:,:,j] / 255.0 - .25, 0)
                 cv2.imshow("camera", disp_frame)
                 cv2.waitKey(30)
 
@@ -122,6 +125,7 @@ class AMT():
                 print "offset", offset
                 time.sleep(offset)
                 print "total time: ", time.time() - start
+
 
        
         except KeyboardInterrupt:
@@ -235,14 +239,20 @@ class AMT():
         statistics_file.write("success number: " + str(self.succeed))
         statistics_file.close()
         rollout_name = self.next_rollout()
-        rollout_path = self.options.rollouts_dir + rollout_name + '/'
+        if self.name:
+            rollout_path = self.options.rollouts_dir + self.name + "_rollouts/" + rollout_name + '/'
+        else:
+            rollout_path = self.options.rollouts_dir + rollout_name + '/'
 
         print "Saving rollout to " + rollout_path + "..."
         os.makedirs(rollout_path)
         rollout_states_file = open(rollout_path + "states.txt", 'a+')
         rollout_deltas_file = open(rollout_path + "net_deltas.txt", 'a+')
         print "Saving template to " + rollout_path + "..."
-        template = cv2.imread("/home/annal/Izzy/vision_amt/scripts/objects/template.png")
+        if self.current_template is not None:
+            template = self.current_template
+        else:
+            template = cv2.imread("/home/annal/Izzy/vision_amt/scripts/objects/template.png")
         np.save(rollout_path + "template.npy", template)
         print "Saving raw frames to " + self.options.originals_dir + "..."
         print "Saving binaries to " + self.options.binaries_dir + "..."
@@ -253,7 +263,7 @@ class AMT():
 
         i = 0
         for frame, state,deltas, true_state in recording:
-            filename = rollout_name + "_frame_" + str(i) + ".jpg"
+            filename = self.name + '_' + rollout_name + "_frame_" + str(i) + ".jpg"
             raw_states_file.write(filename + self.lst2str(state) + "\n") 
             rollout_states_file.write(filename + self.lst2str(state) + "\n")
             rollout_deltas_file.write(filename + self.lst2str(deltas) + "\n")
@@ -292,26 +302,30 @@ class AMT():
                 return 'next'
             time.sleep(.005)
 
-    @staticmethod
-    def rollout_dirs():
-        """
-        :return: list of strings that are the names of rollout dirs
-        """
-        return list(os.walk(AMTOptions.rollouts_dir))[0][1]
-
-    @staticmethod
-    def next_rollout():
+    def next_rollout(self):
         """
         :return: the String name of the next new potential rollout
                 (i.e. do not overwrite another rollout)
         """
         i = 0
         prefix = AMTOptions.rollouts_dir + 'rollout'
+        if self.name:
+            prefix = self.options.rollouts_dir + self.name + "_rollouts/rollout"
+        else:
+            prefix = self.options.rollouts_dir
         path = prefix + str(i) + "/"
         while os.path.exists(path):
             i += 1
-            path = prefix + str(i) + "/"
+            path = prefix +  str(i) + "/"
+        print path
         return 'rollout' + str(i)
+
+    @staticmethod
+    def rollout_dirs():
+        """
+        :return: list of strings that are the names of rollout dirs
+        """
+        return list(os.walk(AMTOptions.rollouts_dir))[0][1]
 
     @staticmethod
     def lst2str(lst):
@@ -331,8 +345,28 @@ class AMT():
         states = states[:-change]
         return zip(frames, states)
 
+
+
 if __name__ == "__main__":
-    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-n", "--name", type=str,
+                        help="run experiment, enter your name to save in folder")
+    parser.add_argument("-i", "--iteration", type=int,
+                        help="The number of dagger rollouts already run")
+    parser.add_argument("-e", "--experiment", help="Runs in limited experiment mode, requires other flags",
+                    action="store_true")
+    args = parser.parse_args()
+    if args.name:
+        person = args.name 
+    else:
+        person = None
+    if args.iteration:
+        iteration = args.iteration
+    else:
+        iteration = 0
+    limited = False
+    if args.experiment:
+        limited = True
 
     bincam = BinaryCamera('./meta.txt')
     bincam.open()
@@ -344,96 +378,121 @@ if __name__ == "__main__":
 
     options.tf_net = net6.NetSix()
 
-    # template_file = open(options.templates_dir + '/saved_template_paths.txt', 'r')
-    # options.tf_net_path = '/media/1tb/Izzy/nets/net6_07-01-2016_16h24m28s.ckpt'
+    print iteration == 1 and person is not None
+    if iteration == 1 and person is not None:
+        template_file = open(options.templates_dir + '/training_middle_20_paths.txt', 'r')
+    elif iteration == 2 and person is not None:
+        template_file = open(options.templates_dir + '/training_last_20_paths.txt', 'r')
+    else:
+        print "not running a set iteration"
+        template_file = open(options.templates_dir + '/saved_template_paths.txt', 'r')
 
-    #Net used for Singulation Demo 
-    template_file = open(options.templates_dir + '/demo_templates_paths.txt', 'r')
+    # template_file = open(options.templates_dir + '/saved_template_paths.txt', 'r')
     options.tf_net_path = '/media/1tb/Izzy/nets/net6_07-01-2016_16h24m28s.ckpt'
 
+    #Net used for Singulation Demo 
+    # template_file = open(options.templates_dir + '/demo_templates_paths.txt', 'r')
+    # options.tf_net_path = '/media/1tb/Izzy/nets/net6_07-01-2016_16h24m28s.ckpt'
 
-    amt = AMT(bincam, izzy, options=options)
+
+    amt = AMT(bincam, izzy, options=options, name=person)
 
     current_state = amt.state(amt.izzy.getState())
     amt.return_to_start(current_state)
-
+    amt.current_template = None
 
     while True:
-        print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 'd' -> demonstrate, 'c' -> compile train/test sets, 'p' -> run on previous template, 'l' -> run templates saved in 'last_templates'): "
+        if limited:
+            print "Waiting for keypress ('n' -> next, 'q' -> quit, 'p' -> previous)"
+        else:
+            print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 'd' -> demonstrate, 'c' -> compile train/test sets, 'p' -> run on previous template, 'l' -> run templates saved in 'last_templates'): "
         char = getch()
-        if char == 'q':
-            print "Quitting..."
-            break
-        
-        elif char == 'r':
-            #izzy.gotoState(ZekeState([None, None, .05, None, None, None]), tra_speed = .04)
-            print "Displaying template"
-            singulationImg.generate_template()
-            amt.display_template()
-            print "Rolling out..."
-            ro = amt.rollout_tf()
-            print "Done rolling out."
-
-        elif char == 'u':
-            print "deprecated, and does not work"
-            print "Updating weights..."
-            amt.update_weights()
-            print "Done updating."
-
-        elif char == 'd':
-            print "demo loop"
-            names = []
-            i = 0
-            while True:
+        if limited:
+            if char == 'q':
+                print "Quitting..."
+                break
+            elif char == 'n':
                 try:
                     name = template_file.next()
-                    names.append(name)
+                    name = name[:name.find('\n')]
                 except StopIteration:
-                    name = names[i]
-                    i += 1
-                    i = i % len(names)
+                    print 'Completed all saved templates'
+                    continue
+            
                 print 'Using template: ' + name
-                template = np.load(name[:name.find('\n')])
+                template = np.load(name)
+                amt.current_template = template
                 amt.display_template(template)
                 print "Rolling out..."
                 ro = amt.rollout_tf()
                 print "Done rolling out."
 
-        elif char == 'c':
-            print 'Compiling train and test sets...'
-            compile_sets.compile()
-            print 'Done compiling sets'
-
-        elif char == 'p':
-            print 'Displaying last template'
-            amt.display_template()
-            print "Rolling out..."
-            ro = amt.rollout_tf()
-            print "Done rolling out."
-
-        elif char == 'l':
-            #note that using this saves the wrong template. Find the template where it was referenced
-            try:
-                name = template_file.next()
-            except StopIteration:
-                print 'Completed all saved templates'
-                continue
+            elif char == 'p':
+                print "Displaying template"
+                if amt.current_template is not None:
+                    amt.display_template(amt.current_template)
+                else:
+                    amt.display_template()
+                print "Rolling out"
+                ro = amt.rollout_tf()
+        else:
+            if char == 'q':
+                print "Quitting..."
+                break
             
-            print 'Using template: ' + name
-            template = np.load(name[:name.find('\n')])
-            amt.display_template(template)
-            print "Rolling out..."
-            ro = amt.rollout_tf()
-            print "Done rolling out."
+            elif char == 'r':
+                #izzy.gotoState(ZekeState([None, None, .05, None, None, None]), tra_speed = .04)
+                print "Displaying template"
+                singulationImg.generate_template()
+                amt.display_template()
+                print "Rolling out..."
+                ro = amt.rollout_tf()
+                print "Done rolling out."
 
-        elif char == 't':
-            #note that using this saves the wrong template. Find the template where it was referenced
-            while True:
+            elif char == 'u':
+                print "deprecated, and does not work"
+                print "Updating weights..."
+                amt.update_weights()
+                print "Done updating."
+
+            elif char == 'd':
+                print "demo loop"
+                names = []
+                i = 0
+                while True:
+                    try:
+                        name = template_file.next()
+                        names.append(name)
+                    except StopIteration:
+                        name = names[i]
+                        i += 1
+                        i = i % len(names)
+                    print 'Using template: ' + name
+                    template = np.load(name[:name.find('\n')])
+                    amt.display_template(template)
+                    print "Rolling out..."
+                    ro = amt.rollout_tf()
+                    print "Done rolling out."
+
+            elif char == 'c':
+                print 'Compiling train and test sets...'
+                compile_sets.compile()
+                print 'Done compiling sets'
+
+            elif char == 'p':
+                print 'Displaying last template'
+                amt.display_template()
+                print "Rolling out..."
+                ro = amt.rollout_tf()
+                print "Done rolling out."
+
+            elif char == 'l':
+                #note that using this saves the wrong template. Find the template where it was referenced
                 try:
                     name = template_file.next()
                 except StopIteration:
                     print 'Completed all saved templates'
-                    break
+                    continue
                 
                 print 'Using template: ' + name
                 template = np.load(name[:name.find('\n')])
@@ -442,9 +501,21 @@ if __name__ == "__main__":
                 ro = amt.rollout_tf()
                 print "Done rolling out."
 
-
-        # elif char == 't':
-        #     amt.test()
+            elif char == 't':
+                #note that using this saves the wrong template. Find the template where it was referenced
+                while True:
+                    try:
+                        name = template_file.next()
+                    except StopIteration:
+                        print 'Completed all saved templates'
+                        break
+                    
+                    print 'Using template: ' + name
+                    template = np.load(name[:name.find('\n')])
+                    amt.display_template(template)
+                    print "Rolling out..."
+                    ro = amt.rollout_tf()
+                    print "Done rolling out."
 
     template_file.close()
     print "Done."

@@ -6,8 +6,10 @@ from random import shuffle
 
 
 
-def load_rollouts(clean, rand, r_rng, f_rng, outfile):
+def load_rollouts(clean, rand, r_rng, f_rng, outfile, name = None):
     supervised_dir = AMTOptions.supervised_dir
+    if name is not None:
+        supervised_dir += name + "_rollouts/"
     rollouts = [x[0] for x in os.walk(supervised_dir)]
     val = [rollout_dir for rollout_dir in rollouts if rollout_dir != supervised_dir]
     supervisor_dirs = [rollout_dir for rollout_dir in rollouts if rollout_dir != supervised_dir]
@@ -16,6 +18,8 @@ def load_rollouts(clean, rand, r_rng, f_rng, outfile):
     if rand:
         print "randomizing"
         shuffle(supervisor_dirs)
+    if len(supervisor_dirs) < np.max(r_rng):
+        return True
     supervisor_dirs = supervisor_dirs[r_rng[0]:r_rng[1]]
 
     for dirname in supervisor_dirs:
@@ -48,6 +52,7 @@ def load_rollouts(clean, rand, r_rng, f_rng, outfile):
             new_deltas = deltas
         for delta in new_deltas:
             outfile.write(delta)
+    return False
 
 
 if __name__ == "__main__":

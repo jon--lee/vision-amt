@@ -8,6 +8,7 @@ import random
 from pipeline.bincam import BinaryCamera
 import sys, os, time, cv2
 from Net.tensor import inputdata
+from options import AMTOptions
 
 # Program parameters
 # number of images to output
@@ -83,7 +84,7 @@ def makeImg(images):
     yCenter = 210
     # x from 0 to 310; y from 155 - sqrt(-(x-310)x) to 155 + sqrt(-(x-310)x)
     x = np.random.normal(xCenter, (radius*1.2))
-    print (radius/2), yRadius/2
+    # print (radius/2), yRadius/2
     # field = Image.new('RGB', (int(radius*1.2),int(yRadius*1.2)), color=400)
     # yRadius = math.sqrt(-1 * x * (x - radius * 2))
     y = np.random.normal(yCenter, (yRadius*1.2))
@@ -137,7 +138,7 @@ def generate_template():
     if (backName == "back"):
         model = makeTransparent(model)
     # save arrangements as numbered png files
-    print order
+    # print order
     fileout = "/home/annal/Izzy/vision_amt/scripts/objects/template.png"
     model.save(fileout)
     return center
@@ -184,6 +185,23 @@ def display_template(bc, template=None):
         elif a == ord(' '):
             return 'next'
         time.sleep(.005)
+
+def save_templates(num):
+    save_directory = AMTOptions.amt_dir + 'saved_templates/'
+    filename = save_directory + 'template_paths.txt'
+    paths = open(filename, 'w+')
+    for i in range(num):
+        center = generate_template()
+        name = save_directory + 'template_' + str(i) + '.npy'
+        paths.write(name + '\n')
+        template = cv2.imread("/home/annal/Izzy/vision_amt/scripts/objects/template.png")
+        np.save(name, template)
+    paths.close()
+
+    
+if __name__ == '__main__':
+    save_templates(60)
+
 
 # bc = BinaryCamera('./meta.txt')
 # bc.open()

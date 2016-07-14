@@ -15,7 +15,7 @@ from template_finder import TemplateGUI
 
 class VideoMaker(object):
     def __init__(self,rng =[]):
-        self.addr = "data/amt/supervised_rollouts/"
+        self.addr = "data/amt/supervised_rollouts/Caleb_rollouts/"
         self.rollouts = self.compileList(rng)
      
 
@@ -57,7 +57,7 @@ class VideoMaker(object):
         
         for rollout in self.rollouts:
             for i in range(0,100):
-                img = cv2.imread(self.addr+rollout+'/'+rollout+'_frame_'+str(i)+'.jpg',1)
+                img = cv2.imread(self.addr+rollout+'/'+'Caleb_' + rollout+'_frame_'+str(i)+'.jpg',1)
                 writer.write(img)
 
         writer.release()
@@ -76,7 +76,7 @@ class VideoMaker(object):
 
 if __name__ == '__main__':
     print "running"
-    rng = [i for i in range(455, 456)]
+    rng = [i for i in range(0, 5)]
     ct = VideoMaker(rng)
     ct.run_many()
 

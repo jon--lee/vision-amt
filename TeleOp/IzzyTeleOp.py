@@ -41,7 +41,7 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
-def teleop(c, izzy, t, bc, name):
+def teleop(c, izzy, t, bc, name, template):
     target_state_i = get_state(izzy.getState())
     # target_state_t = get_state(t.getState())
     print "Start"
@@ -123,7 +123,7 @@ def teleop(c, izzy, t, bc, name):
     stop = False
     return_to_start(izzy)
     # print avg_angd/100.0, max_angd, avg_ford/100.0, max_ford
-    return prompt_save(frames, deltas_lst, states, name)
+    return prompt_save(frames, deltas_lst, states, name, template)
 
 
 def return_to_start(izzy):
@@ -145,7 +145,7 @@ def safety(delta):
     return delta
 
 
-def prompt_save(frames, deltas, states, name):
+def prompt_save(frames, deltas, states, name, template):
     num_rollouts = len(rollout_dirs())
     print "Save if you were successful. Save this one? (y/n): "
     char = getch()
@@ -153,10 +153,10 @@ def prompt_save(frames, deltas, states, name):
         # print len(deltas)
         # print len(frames)
         # print states
-        return save_recording(frames, deltas, states, name)
+        return save_recording(frames, deltas, states, name, template)
     elif char == 'n':
         return False
-    prompt_save(frames, deltas)
+    prompt_save(frames, deltas, states, name, template)
 
 def rollout_dirs():
         return list(os.walk(AMTOptions.supervised_dir))[0][1]
@@ -190,7 +190,7 @@ def lst2str(lst):
         s += " " + str(el)
     return s
 
-def save_recording(frames, deltas, states, name):
+def save_recording(frames, deltas, states, name, template):
     if name:
         start_path = AMTOptions.supervised_dir + name + "_rollouts/"
     else:
@@ -210,13 +210,13 @@ def save_recording(frames, deltas, states, name):
     deltas_file = open(rollout_path + 'deltas.txt', 'a+')
     states_file = open(rollout_path + 'states.txt', 'a+')
 
-    template = cv2.imread("/home/annal/Izzy/vision_amt/scripts/objects/template.png")
+    # template = cv2.imread("/home/annal/Izzy/vision_amt/scripts/objects/template.png")
     np.save(rollout_path + "template.npy", template)
 
 
     i = 0
     for frame, delta, state in zip(frames, deltas, states):
-        filename = rollout_name + '_frame_' + str(i) + '.jpg'
+        filename = name + '_' + rollout_name + '_frame_' + str(i) + '.jpg'
         deltas_file.write(filename + lst2str(delta) + '\n')
         states_file.write(filename + lst2str(state) + '\n')
         cv2.imwrite(rollout_path + filename, frame)
@@ -335,8 +335,9 @@ def display_template(bc, template=None):
             cv2.destroyAllWindows()
             break
         elif a == ord(' '):
-            return 'next'
+            return 'next', template
         time.sleep(.005)
+    return 'display', template
 
 def record_template(bc, template=None):
     # records the process of placing blocks of the template
@@ -374,13 +375,33 @@ def record_template(bc, template=None):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--experiment", type=str,
-                        help="run experiment, will prompt for name")
+    # parser.add_argument("-s", "--supervised", help="Run for supervised mode",
+    #                 action="store_true")
+    # parser.add_argument("-d", "--DAgger", help="Runs for dagger mode",
+    #                 action="store_true")
+    parser.add_argument("-n", "--name", type=str,
+                        help="run experiment, enter your name to save in folder")
+    parser.add_argument("-c", "--count", type=int,
+                        help="number of rollouts you want to run")
+    parser.add_argument("-e", "--experiment", help="Runs in limited experiment mode, requires other flags",
+                    action="store_true")
     args = parser.parse_args()
-    if args.experiment:
-        person = args.experiment 
+    if args.name:
+        person = args.name 
     else:
         person = None
+    if args.count:
+        count = args.count
+    else:
+        count = 0
+    limited = False
+    if args.experiment:
+        limited = True
+
+    print count <= 20
+
+    print "person, ", person, "entered: ", (count == 20) 
+
     options = AMTOptions()
     bc = BinaryCamera('./meta.txt')
     bc.open()
@@ -389,62 +410,106 @@ if __name__ == '__main__':
     # t = DexRobotTurntable()
     t = None
 
-    template_file = open(options.templates_dir + '/saved_template_paths.txt', 'r')
+    if count == 20 and person is not None:
+        template_file = open(options.templates_dir + '/training_first_20_paths.txt', 'r')
+    elif count == 40 and person is not None:
+        template_file = open(options.templates_dir + '/training_last_40_paths.txt', 'r')
+    elif count == 60 and person is not None:
+        template_file = open(options.templates_dir + '/training_paths.txt', 'r')
+    else:
+        template_file = open(options.templates_dir + '/template_paths.txt', 'r')
 
  
     c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
     return_to_start(izzy)
+    last = None
     while True:
-        print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 't' -> test, 'd' -> demonstrate, 'c' -> compile train/test sets, 'p' -> run on previous template, 'l' -> run templates saved in 'last_templates'): "
+        if limited:
+            print "Waiting for keypress ('n' -> next, 'p' -> previous, 'q' -> quit)"
+        else:
+            print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 't' -> test, 'd' -> demonstrate, 'c' -> compile train/test sets, 'p' -> run on previous template, 'l' -> run templates saved in 'last_templates'): "
         char = getch()
-        if char == 'q':
-            print "Quitting..."
-            break
-        elif char == 'r':
-            print "Generating template"
-            singulationImg.generate_template()
-            print "Displaying template"
-            next = display_template(bc)
-            if next == 'next':
-                continue
-            print "Rolling out"
-            teleop(c, izzy, t, bc, person)
-        elif char == 'p':
-            print "Displaying template"
-            display_template(bc)
-            print "Rolling out"
-            teleop(c, izzy, t, bc, person)
-        elif char == 't':
-            print "Iterating through training set"
-            i = 0
-            success = True
-            while True:
+        if limited:
+            if char == 'q':
+                print "Quitting..."
+                break
+            elif char == 'n':
                 try:
-                    if success:
-                        name = template_file.next()
+                    name = template_file.next()
+                    name = name[:name.find('\n')]
                 except StopIteration:
-                    print "successfully completed all saved templates"
-                    break
+                    print 'Completed all saved templates'
+                    continue
+                print 'Using template: ' + name
+                template = np.load(name)
+                last = template
+                result = display_template(bc, template)
+                print "Rolling out..."
+                if result != 'next':
+                    teleop(c, izzy, t, bc, person, template)
+                print "Done rolling out."
+            elif char == 'p':
+                print "Displaying template"
+                if last is not None:
+                    display_template(bc, last)
+                else:
+                    display_template(bc)
+                print "Rolling out"
+                teleop(c, izzy, t, bc, person, last)
+        else:
+            if char == 'q':
+                print "Quitting..."
+                break
+            elif char == 'r':
+                print "Generating template"
+                singulationImg.generate_template()
+                print "Displaying template"
+                next, template = display_template(bc)
+                if next == 'next':
+                    continue
+                print "Rolling out"
+                teleop(c, izzy, t, bc, person, template)
+            elif char == 'p':
+                print "Displaying template"
+                if last is not None:
+                    display_template(bc, last)
+                else:
+                    display_template(bc)
+                print "Rolling out"
+                teleop(c, izzy, t, bc, person, last)
+            elif char == 't':
+                print "Iterating through training set"
+                i = 0
+                success = True
+                while True:
+                    try:
+                        if success:
+                            name = template_file.next()
+                            name = name[:name.find('\n')]
+                    except StopIteration:
+                        print "successfully completed all saved templates"
+                        break
+                    print 'Using template: ' + name
+                    template = np.load(name)
+                    last = template
+                    result = display_template(bc, template)
+                    print "Rolling out..."
+                    success = teleop(c, izzy, t, bc, person, template)
+                    print "Done rolling out."
+
+            elif char == 'l':
+                try:
+                    name = template_file.next()
+                except StopIteration:
+                    print 'Completed all saved templates'
+                    continue
+                
                 print 'Using template: ' + name
                 template = np.load(name[:name.find('\n')])
                 result = display_template(bc, template)
                 print "Rolling out..."
-                success = teleop(c, izzy, t, bc, )
+                if result != 'next':
+                    teleop(c, izzy, t, bc, person, template)
                 print "Done rolling out."
-
-        elif char == 'l':
-            try:
-                name = template_file.next()
-            except StopIteration:
-                print 'Completed all saved templates'
-                continue
-            
-            print 'Using template: ' + name
-            template = np.load(name[:name.find('\n')])
-            result = display_template(bc, template)
-            print "Rolling out..."
-            if result != 'next':
-                teleop(c, izzy, t, bc)
-            print "Done rolling out."
     print "Done"
    

@@ -18813,3 +18813,64 @@ DEBUG:root:[ Iteration 0 ] Training rotation loss: 0.0126446  Training extension
 DEBUG:root:Saving...
 DEBUG:root:Saved model to /media/1tb/Izzy/nets/net6_07-06-2016_16h09m01s.ckpt
 DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training rotation loss: 0.0192337  Training extension loss: 0.00565937
+DEBUG:root:[ Iteration 0 ] Testing rotation loss: 0.0194076  Testing extension loss: 0.00554561
+DEBUG:root:[ Iteration 3 ] Training rotation loss: 0.0193527  Training extension loss: 0.00562027
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /media/1tb/Izzy/nets/net6_07-13-2016_14h45m43s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training rotation loss: 0.0192956  Training extension loss: 0.00560031
+DEBUG:root:[ Iteration 0 ] Testing rotation loss: 0.0190964  Testing extension loss: 0.00551605
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /media/1tb/Izzy/nets/net6_07-13-2016_14h46m14s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training rotation loss: 0.0193304  Training extension loss: 0.00570263
+DEBUG:root:[ Iteration 0 ] Testing rotation loss: 0.0192176  Testing extension loss: 0.00574122
+DEBUG:root:[ Iteration 3 ] Training rotation loss: 0.0193778  Training extension loss: 0.00574005
+DEBUG:root:[ Iteration 6 ] Training rotation loss: 0.0193823  Training extension loss: 0.00559672
+DEBUG:root:[ Iteration 9 ] Training rotation loss: 0.0192072  Training extension loss: 0.00564165
+DEBUG:root:[ Iteration 12 ] Training rotation loss: 0.0191913  Training extension loss: 0.00561455
+DEBUG:root:[ Iteration 15 ] Training rotation loss: 0.0192978  Training extension loss: 0.00547619
+DEBUG:root:[ Iteration 18 ] Training rotation loss: 0.01911  Training extension loss: 0.00533712
+DEBUG:root:[ Iteration 20 ] Testing rotation loss: 0.0191271  Testing extension loss: 0.00532889
+DEBUG:root:[ Iteration 21 ] Training rotation loss: 0.019261  Training extension loss: 0.00531238
+DEBUG:root:[ Iteration 24 ] Training rotation loss: 0.0190324  Training extension loss: 0.0052116
+DEBUG:root:[ Iteration 27 ] Training rotation loss: 0.0187463  Training extension loss: 0.00499583
+DEBUG:root:[ Iteration 30 ] Training rotation loss: 0.0182712  Training extension loss: 0.00451351
+DEBUG:root:[ Iteration 33 ] Training rotation loss: 0.0165554  Training extension loss: 0.00386747
+DEBUG:root:[ Iteration 36 ] Training rotation loss: 0.0140793  Training extension loss: 0.00295236
+DEBUG:root:[ Iteration 39 ] Training rotation loss: 0.0128568  Training extension loss: 0.00259672
+DEBUG:root:[ Iteration 40 ] Testing rotation loss: 0.0123403  Testing extension loss: 0.00242432
+DEBUG:root:[ Iteration 42 ] Training rotation loss: 0.0111285  Training extension loss: 0.00248365
+DEBUG:root:[ Iteration 45 ] Training rotation loss: 0.0110524  Training extension loss: 0.00264686
+DEBUG:root:[ Iteration 48 ] Training rotation loss: 0.0113674  Training extension loss: 0.0027881
+DEBUG:root:[ Iteration 51 ] Training rotation loss: 0.0109124  Training extension loss: 0.00272672
+DEBUG:root:[ Iteration 54 ] Training rotation loss: 0.00982391  Training extension loss: 0.00280013
+DEBUG:root:[ Iteration 57 ] Training rotation loss: 0.00871563  Training extension loss: 0.00255819
+DEBUG:root:[ Iteration 60 ] Training rotation loss: 0.00894547  Training extension loss: 0.00238816
+DEBUG:root:[ Iteration 60 ] Testing rotation loss: 0.0096227  Testing extension loss: 0.00190698
+DEBUG:root:[ Iteration 63 ] Training rotation loss: 0.0081925  Training extension loss: 0.00226047
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /media/1tb/Izzy/nets/net6_07-13-2016_14h48m30s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training rotation loss: 0.0159794  Training extension loss: 0.00364805
+DEBUG:root:[ Iteration 0 ] Testing rotation loss: 0.0169955  Testing extension loss: 0.00256351
+DEBUG:root:[ Iteration 3 ] Training rotation loss: 0.0159534  Training extension loss: 0.00360736
+DEBUG:root:[ Iteration 6 ] Training rotation loss: 0.0158978  Training extension loss: 0.00350852
+DEBUG:root:[ Iteration 9 ] Training rotation loss: 0.0157966  Training extension loss: 0.00331494
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /media/1tb/Izzy/nets/net6_07-13-2016_15h38m46s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training rotation loss: 0.0156947  Training extension loss: 0.00383513
+DEBUG:root:[ Iteration 0 ] Testing rotation loss: 0.0148479  Testing extension loss: 0.00432807
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /media/1tb/Izzy/nets/net6_07-13-2016_15h40m41s.ckpt
+DEBUG:root:Optimization done.
+DEBUG:root:[ Iteration 0 ] Training rotation loss: 0.0154476  Training extension loss: 0.00411042
+DEBUG:root:[ Iteration 0 ] Testing rotation loss: 0.0158557  Testing extension loss: 0.00454517
+DEBUG:root:Saving...
+DEBUG:root:[ Iteration 0 ] Training rotation loss: 0.0161954  Training extension loss: 0.00347906
+DEBUG:root:[ Iteration 0 ] Testing rotation loss: 0.0162241  Testing extension loss: 0.00388009
+DEBUG:root:Saving...
+DEBUG:root:Saved model to /media/1tb/Izzy/nets/net6_07-13-2016_16h04m56s.ckpt
+DEBUG:root:Optimization done.
