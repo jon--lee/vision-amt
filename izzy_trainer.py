@@ -239,7 +239,7 @@ class AMT():
         statistics_file.write("success number: " + str(self.succeed))
         statistics_file.close()
         rollout_name = self.next_rollout()
-        if self.name:
+        if self.name is not None:
             rollout_path = self.options.rollouts_dir + self.name + "_rollouts/" + rollout_name + '/'
         else:
             rollout_path = self.options.rollouts_dir + rollout_name + '/'
@@ -263,7 +263,10 @@ class AMT():
 
         i = 0
         for frame, state,deltas, true_state in recording:
-            filename = self.name + '_' + rollout_name + "_frame_" + str(i) + ".jpg"
+            if self.name:
+                filename = self.name + '_' + rollout_name + "_frame_" + str(i) + ".jpg"
+            else:
+                filename = rollout_name + "_frame_" + str(i) + ".jpg"
             raw_states_file.write(filename + self.lst2str(state) + "\n") 
             rollout_states_file.write(filename + self.lst2str(state) + "\n")
             rollout_deltas_file.write(filename + self.lst2str(deltas) + "\n")
@@ -308,11 +311,11 @@ class AMT():
                 (i.e. do not overwrite another rollout)
         """
         i = 0
-        prefix = AMTOptions.rollouts_dir + 'rollout'
+        # prefix = AMTOptions.rollouts_dir 
         if self.name:
             prefix = self.options.rollouts_dir + self.name + "_rollouts/rollout"
         else:
-            prefix = self.options.rollouts_dir
+            prefix = self.options.rollouts_dir + 'rollout'
         path = prefix + str(i) + "/"
         while os.path.exists(path):
             i += 1
@@ -387,8 +390,7 @@ if __name__ == "__main__":
         print "not running a set iteration"
         template_file = open(options.templates_dir + '/saved_template_paths.txt', 'r')
 
-    # template_file = open(options.templates_dir + '/saved_template_paths.txt', 'r')
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_07-01-2016_16h24m28s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_07-15-2016_10h44m06s.ckpt'
 
     #Net used for Singulation Demo 
     # template_file = open(options.templates_dir + '/demo_templates_paths.txt', 'r')
@@ -400,13 +402,17 @@ if __name__ == "__main__":
     current_state = amt.state(amt.izzy.getState())
     amt.return_to_start(current_state)
     amt.current_template = None
-
+    skip = False
     while True:
         if limited:
             print "Waiting for keypress ('n' -> next, 'q' -> quit, 'p' -> previous)"
         else:
             print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 'd' -> demonstrate, 'c' -> compile train/test sets, 'p' -> run on previous template, 'l' -> run templates saved in 'last_templates'): "
-        char = getch()
+        if not skip:
+            char = getch()
+        else:
+            char = 'n'
+            skip = False
         if limited:
             if char == 'q':
                 print "Quitting..."
@@ -414,7 +420,7 @@ if __name__ == "__main__":
             elif char == 'n':
                 try:
                     name = template_file.next()
-                    name = name[:name.find('\n')]
+                    name = name.split('\n')[0]
                 except StopIteration:
                     print 'Completed all saved templates'
                     continue
@@ -422,7 +428,10 @@ if __name__ == "__main__":
                 print 'Using template: ' + name
                 template = np.load(name)
                 amt.current_template = template
-                amt.display_template(template)
+                nxt = amt.display_template(template)
+                if nxt == 'next':
+                    skip = True
+                    continue
                 print "Rolling out..."
                 ro = amt.rollout_tf()
                 print "Done rolling out."
@@ -469,7 +478,9 @@ if __name__ == "__main__":
                         i = i % len(names)
                     print 'Using template: ' + name
                     template = np.load(name[:name.find('\n')])
-                    amt.display_template(template)
+                    nxt = amt.display_template(template)
+                    if nxt == 'next':
+                        continue
                     print "Rolling out..."
                     ro = amt.rollout_tf()
                     print "Done rolling out."

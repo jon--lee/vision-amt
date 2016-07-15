@@ -130,8 +130,8 @@ def convert_locations(state, ix, iy, tx, ty):
     extension = iy - ty 
     delta = []
     appear_delta = []
-    delta.append(np.sign(rotation) * min(np.abs(pixelstoMeters(rotation))/2, .0266))
-    delta.append(np.sign(extension) * min(np.abs(pixelstoMeters(extension))/2, .006))
+    delta.append(np.sign(rotation) * min(np.abs(pixelstoMeters(rotation))/3, .0266))
+    delta.append(np.sign(extension) * min(np.abs(pixelstoMeters(extension))/3, .006))
     appear_delta.append(np.sign(rotation) * min(np.abs(pixelstoMeters(rotation)), .0266 * 4))
     appear_delta.append(np.sign(extension) * min(np.abs(pixelstoMeters(extension)), .006 * 4))
     state[0] += appear_delta[0]
@@ -225,7 +225,9 @@ def draw_rollouts(r_lst, name):
     # pasteOn(finger_L, full_arm, arm.size[0]/2, 100)
     # pasteOn(finger_R, full_arm, arm.size[0]/2, 100)
     global img, drawing
-    for rollout_num in r_lst:
+    r_i = 0
+    while r_i < len(r_lst):
+        rollout_num = r_lst[r_i]
         feedback = []
         rollout_name = 'rollout' + str(rollout_num)
         image_path = start_path + rollout_name +'/' + name + '_' + 'rollout'+str(rollout_num) +'_frame_'
@@ -237,6 +239,23 @@ def draw_rollouts(r_lst, name):
         cv2.setMouseCallback('image',draw_circle)
 
         lastx, lasty = tx, ty
+        for s in range(80):
+            start = time.time()
+            image_frame = image_path + str(s) + '.jpg'
+            img = cv2.imread(image_frame)
+            rows,cols,colour = img.shape
+            M = cv2.getRotationMatrix2D((cols/2,rows/2),270,1)
+            img = cv2.warpAffine(img,M,(cols,rows))
+            start = time.time()
+            while True:
+                cv2.imshow('image',img)
+                k = cv2.waitKey(30) & 0xFF
+                if k == ord('m'):
+                    mode = not mode
+                elif k == 27:
+                    break
+                if time.time() - start > .05:
+                    break
         for i in range(80):
             state = convert_state(states.next())
             image_frame = image_path + str(i) + '.jpg'
@@ -282,16 +301,23 @@ def draw_rollouts(r_lst, name):
                     mode = not mode
                 elif k == 27:
                     break
-                if time.time() - start > .1:
+                if time.time() - start > .25:
                     break
             print "next frame: ", i
-        print "do you want to continue and save? enter (y/n)"
+            # if name is not None:
+            #     target_path = AMTOptions.rollouts_dir + name + "_rollouts/feedback_img_" + str(i) + ".jpg"
+            #     cv2.imwrite(target_path, img)
+        print "do you want to continue? enter (y/n)"
         char = getch()
         if char == 'y':
-            save_data(feedback, write_path)
-            continue
+            print "would you like to save your last run? enter (y/n)"
+            char = getch()
+            if char == 'y':
+                save_data(feedback, write_path)
+                r_i += 1
+            else:
+                continue
         if char == 'n':
-            save_data(feedback, write_path)
             break
     # print feedback
     

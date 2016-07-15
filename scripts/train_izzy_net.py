@@ -10,10 +10,10 @@ from scripts import compile_supervisor, merge_supervised
 
 def copy_over(infile, outfile, first, last):
     lines = infile.readlines()
-    rol_num = lambda x: int(x[x.find('_rollout') + len('_rollout'):x.find('_rollout') + len('_rollout') + 1])
+    rol_num = lambda x: int(x[x.find('_rollout') + len('_rollout'):x.find('_frame_')])
     for line in lines:
-    	if rol_num(line) >= first and rol_num(line) <= last: 
-    		print rol_num(line), first, last
+    	# print line, rol_num(line), first, last
+        if rol_num(line) >= first and rol_num(line) <= last:
     		outfile.write(line)
 
 if __name__ == '__main__':
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         sys.exit()
     outfile = open(AMTOptions.amt_dir + 'deltas.txt', 'w+')
     if sup:
-        failure = merge_supervised.load_rollouts(False, False, (first,last-1), (0,-1), outfile, name = person)
+        failure = merge_supervised.load_rollouts(False, False, (first,last), (0,-1), outfile, name = person)
         if failure:
             print "did not have the sufficient rollouts specified"
         outfile.close()
@@ -69,16 +69,18 @@ if __name__ == '__main__':
             f.extend(filenames)
         for filename in f:
             read_path = AMTOptions.rollouts_dir + person + "_rollouts/" + filename
-            if read_path.find("retroactive_feedback") != -1:
+            if read_path.find("retroactive_feedback") != -1 and read_path.find("~") == -1:
             	print filename
-                index = read_path.find("retroactive_feedback") + len("retroactive_feedback")
-                start = int(read_path[index:index + 1])
-                end = int(read_path[index+2:index + 3])
+                paths = filename.split('_')
+                index = len('feedback')
+                end_index = paths[2].find(".txt")
+                start = int(paths[1][index:])
+                end = int(paths[2][:end_index])
                 print start, end
                 if start < last and first <= end:
                     infile = open(read_path, 'r')
 
-                    copy_over(infile, outfile, max(start, first), min(last-1, end))
+                    copy_over(infile, outfile, max(start, first), min(last, end))
                     infile.close()
             
 
@@ -88,7 +90,7 @@ if __name__ == '__main__':
 
     data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file,channels=3)
     net = net6.NetSix()
-    # net.optimize(300,data, batch_size=200)
+    net.optimize(300,data, batch_size=200)
 
     # path = '//media/1tb/Izzy/nets/net6_07-01-2016_16h15m32s.ckpt'
     # net.optimize(200,data,path = path, batch_size=200)

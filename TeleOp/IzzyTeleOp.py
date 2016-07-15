@@ -216,7 +216,10 @@ def save_recording(frames, deltas, states, name, template):
 
     i = 0
     for frame, delta, state in zip(frames, deltas, states):
-        filename = name + '_' + rollout_name + '_frame_' + str(i) + '.jpg'
+        if name is not None:
+            filename = name + '_' + rollout_name + '_frame_' + str(i) + '.jpg'
+        else:
+            filename = rollout_name + '_frame_' + str(i) + '.jpg'
         deltas_file.write(filename + lst2str(delta) + '\n')
         states_file.write(filename + lst2str(state) + '\n')
         cv2.imwrite(rollout_path + filename, frame)
@@ -385,6 +388,8 @@ if __name__ == '__main__':
                         help="number of rollouts you want to run")
     parser.add_argument("-e", "--experiment", help="Runs in limited experiment mode, requires other flags",
                     action="store_true")
+    parser.add_argument("-s", "--start", type=int,
+                        help="If you would like to start at a particular iteration number")
     args = parser.parse_args()
     if args.name:
         person = args.name 
@@ -397,6 +402,10 @@ if __name__ == '__main__':
     limited = False
     if args.experiment:
         limited = True
+    if args.start:
+        i_at = args.start
+    else:
+        i_at = 0
 
     print count <= 20
 
@@ -418,6 +427,8 @@ if __name__ == '__main__':
         template_file = open(options.templates_dir + '/training_paths.txt', 'r')
     else:
         template_file = open(options.templates_dir + '/template_paths.txt', 'r')
+    for i in range(i_at):
+        template_file.next()
 
  
     c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
@@ -430,10 +441,12 @@ if __name__ == '__main__':
             print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 't' -> test, 'd' -> demonstrate, 'c' -> compile train/test sets, 'p' -> run on previous template, 'l' -> run templates saved in 'last_templates'): "
         char = getch()
         if limited:
+            print "You are at iteration: ", i_at
             if char == 'q':
                 print "Quitting..."
                 break
             elif char == 'n':
+                i_at += 1
                 try:
                     name = template_file.next()
                     name = name[:name.find('\n')]
@@ -443,10 +456,12 @@ if __name__ == '__main__':
                 print 'Using template: ' + name
                 template = np.load(name)
                 last = template
-                result = display_template(bc, template)
+                result = display_template(bc, template)[0]
+                print result
                 print "Rolling out..."
-                if result != 'next':
-                    teleop(c, izzy, t, bc, person, template)
+                if result == 'next':
+                    continue
+                teleop(c, izzy, t, bc, person, template)
                 print "Done rolling out."
             elif char == 'p':
                 print "Displaying template"
