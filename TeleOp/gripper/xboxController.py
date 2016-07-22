@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 import time
+import sys
 
 
 class XboxController:
@@ -46,6 +47,8 @@ class XboxController:
         return updates*self.scales
         
     def calibrate(self):
+        save_stdout = sys.stdout
+        sys.stdout = open('trash', 'w') 
         # calibrate sticks 
         # reset offsets and scaling factors 
         length = len(self.offsets)
@@ -57,6 +60,8 @@ class XboxController:
         self.offsets = self.convert(state)    
         self.uScale = abs(1/(np.ones(length)-self.offsets))
         self.lScale = abs(1/(-np.ones(length)-self.offsets))
+        sys.stdout = save_stdout
+
 
         
     def convert(self,state):

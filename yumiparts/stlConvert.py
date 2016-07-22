@@ -114,7 +114,8 @@ def generatePose(partNum, tilt1, tilt2, outputName, wid):
     sAxis
     points
     """
-    filename = "/Users/chrispowers/Desktop/research/vision-amt/yumiparts/obj" + str(partNum) + ".txt"
+    
+    filename = "/home/annal/Izzy/vision_amt/yumiparts/obj" + str(partNum) + ".txt"
     inputFile = open(filename, "r")
     def readVector():
         currStr = ""

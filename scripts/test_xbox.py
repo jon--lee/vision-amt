@@ -30,4 +30,5 @@ c = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2
 
 while True:
 	print c.getUpdates()
+	time.sleep(.25)
 

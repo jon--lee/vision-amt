@@ -4,7 +4,7 @@ sys.path.append('/home/annal/Izzy/vision_amt/scripts/objects/')
 import tty, termios
 from options import AMTOptions
 from pipeline.bincam import BinaryCamera
-from Net.tensor import inputdata, net3,net4,net5,net6
+from Net.tensor import inputdata, net3,net4,net5,net6, net6_c
 from scripts.objects import singulationImg
 from scripts import overlay, click_centers, transfer_weights
 import time
@@ -25,8 +25,8 @@ sys.path[0] = sys.path[0] + '/../../GPIS/src/grasp_selection/control/DexControls
         
 from DexRobotZeke import DexRobotZeke
 from ZekeState import ZekeState
-from DexRobotTurntable import DexRobotTurntable
-from TurntableState import TurntableState
+# from DexRobotTurntable import DexRobotTurntable
+# from TurntableState import TurntableState
 
 
 def getch():
@@ -46,12 +46,13 @@ def getch():
 
 class AMT():
 
-    def __init__(self, bincam, izzy, turntable, options=AMTOptions()):
+    # def __init__(self, bincam, izzy, turntable, options=AMTOptions()):
+    def __init__(self, bincam, izzy, options=AMTOptions()):
         self.bc = bincam
         self.izzy = izzy
-        self.turntable = turntable
+        # self.turntable = turntable
         self.options = options
-        self.r = reset_rollout.reset(izzy, turntable)
+        # self.r = reset_rollout.reset(izzy, turntable)
         self.succeed = 0.0
         self.total = 0
         # self.weights = []
@@ -62,28 +63,32 @@ class AMT():
 
 
     def initial_demonstration(self, controller):
-        print "Starting supervisor demonstration..."
-        recording = []
-        try:
-            while True:
-                controls = controller.getUpdates()
-                deltas = self.controls2deltas(controls)
-                print deltas
-                if not all(d == 0.0 for d in deltas):
-                    frame = self.bc.read_frame()
-                    new_izzy, new_t = self.apply_deltas(deltas)
-                    recording.append((frame, deltas))
+        print "DEPRECATED"
+        # izzy_state = self.state(self.izzy.getState())
+        # t_state = self.state(self.turntable.getState())
+        # print "Starting supervisor demonstration..."
+        # recording = []
+        # try:
+        #     while True:
+        #         controls = controller.getUpdates()
+        #         deltas = self.controls2deltas(controls)
+        #         # print deltas
+        #         if not all(d == 0.0 for d in deltas):
+        #             frame = self.bc.read_frame()
+        #             new_izzy, new_t = self.apply_deltas(izzy_state, deltas)
+        #             recording.append((frame, deltas))
                                                
-                    self.izzy._zeke._queueState(ZekeState(new_izzy))
-                    self.turntable.gotoState(TurntableState(new_t), .25, .25)
+        #             self.izzy._zeke._queueState(ZekeState(new_izzy))
+        #             self.turntable.gotoState(TurntableState(new_t), .25, .25)
                         
-                    time.sleep(0.08)
+        #             time.sleep(0.08)
 
-        except KeyboardInterrupt:
-            pass
+        # except KeyboardInterrupt:
+        #     pass
 
-        self.save_initial(recording)
-        print "Supervisor demonstration done."
+        # self.save_initial(recording)
+        # print "Supervisor demonstration done."
+        return
 
     # [rot, elev, ext, wrist, grip, turntable]
     @staticmethod
@@ -114,9 +119,9 @@ class AMT():
     def rescale_sup(self, deltas):
         # deltas[0] = deltas[0]*0.00754716981132
         # deltas[1] = deltas[1]*0.004
-        print deltas
-        deltas[0] = deltas[0]*0.11
-        deltas[1] = deltas[1]*0.1
+        # print deltas
+        deltas[0] = deltas[0]*0.02
+        deltas[1] = deltas[1]*0.006
 
         # deltas[0] = deltas[0]*0.2
         # deltas[1] = deltas[1]*0.1
@@ -135,8 +140,8 @@ class AMT():
 
         deltas[0] = np.sign(deltas[0])*np.min([0.2,np.abs(deltas[0])])
         deltas[1] = np.sign(deltas[1])*np.min([0.01,np.abs(deltas[1])])
-        deltas[2] = 0.0#np.sign(deltas[2])*np.min([0.005,np.abs(deltas[2])])
-        deltas[3] = np.sign(deltas[3])*np.min([0.2,np.abs(deltas[3])])
+        # deltas[2] = 0.0#np.sign(deltas[2])*np.min([0.005,np.abs(deltas[2])])
+        # deltas[3] = np.sign(deltas[3])*np.min([0.2,np.abs(deltas[3])])
         return deltas
 
     def rollout_tf(self, num_frames=100):
@@ -149,12 +154,15 @@ class AMT():
         # for path in self.options.tf_net_path:
         #     print path
         #     self.weights.append(transfer_weights.all_weights(net, sess, path))
+        current_state = self.state(self.izzy.getState()) #self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
+        print current_state, 
         
         for i in range(4):
             self.bc.vc.grab()
         try:
             for i in range(num_frames):
                 # Read from the most updated frame
+                start = time.time()
                 for i in range(4):
                     self.bc.vc.grab()
                 frame = self.bc.read_frame()
@@ -171,54 +179,88 @@ class AMT():
                 cv2.imshow("camera", disp_frame)
                 cv2.waitKey(30)
 
-                current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
                 
                 delta_states = []
                 magnitudes = []
                 # for graph in self.graphs:
                 #     # transfer_weights.assign_all_variables(sess, net, weight_dict)
                 #     with graph.as_default()
-                delta_state = self.rescale_sup(net.output(sess, gray_frame,channels=3))
+                # current_state = self.long2short_state(self.state(self.izzy.getState()), self.state(self.turntable.getState()))
+                # outval = net.output(sess, gray_frame,channels=3, clasfc=True)
+                outval = net.output(sess, gray_frame,channels=3)
+                print "outval: ", outval
+                delta_state = self.rescale_sup(outval)
                 delta_state = self.deltaSafetyLimites(delta_state)
-                delta_state[2] = 0.0
-                delta_state[3] = 0.0
+                # delta_state[2] = 0.0
+                # delta_state[3] = 0.0
                 # delta_states.append(delta_state)
                 # magnitudes.append(np.linalg.norm(delta_state))
                 # bst = np.argmax(magnitudes)
                 # delta_state = delta_states[bst]
                 
-                recording.append((frame, current_state,delta_state))
-                new_izzy, new_t = self.apply_deltas(delta_state)
+
+                recording.append((frame, current_state, delta_state))
+                new_izzy = self.apply_deltas(current_state, delta_state)
 
                 # TODO: uncomment these to update izzy and t
                 print "DELTA STATE ",delta_state
+                print "current_state: ", new_izzy
                 self.izzy._zeke._queueState(ZekeState(new_izzy))
-                self.turntable.gotoState(TurntableState(new_t), .25, .25)
+                # self.turntable.gotoState(TurntableState(new_t), .25, .25)
+                current_state = new_izzy[:]
 
-                time.sleep(.005)
+                offset = max(0, .25 - (time.time() - start))
+                print offset
+                time.sleep(offset)
+                print time.time() - start
+
        
         except KeyboardInterrupt:
             pass
+        self.return_to_start(current_state)
         cv2.destroyAllWindows()
         sess.close()
         self.prompt_save(recording)
+
+    def get_state(self, state):
+        if isinstance(state, ZekeState):# or isinstance(state, TurntableState):
+            return state.state
+        return state
+
+    def safety(self, delta):
+        delta[0] = np.sign(delta[0]) * min(abs(delta[0]), .02)
+        delta[2] = np.sign(delta[2]) * min(abs(delta[2]), .007)
+        return delta
+
+    def return_to_start(self, current_state):
+        # current_state = self.get_state(self.izzy.getState())
+        print current_state, type(current_state)
+        destination = np.array([3.4701, 0.021, 0.024, 4.2359, 0.0004, 7.138])
+        while np.linalg.norm(current_state - destination) > .001:
+            print np.linalg.norm(current_state - destination)
+            print self.safety(destination - np.array(current_state))
+            current_state = current_state + self.safety(destination - np.array(current_state))
+            self.izzy._zeke._queueState(ZekeState(current_state))
+            time.sleep(.1)
+            print current_state
+        time.sleep(.25)
     
-    def test(self):
-        try:
-            while True:
-                izzy_state = self.state(self.izzy.getState())
-                turntable_state = self.state(self.turntable.getState())
-                print self.long2short_state(izzy_state, turntable_state)
-                time.sleep(.03)    
-        except KeyboardInterrupt:
-            pass
+    # def test(self):
+    #     try:
+    #         while True:
+    #             izzy_state = self.state(self.izzy.getState())
+    #             turntable_state = self.state(self.turntable.getState())
+    #             print self.long2short_state(izzy_state, turntable_state)
+    #             time.sleep(.03)    
+    #     except KeyboardInterrupt:
+    #         pass
             
     @staticmethod
     def state(state):
         """
             Necessary wrapper for quickly converting between PyControl and ZekeCode
         """
-        if isinstance(state, ZekeState) or isinstance(state, TurntableState):
+        if isinstance(state, ZekeState):# or isinstance(state, TurntableState):
             return state.state
         return state
 
@@ -241,46 +283,48 @@ class AMT():
             return None
         self.prompt_save(recording)
 
-    def apply_deltas(self, delta_state):
+    def apply_deltas(self, izzy_state, delta_state):
         """
             Get current states and apply given deltas
             Handle max and min states as well
         """
-        izzy_state = self.state(self.izzy.getState())
-        t_state = self.state(self.turntable.getState())
+        # izzy_state = self.state(self.izzy.getState())
+        # t_state = self.state(self.turntable.getState())
         izzy_state[0] += delta_state[0]
         izzy_state[1] = 0.00952
         izzy_state[2] += delta_state[1]
         izzy_state[3] = 4.211
-        izzy_state[4] += delta_state[2]#0.054# 0.0544 #delta_state[2]
-        t_state[0] += delta_state[3]
+        # izzy_state[4] += delta_state[2]#0.054# 0.0544 #delta_state[2]
+        # t_state[0] += delta_state[3]
         # print self.options.ROTATE_LOWER_BOUND, izzy_state[0]
         izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND, izzy_state[0])
         izzy_state[0] = max(self.options.ROTATE_LOWER_BOUND, izzy_state[0])
-        izzy_state[4] = min(self.options.GRIP_UPPER_BOUND, izzy_state[4])
-        izzy_state[4] = max(self.options.GRIP_LOWER_BOUND, izzy_state[4])
-        t_state[0] = min(self.options.TABLE_UPPER_BOUND, t_state[0])
-        t_state[0] = max(self.options.TABLE_LOWER_BOUND, t_state[0])
+        izzy_state[2] = min(self.options.EXTENSION_UPPER_BOUND, izzy_state[2])
+        izzy_state[2] = max(self.options.EXTENSION_LOWER_BOUND, izzy_state[2])
+        # izzy_state[4] = min(self.options.GRIP_UPPER_BOUND, izzy_state[4])
+        # izzy_state[4] = max(self.options.GRIP_LOWER_BOUND, izzy_state[4])
+        # t_state[0] = min(self.options.TABLE_UPPER_BOUND, t_state[0])
+        # t_state[0] = max(self.options.TABLE_LOWER_BOUND, t_state[0])
  
-        return izzy_state, t_state
+        return izzy_state
 
 
-    @staticmethod
-    def short2long_state(short_state):
-        """
-            Convert 4-element state to izzy and turntable states
-            Returns a tuple (first element is izzy state, second is turntable)
-        """
-        izzy_state = [short_state[0], 0, short_state[1], 0, short_state[2], 0]
-        t_state = [short_state[-1]]
-        return izzy_state, t_state
+    # @staticmethod
+    # def short2long_state(short_state):
+    #     """
+    #         Convert 4-element state to izzy and turntable states
+    #         Returns a tuple (first element is izzy state, second is turntable)
+    #     """
+    #     izzy_state = [short_state[0], 0, short_state[1], 0, short_state[2], 0]
+    #     t_state = [short_state[-1]]
+    #     return izzy_state, t_state
 
-    @staticmethod
-    def long2short_state(izzy_state, t_state):
-        """
-            Convert given izzy state and t state to four element state
-        """
-        return [izzy_state[0], izzy_state[2], izzy_state[4], t_state[0]]
+    # @staticmethod
+    # def long2short_state(izzy_state, t_state):
+    #     """
+    #         Convert given izzy state and t state to four element state
+    #     """
+    #     return [izzy_state[0], izzy_state[2]]#, izzy_state[4], 0.0]
 
     
     def update_weights(self, iterations=10):
@@ -315,26 +359,26 @@ class AMT():
             else:
                 test_writer.write(new_line)
     
-    def save_initial(self, tups):
-        """
-            Different from save recording in that this is intended
-            for saving initial supervisor demonstrations
-        """
-        tups = self.roll(tups, 4)
-        print "Saving initial demonstration"
-        prefix = datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss")
-        print "Saving raw frames to " + self.options.originals_dir + "..."
-        print "Saving binary frames to " + self.options.binaries_dir + "..."
-        deltas_file = open(self.options.deltas_file, 'a+')
-        i = 0
-        for frame, delta in tups:
-            filename = prefix + "_frame_" + str(i) + ".jpg"
-            deltas_file.write(filename + self.lst2str(delta) + "\n")
-            cv2.imwrite(self.options.originals_dir + filename, frame)
-            cv2.imwrite(self.options.binaries_dir + filename, self.segment(frame))
-            i += 1
-        deltas_file.close()
-        print "Done saving."
+    # def save_initial(self, tups):
+    #     """
+    #         Different from save recording in that this is intended
+    #         for saving initial supervisor demonstrations
+    #     """
+    #     tups = self.roll(tups, 4)
+    #     print "Saving initial demonstration"
+    #     prefix = datetime.datetime.now().strftime("%m-%d-%Y_%Hh%Mm%Ss")
+    #     print "Saving raw frames to " + self.options.originals_dir + "..."
+    #     print "Saving binary frames to " + self.options.binaries_dir + "..."
+    #     deltas_file = open(self.options.deltas_file, 'a+')
+    #     i = 0
+    #     for frame, delta in tups:
+    #         filename = prefix + "_frame_" + str(i) + ".jpg"
+    #         deltas_file.write(filename + self.lst2str(delta) + "\n")
+    #         cv2.imwrite(self.options.originals_dir + filename, frame)
+    #         cv2.imwrite(self.options.binaries_dir + filename, self.segment(frame))
+    #         i += 1
+    #     deltas_file.close()
+    #     print "Done saving."
 
     def save_recording(self, recording):
         """
@@ -450,18 +494,20 @@ if __name__ == "__main__":
 
     izzy = DexRobotZeke()
     izzy._zeke.steady(False)
-    t = DexRobotTurntable()
+    # t = DexRobotTurntable()
 
+    # options.tf_net = net6_c.NetSix_C()
     options.tf_net = net6.NetSix()
 
     template_file = open(options.amt_dir + '/saved_template_paths.txt', 'r')
 
     # FOR MULTINETS changed to a list
     # options.tf_net_path = ['/media/1tb/Izzy/nets/net6_06-16-2016_10h43m14s.ckpt']
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_06-17-2016_10h20m50s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_06-22-2016_11h32m47s.ckpt'
 
 
-    amt = AMT(bincam, izzy, t, options=options)
+    # amt = AMT(bincam, izzy, t, options=options)
+    amt = AMT(bincam, izzy, options=options)
     # amt.weights = []
     # amt.graphs = []
     # for _ in range(len(options.tf_net_path)):
@@ -474,7 +520,7 @@ if __name__ == "__main__":
 
 
     while True:
-        print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 't' -> test, 'd' -> demonstrate, 'c' -> compile train/test sets, 'p' -> run on previous template, 'l' -> run templates saved in 'last_templates'): "
+        print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 'd' -> demonstrate, 'c' -> compile train/test sets, 'p' -> run on previous template, 'l' -> run templates saved in 'last_templates'): "
         char = getch()
         if char == 'q':
             print "Quitting..."
@@ -527,8 +573,8 @@ if __name__ == "__main__":
             ro = amt.rollout_tf()
             print "Done rolling out."
 
-        elif char == 't':
-            amt.test()
+        # elif char == 't':
+        #     amt.test()
 
     template_file.close()
     print "Done."

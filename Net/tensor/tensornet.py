@@ -63,8 +63,9 @@ class TensorNet():
         sess = tf.Session()
         with sess.as_default():
             sess.run(tf.initialize_all_variables())
-            saver = tf.train.Saver()
-            saver.restore(sess, var_path)
+            # changed to self.saver
+            self.saver = tf.train.Saver()
+            self.saver.restore(sess, var_path)
         return sess
 
 
@@ -96,15 +97,20 @@ class TensorNet():
                     feed_dict = { self.x: ims, self.y_: labels }
                     if i % 3 == 0:
                         # batch_loss = self.acc.eval(feed_dict=feed_dict) # classification
-                        batch_loss = self.loss.eval(feed_dict=feed_dict) # regression
-                        self.log("[ Iteration " + str(i) + " ] Training loss: " + str(batch_loss))
+                        # batch_loss = self.loss.eval(feed_dict=feed_dict) # regression
+                        rot_loss = self.rot.eval(feed_dict=feed_dict) # regression
+                        fore_loss = self.fore.eval(feed_dict=feed_dict) # regression
+                        self.log("[ Iteration " + str(i) + " ] Training rotation loss: " + str(rot_loss) + "  Training extension loss: " + str(fore_loss))
                     if i % test_print == 0:
                         test_batch = data.next_test_batch()
                         test_ims, test_labels = test_batch
                         test_dict = { self.x: test_ims, self.y_: test_labels }
                         # test_loss = self.acc.eval(feed_dict=test_dict) # classification
-                        test_loss = self.loss.eval(feed_dict=test_dict) # regression
-                        self.log("[ Iteration " + str(i) + " ] Test loss: " + str(test_loss))
+                        # test_loss = self.loss.eval(feed_dict=test_dict) # regression
+                        # self.log("[ Iteration " + str(i) + " ] Test loss: " + str(test_loss))
+                        rot_t_loss = self.rot.eval(feed_dict=test_dict) # regression
+                        fore_t_loss = self.fore.eval(feed_dict=test_dict) # regression
+                        self.log("[ Iteration " + str(i) + " ] Testing rotation loss: " + str(rot_t_loss) + "  Testing extension loss: " + str(fore_t_loss))
                     self.train.run(feed_dict=feed_dict)
                 
 
@@ -139,12 +145,13 @@ class TensorNet():
             return sess.run(self.y_out, feed_dict={self.x:im})
         
 
-    def output(self, sess, im,channels,clasfc = False):
+    def output(self, sess, im,channels,clasfc = False, mask=True):
         """
             accepts batch of 3d images, converts to tensor
             and returns four element list of controls
         """
-        im = inputdata.im2tensor(im,channels)
+        if mask:
+            im = inputdata.im2tensor(im,channels)
         shape = np.shape(im)
         im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
         with sess.as_default():
@@ -155,17 +162,19 @@ class TensorNet():
                 return sess.run(self.y_out, feed_dict={self.x:im}) [0]
 
 
-    def class_dist(self,sess,im,channels=3):
+    def class_dist(self,sess,im,channels=3, mask=True):
         """
         accepts batch of 3d images, converts to tensor
         and returns four element list of controls
         """
-        im = inputdata.im2tensor(im,channels)
+        if mask:
+            im = inputdata.im2tensor(im,channels)
         shape = np.shape(im)
+        # print shape
         im = np.reshape(im, (-1, shape[0], shape[1], shape[2]))
         with sess.as_default():            
             dists = sess.run(self.y_out, feed_dict={self.x:im}) [0]
-            return np.reshape(dists, [4,5])
+            return np.reshape(dists, [2,5])
 
 
     @staticmethod

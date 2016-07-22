@@ -460,7 +460,7 @@ if __name__ == "__main__":
  
     options.tf_net = net6.NetSix()
 
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_06-06-2016_16h00m43s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_06-22-2016_18h10m13s.ckpt'
 
     amt = AMT(bincam, izzy, t, c, options=options)
 

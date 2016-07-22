@@ -8,6 +8,8 @@ import tensorflow as tf
 import overlay
 import numpy as np
 import time
+from options import AMTOptions
+
 
 def rescale(deltas):
     deltas[0] = deltas[0]*0.15
@@ -16,7 +18,14 @@ def rescale(deltas):
     deltas[3] = deltas[3]*0.02
     return deltas
 
-T = 10
+T = 2
+
+def show(image):
+    while True:
+        cv2.imshow('preview', image)
+        a = cv2.waitKey(30)
+        if a == 27:
+            break
 
 def color(frame): 
     color_frame = cv2.resize(frame.copy(), (250, 250))
@@ -27,7 +36,8 @@ def color(frame):
 class AnalysisReg():
     def __init__(self):
         self.net = net6.NetSix()
-        self.path = '/media/1tb/Izzy/nets/net6_06-06-2016_11h27m25s.ckpt'
+        self.path = '/media/1tb/Izzy/nets/net6_06-09-2016_12h06m48s.ckpt'
+        #self.path = '/media/1tb/Izzy/nets/net6_06-06-2016_11h27m25s.ckpt'
         self.sess = self.net.load(self.path) 
 
     def compare_batches(self, reals, synths):
@@ -36,8 +46,8 @@ class AnalysisReg():
         for i in range(len(differences)):
             real = reals[i]
             synth = synths[i]
-            deltas_real = np.array(rescale(self.net.output(self.sess, real, 3, False))[:2])
-            deltas_synth = np.array(rescale(self.net.output(self.sess, synth, 3, False))[:2])
+            deltas_real = np.array(rescale(self.net.output(self.sess, real, 3, clasfc=False, mask=False))[:2])
+            deltas_synth = np.array(rescale(self.net.output(self.sess, synth, 3, clasfc=False, mask=False))[:2])
             
             print str(deltas_real) + "  |  " + str(deltas_synth)
 
@@ -73,9 +83,9 @@ class AnalysisClass():
             print "\n"
             real = reals[i]
             synth = synths[i]
-            real_dist = self.net.class_dist(self.sess, real, 3)[:2]
+            real_dist = self.net.class_dist(self.sess, real, 3, mask=False)[:2]
             real_rot_dist, real_ext_dist = real_dist[0], real_dist[1]
-            synth_dist = self.net.class_dist(self.sess, synth, 3)[:2]
+            synth_dist = self.net.class_dist(self.sess, synth, 3, mask=False)[:2]
             synth_rot_dist, synth_ext_dist = synth_dist[0], synth_dist[1]
             
             print real_dist
@@ -148,18 +158,16 @@ def sample_real(bc, load = False):
     direct = 'scripts/objects/synth/'
     overlays = []
     for i in range(T):
-        image = color(cv2.imread(direct + str(i) + '.png'))
+        image = cv2.imread(direct + str(i) + '.png')
         overlays.append(image)
-
-
     reals = []
     if load:
         reals = np.load('real_samples.npy')
     for i in range(T):
         try:
             while True:
-                frame = bc.read_frame()
-                frame = process_image(frame)
+                frame = inputdata.im2tensor(bc.read_frame(), channels=3)
+                #frame = process_image(frame)
                 final = overlay.overlay(frame, overlays[i])
 
                 cv2.imshow('preview', final)
@@ -172,8 +180,8 @@ def sample_real(bc, load = False):
         frame = bc.read_frame()
         frame = color(frame)
         reals.append(frame)
-        np.save('real_samples.npy', reals)
-    np.save('real_samples.npy', reals)
+        #np.save('real_samples.npy', reals)
+    #np.save('real_samples.npy', reals)
 
 
 def sample_synth():
@@ -188,13 +196,50 @@ def sample_synth():
         
 
 
+def combine_mask(reals, synths):
+    for i in range(len(reals)):
+        real = inputdata.im2tensor(reals[i], channels=3)
+        synth = inputdata.im2tensor(synths[i], channels=3)
+        gripper_channel = real[:,:,1]
+        for j in range(3):
+            synth[:,:,j] += gripper_channel
+        reals[i] = real
+        synths[i] = synth
+    return reals, synths
+
+def sample_rollouts(start, end):
+    """
+        Get real and synth samples from trajectories
+        (int) start to (int) end
+        return lists of resized but unmasked images as np.array
+    """
+    reals = []
+    synths = []
+    for i in range(start, end + 1):
+        dir_path = AMTOptions.rollouts_dir + 'rollout' + str(i) + '/'
+        synth_path = dir_path + 'template.npy'
+        real_path = dir_path + 'rollout' + str(i) + '_frame_0.jpg'
+        real = cv2.imread(real_path)
+        synth = np.load(synth_path)
+        real = color(real)
+        synth = color(synth)
+        reals.append(real)
+        synths.append(synth)
+    return reals, synths
+
 if __name__ == '__main__':
     #sample_synth()
     #bc = BinaryCamera("./meta.txt")
     #bc.open()
     #time.sleep(1)
-    #sample_real(bc)
-    reals, synths = load_batches()
+    #sample_real(bc)                                # obtain real samples (uncomment everything above)
+    #reals, synths = load_batches()                 # load saved samples from previous
+    reals, synths = sample_rollouts(1608,1698)    # search rollouts for samples
+    reals, synths = combine_mask(reals, synths)
+    #show(reals[24] * 255.0)
+    #show(synths[24] * 255.0)
+    
+    #show(reals[0] * 255.0)
     with tf.Graph().as_default():
         ar = AnalysisReg()
         ar.compare_batches(reals, synths)
@@ -203,3 +248,7 @@ if __name__ == '__main__':
         ac = AnalysisClass()
         ac.compare_batches(reals, synths)
         ac.print_results()
+
+
+
+

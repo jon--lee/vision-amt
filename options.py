@@ -55,12 +55,28 @@ class AMTOptions(Options):
     grayscales_dir = Options.amt_dir + "grayscales/"
     colors_dir = Options.amt_dir + "colors/"
     policies_dir = Options.amt_dir + "policies/"
+    supervised_dir = Options.amt_dir + "supervised_rollouts/"
+    templates_dir = Options.amt_dir + "templates/"
 
-    ROTATE_UPPER_BOUND = 3.82
-    ROTATE_LOWER_BOUND = 3.06954
+    # for zeke
+    # ROTATE_UPPER_BOUND = 3.82
+    # ROTATE_LOWER_BOUND = 3.06954
+
+    ROTATE_UPPER_BOUND = 4.11
+    ROTATE_LOWER_BOUND = 3.159
+
+    #for zeke
+    # EXTENSION_UPPER_BOUND = 0.31197062988281271
+    # EXTENSION_LOWER_BOUND = 0.013355200195312483
+
+    EXTENSION_UPPER_BOUND = 0.26
+    EXTENSION_LOWER_BOUND = 0.0127
     
     GRIP_UPPER_BOUND = .06
     GRIP_LOWER_BOUND = .0023
     
     TABLE_LOWER_BOUND = .002
-    TABLE_UPPER_BOUND = 7.0    
+    TABLE_UPPER_BOUND = 7.0
+
+    CLASS_ANGLES = [.02, .01, 0, -.01, -.02]
+    CLASS_FORWARD = [.006, .0045, .003, .0015, 0]
