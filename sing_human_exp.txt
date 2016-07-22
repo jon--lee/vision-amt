@@ -1,0 +1,158 @@
+Jonathan 20 supervised:
+/media/1tb/Izzy/nets/net6_07-14-2016_16h10m54s.ckpt
+Training rotation loss: 0.0033037  Training extension loss: 0.000815085
+Testing rotation loss: 0.00567414  Testing extension loss: 0.00104567
+
+Jonathan 20 supervised 20 DAgger
+/media/1tb/Izzy/nets/net6_07-14-2016_17h46m20s.ckpt
+Training rotation loss: 0.00312133  Training extension loss: 0.000984958
+Testing rotation loss: 0.00481642  Testing extension loss: 0.0013325
+
+Jonathan 20 supervised 40 DAgger
+/media/1tb/Izzy/nets/net6_07-15-2016_10h44m06s.ckpt
+Training rotation loss: 0.00307925  Training extension loss: 0.00102162
+Testing rotation loss: 0.00396202  Testing extension loss: 0.000927192
+
+Jonathan 40 supervised
+/media/1tb/Izzy/nets/net6_07-15-2016_11h48m14s.ckpt
+Training rotation loss: 0.00367961  Training extension loss: 0.000790939
+Testing rotation loss: 0.00440046  Testing extension loss: 0.000978804
+
+Jonathan 60 supervised
+/media/1tb/Izzy/nets/net6_07-15-2016_11h57m33s.ckpt
+Training rotation loss: 0.00419595  Training extension loss: 0.000918078
+Testing rotation loss: 0.00623276  Testing extension loss: 0.00121729
+total: 30
+success rate: 0.6
+success number: 18.0
+failures: ['rollout1', 'rollout2', 'rollout3', 'rollout6', 'rollout7', 'rollout13', 'rollout15', 'rollout18', 'rollout20', 'rollout23', 'rollout24', 'rollout26']
+
+ChJon 20 Supervised:
+/media/1tb/Izzy/nets/net6_07-18-2016_11h05m15s.ckpt
+Testing rotation loss: 0.00730945  Testing extension loss: 0.00140689
+Training rotation loss: 0.00510292  Training extension loss: 0.00111919
+
+ChJon 40 supervised:
+
+ChJon 60 supervised:
+
+ChJon 20 Supervised 20 DAgger
+/media/1tb/Izzy/nets/net6_07-18-2016_11h58m05s.ckpt
+Training rotation loss: 0.00368287  Training extension loss: 0.000945255
+Testing rotation loss: 0.00508226  Testing extension loss: 0.00116983
+
+ChJon 20 Supervised 40 DAgger:
+
+
+Jacky 20 Supervised:
+/media/1tb/Izzy/nets/net6_07-18-2016_13h43m29s.ckpt
+Training rotation loss: 0.00455671  Training extension loss: 0.00102246
+Testing rotation loss: 0.00546436  Testing extension loss: 0.00124806
+
+Jacky 40 Supervised:
+
+Jacky 60 Supervised:
+
+Jacky 20 supervised 20 DAgger:
+/media/1tb/Izzy/nets/net6_07-18-2016_14h32m27s.ckpt
+Training rotation loss: 0.00321792  Training extension loss: 0.000634253
+Testing rotation loss: 0.00326308  Testing extension loss: 0.000645583
+
+Jacky 20 Supervised 40 DAgger:
+
+Aimee 20 supervised
+/media/1tb/Izzy/nets/net6_07-19-2016_16h47m52s.ckpt
+Testing rotation loss: 0.00630703  Testing extension loss: 0.00147899
+Training rotation loss: 0.0046998  Training extension loss: 0.00120489
+
+Aimee 40 Supervised
+/media/1tb/Izzy/nets/net6_07-20-2016_14h57m06s.ckpt
+Testing rotation loss: 0.0062859  Testing extension loss: 0.00138535
+Training rotation loss: 0.00578341  Training extension loss: 0.0012073
+
+Aimee 60 Supervised
+/media/1tb/Izzy/nets/net6_07-20-2016_15h06m14s.ckpt
+Training rotation loss: 0.00466669  Training extension loss: 0.00101081
+Testing rotation loss: 0.00616639  Testing extension loss: 0.00122337
+total: 30
+success rate: 0.733333333333
+success number: 22.0
+failures: ['rollout1', 'rollout2', 'rollout3', 'rollout17', 'rollout18', 'rollout20', 'rollout23', 'rollout27']
+
+Aimee 20 supervised 20 DAgger
+/media/1tb/Izzy/nets/net6_07-19-2016_17h27m25s.ckpt
+Training rotation loss: 0.00431591  Training extension loss: 0.00102008
+Testing rotation loss: 0.00483072  Testing extension loss: 0.00128905
+
+Aimee 20 supervised 40 DAgger
+/media/1tb/Izzy/nets/net6_07-19-2016_17h59m22s.ckpt
+Training rotation loss: 0.00409635  Training extension loss: 0.00138011
+Testing rotation loss: 0.00455293  Testing extension loss: 0.00167824
+
+
+Chris 20 supervised:
+/media/1tb/Izzy/nets/net6_07-20-2016_10h28m56s.ckpt
+Training rotation loss: 0.00400524  Training extension loss: 0.000885993
+Testing rotation loss: 0.00426326  Testing extension loss: 0.000909617
+
+Chris 40 supervised:
+/media/1tb/Izzy/nets/net6_07-20-2016_10h38m04s.ckpt
+Training rotation loss: 0.00386369  Training extension loss: 0.000706461
+Testing rotation loss: 0.00417269  Testing extension loss: 0.000906161
+
+Chris 60 Supervised:
+/media/1tb/Izzy/nets/net6_07-20-2016_13h04m31s.ckpt
+Training rotation loss: 0.00376084  Training extension loss: 0.000949132
+Testing rotation loss: 0.00365172  Testing extension loss: 0.00108131
+total: 24
+success rate: 0.541666666667
+success number: 13.0
+failures: ['rollout0', 'rollout2', 'rollout3', 'rollout5', 'rollout7', 'rollout8', 'rollout10', 'rollout11', 'rollout15', 'rollout20', 'rollout23']
+
+
+Dave 20 supervised:
+/media/1tb/Izzy/nets/net6_07-20-2016_11h08m10s.ckpt
+Training rotation loss: 0.00316851  Training extension loss: 0.000824563
+Testing rotation loss: 0.00417444  Testing extension loss: 0.0011211
+Experimental values:
+
+Dave 40 Supervised:
+/media/1tb/Izzy/nets/net6_07-20-2016_15h37m33s.ckpt
+Testing rotation loss: 0.00575682  Testing extension loss: 0.00140251
+Training rotation loss: 0.00391008  Training extension loss: 0.00100918
+
+Dave 60 Supervised:
+/media/1tb/Izzy/nets/net6_07-20-2016_15h50m37s.ckpt
+Training rotation loss: 0.00470244  Training extension loss: 0.00121949
+Testing rotation loss: 0.00620686  Testing extension loss: 0.00143315
+
+Dave 20 Supervised 20 DAgger:
+/media/1tb/Izzy/nets/net6_07-20-2016_11h53m16s.ckpt
+Training rotation loss: 0.00366571  Training extension loss: 0.000925185
+Testing rotation loss: 0.00331212  Testing extension loss: 0.000995859
+
+Dave 20 supervised 40 DAgger:
+/media/1tb/Izzy/nets/net6_07-20-2016_15h26m59s.ckpt
+Training rotation loss: 0.002201  Training extension loss: 0.00102995
+Testing rotation loss: 0.00331112  Testing extension loss: 0.00118752
+
+
+Lauren 20 Supervised:
+/media/1tb/Izzy/nets/net6_07-21-2016_12h36m29s.ckpt
+Training rotation loss: 0.00517868  Training extension loss: 0.000986535
+Testing rotation loss: 0.00544093  Testing extension loss: 0.00132393
+
+Lauren 40 Supervised:
+/media/1tb/Izzy/nets/net6_07-21-2016_13h56m55s.ckpt
+Training rotation loss: 0.00385355  Training extension loss: 0.0010395
+Testing rotation loss: 0.0066337  Testing extension loss: 0.00128641
+
+Lauren 60 Supervised:
+/media/1tb/Izzy/nets/net6_07-21-2016_14h06m39s.ckpt
+Training rotation loss: 0.00594077  Training extension loss: 0.00133007
+Testing rotation loss: 0.00634737  Testing extension loss: 0.00147691
+
+Lauren 20 Supervised 20 DAgger
+/media/1tb/Izzy/nets/net6_07-21-2016_13h17m00s.ckpt
+Training rotation loss: 0.00343452  Training extension loss: 0.00105905
+Testing rotation loss: 0.00423857  Testing extension loss: 0.00134708

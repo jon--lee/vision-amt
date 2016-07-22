@@ -17,9 +17,7 @@ import IPython
 import reset_rollout
 import numpy as np
 import compile_sets
-
-
-
+from gripper.xboxController import *
 
 
 sys.path[0] = sys.path[0] + '/../../GPIS/src/grasp_selection/control/DexControls'
@@ -54,19 +52,37 @@ class AMT():
         self.graphs = []
         self.name = name
         self.current_template = None
-        self.skip = False
-        self.test_folder = ''
-        self.fail = False
-        self.partial = False
-        self.test_partials = []
-        self.test_fails = []
+        self.controller = XboxController([options.scales[0],155,options.scales[1],155,options.scales[2],options.scales[3]])
+
+    def controls2deltas(controls):
+        deltas = [0.0] * 4
+        stop = False
+        if controls == None:
+            return None, True
+        deltas[0] = controls[0] / 1500.0
+        deltas[1] = controls[2] / 20000.0
+        deltas[2] = controls[4] / 8000.0
+        deltas[3] = controls[5] / 800.0
+        if abs(deltas[0]) < 8e-8:
+            deltas[0] = 0.0
+        if abs(deltas[1]) < 8e-4:#8e-4: #2e-2:
+            deltas[1] = 0.0
+        if abs(deltas[2]) < 5e-3:
+            deltas[2] = 0.0
+        if abs(deltas[3]) < 2e-2:
+            deltas[3] = 0.0 
+        deltas[2] = 0.0
+        deltas[3] = 0.0
+        if deltas[1] < 0:
+            deltas[1] = 0.0
+        print "angles: ", deltas[0]
+        print "forwards: ", deltas[1]
+        return deltas, stop
 
     def rescale_sup(self, deltas):
         deltas[0] = deltas[0]*0.026666666666667
         deltas[1] = deltas[1]*0.006
         return deltas
-
-
 
     def deltaSafetyLimites(self,deltas):
         deltas[0] = np.sign(deltas[0])*np.min([0.2,np.abs(deltas[0])])
@@ -97,6 +113,8 @@ class AMT():
                 gray_frame = np.reshape(gray_frame, (250, 250, 3))
                 h, w = frame.shape[0], frame.shape[1]
                 disp_frame = np.zeros((h, w, frame.shape[2]))
+                controls = self.controller.getUpdates()
+                deltas, stop = controls2deltas(controls)
                 for j in range(frame.shape[2]):
                     #Binary Mask
                     disp_frame[:,:,j] = np.round(frame[:,:,j] / 255.0 - .25, 0)
@@ -173,26 +191,17 @@ class AMT():
 
     def prompt_save(self, recording):
         num_rollouts = len(AMT.rollout_dirs())
-        if self.skip:
-            self.total += 1
-            return self.save_recording(recording)
         print "There are " + str(num_rollouts) + " rollouts. Save this one? (y/n): "
         char = getch()
         if char == 'y':
             self.total += 1
             print "Click the centers to determine success"
-            if not self.skip and len(self.test_folder) > 0:
-                distance = click_centers.max_distance(click_centers.centers(self.bc))
-                cv2.destroyAllWindows()
-                print "Did the task succeed? (y/n,p), max distance was: " + str(distance) + " assumed success: " + str(distance>=100.0) 
-                char = getch()
-                if char == 'y':
-                    self.succeed += 1
-                elif char == 'p':
-                    self.partial = True
-                    self.succeed += 1
-                else:
-                    self.fail = True
+            distance = 100#click_centers.max_distance(click_centers.centers(self.bc))
+            cv2.destroyAllWindows()
+            print "Did the task succeed? (y/n), max distance was: " + str(distance) + " assumed success: " + str(distance>=100.0) 
+            char = getch()
+            if char == 'y':
+                self.succeed += 1
             return self.save_recording(recording)
         elif char == 'n':
             recording = []   # erase recordings and states
@@ -250,30 +259,20 @@ class AMT():
             Clear recordings and states from memory when done writing
             :return:
         """
-
-
+        print "saving statistics to: " + self.options.rollouts_dir + "../statistics_singulation.txt"
+        statistics_file = open(self.options.rollouts_dir + "../statistics_singulation.txt", 'w')
+        statistics_file.write("total: " + str(self.total) + "\n")
+        statistics_file.write("success rate: " + str(self.succeed/self.total) + "\n")
+        statistics_file.write("success number: " + str(self.succeed))
+        statistics_file.close()
         rollout_name = self.next_rollout()
         if self.name is not None:
-            prefix = self.options.rollouts_dir + self.name + "_rollouts/" + self.test_folder
+            rollout_path = self.options.rollouts_dir + self.name + "_rollouts/" + rollout_name + '/'
         else:
-            prefix = self.options.rollouts_dir + self.test_folder
-        rollout_path = prefix + rollout_name +'/'
+            rollout_path = self.options.rollouts_dir + rollout_name + '/'
+
         print "Saving rollout to " + rollout_path + "..."
         os.makedirs(rollout_path)
-        if len(self.test_folder) > 0:
-            print "saving statistics to: " + rollout_path + "/statistics_singulation.txt"
-            statistics_file = open(prefix + "/statistics_singulation.txt", 'w')
-            statistics_file.write("total: " + str(self.total) + "\n")
-            statistics_file.write("success rate: " + str(self.succeed/self.total) + "\n")
-            statistics_file.write("success number: " + str(self.succeed) + '\n')
-            if self.fail:
-                self.test_fails.append(rollout_name)
-                self.fail = False
-            elif self.partial:
-                self.test_partials.append(rollout_name)
-                self.partial = False
-            statistics_file.write("failures: " + str(self.test_fails))
-            statistics_file.close()
         rollout_states_file = open(rollout_path + "states.txt", 'a+')
         rollout_deltas_file = open(rollout_path + "net_deltas.txt", 'a+')
         print "Saving template to " + rollout_path + "..."
@@ -292,9 +291,9 @@ class AMT():
         i = 0
         for frame, state,deltas, true_state in recording:
             if self.name:
-                filename = self.name + '_' + self.test_folder[:-1] + '_' + rollout_name + "_frame_" + str(i) + ".jpg"
+                filename = self.name + '_' + rollout_name + "_frame_" + str(i) + ".jpg"
             else:
-                filename = self.test_folder[:-1] + '_' + rollout_name + "_frame_" + str(i) + ".jpg"
+                filename = rollout_name + "_frame_" + str(i) + ".jpg"
             raw_states_file.write(filename + self.lst2str(state) + "\n") 
             rollout_states_file.write(filename + self.lst2str(state) + "\n")
             rollout_deltas_file.write(filename + self.lst2str(deltas) + "\n")
@@ -319,7 +318,7 @@ class AMT():
         template[:,:,0] = np.zeros((420, 420))
         # template[:,:,2] = np.zeros((420, 420))
         # template = cv2.resize(template, (250, 250))
-        start = time.time()
+
         while 1:
             frame = self.bc.read_frame()
             frame = inputdata.im2tensor(frame, channels = 3)
@@ -331,9 +330,6 @@ class AMT():
                 break
             elif a == ord(' '):
                 return 'next'
-            if self.skip:
-                if time.time() - start > 13:
-                    break
             time.sleep(.005)
 
     def next_rollout(self):
@@ -344,9 +340,9 @@ class AMT():
         i = 0
         # prefix = AMTOptions.rollouts_dir 
         if self.name:
-            prefix = self.options.rollouts_dir + self.name + "_rollouts/" + self.test_folder + "rollout"
+            prefix = self.options.rollouts_dir + self.name + "_rollouts/rollout"
         else:
-            prefix = self.options.rollouts_dir  + self.test_folder + 'rollout'
+            prefix = self.options.rollouts_dir + 'rollout'
         path = prefix + str(i) + "/"
         while os.path.exists(path):
             i += 1
@@ -389,8 +385,6 @@ if __name__ == "__main__":
                         help="The number of dagger rollouts already run")
     parser.add_argument("-e", "--experiment", help="Runs in limited experiment mode, requires other flags",
                     action="store_true")
-    parser.add_argument("-x", "--expedited", help="Runs without human intervention",
-                    action="store_true")
     args = parser.parse_args()
     if args.name:
         person = args.name 
@@ -403,7 +397,6 @@ if __name__ == "__main__":
     limited = False
     if args.experiment:
         limited = True
-    skip = args.expedited
 
     bincam = BinaryCamera('./meta.txt')
     bincam.open()
@@ -423,30 +416,30 @@ if __name__ == "__main__":
     else:
         print "not running a set iteration"
         template_file = open(options.templates_dir + '/saved_template_paths.txt', 'r')
-    test_file = open(options.templates_dir + '/human_study_test_set_paths.txt', 'r')
 
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_07-21-2016_16h17m35s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_07-18-2016_14h32m27s.ckpt'
 
     #Net used for Singulation Demo 
     # template_file = open(options.templates_dir + '/demo_templates_paths.txt', 'r')
     # options.tf_net_path = '/media/1tb/Izzy/nets/net6_07-01-2016_16h24m28s.ckpt'
+
 
     amt = AMT(bincam, izzy, options=options, name=person)
 
     current_state = amt.state(amt.izzy.getState())
     amt.return_to_start(current_state)
     amt.current_template = None
-    amt.skip = skip
+    skip = False
     while True:
         if limited:
             print "Waiting for keypress ('n' -> next, 'q' -> quit, 'p' -> previous)"
         else:
             print "Waiting for keypress ('q' -> quit, 'r' -> rollout, 'u' -> update weights, 'd' -> demonstrate, 'c' -> compile train/test sets, 'p' -> run on previous template, 'l' -> run templates saved in 'last_templates'): "
-        if not amt.skip:
+        if not skip:
             char = getch()
         else:
             char = 'n'
-            # amt.skip = False
+            skip = False
         if limited:
             if char == 'q':
                 print "Quitting..."
@@ -457,23 +450,19 @@ if __name__ == "__main__":
                     name = name.split('\n')[0]
                 except StopIteration:
                     print 'Completed all saved templates'
-                    break
-                    # continue
+                    continue
             
                 print 'Using template: ' + name
                 template = np.load(name)
                 amt.current_template = template
                 nxt = amt.display_template(template)
                 if nxt == 'next':
-                    amt.skip = True
+                    skip = True
                     continue
                 print "Rolling out..."
                 ro = amt.rollout_tf()
                 print "Done rolling out."
-                if skip:
-                    amt.skip = True
-                else:
-                    amt.skip = False
+
             elif char == 'p':
                 print "Displaying template"
                 if amt.current_template is not None:
@@ -551,28 +540,20 @@ if __name__ == "__main__":
                 print "Done rolling out."
 
             elif char == 't':
-                testtype = raw_input('Enter the test data type: ')
-                amt.test_folder = testtype + '_test/'
                 #note that using this saves the wrong template. Find the template where it was referenced
-                start_idx = amt.next_rollout().split('/')[-1]
-                print start_idx
-                # start_idx = int(len('rollout'):)
                 while True:
                     try:
-                        name = test_file.next()
-                        # name = test_file.next()
+                        name = template_file.next()
                     except StopIteration:
                         print 'Completed all saved templates'
                         break
+                    
                     print 'Using template: ' + name
-                    template = np.load(name.split('\n')[0])
-                    amt.current_template = template
-                    # print template
-                    nxt = amt.display_template(template)
-                    if nxt is None:
-                        print "Rolling out..."
-                        ro = amt.rollout_tf()
-                        print "Done rolling out."
+                    template = np.load(name[:name.find('\n')])
+                    amt.display_template(template)
+                    print "Rolling out..."
+                    ro = amt.rollout_tf()
+                    print "Done rolling out."
 
     template_file.close()
     print "Done."

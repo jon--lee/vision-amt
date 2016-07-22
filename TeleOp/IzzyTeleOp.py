@@ -130,17 +130,18 @@ def return_to_start(izzy):
     target_state_i = get_state(izzy.getState())
     current_state = target_state_i
     destination = np.array([3.5857, 0.0017, 0.0117, 1.1239, 0.0002, 0.0])
-    while np.linalg.norm(current_state - destination) > .001:
-        print np.linalg.norm(current_state - destination)
-        print safety(destination - np.array(current_state))
-        current_state = current_state + safety(destination - np.array(current_state))
-        izzy._zeke._queueState(ZekeState(current_state))
-        time.sleep(.1)
-        print current_state
-    time.sleep(.25)
+    # while np.linalg.norm(current_state - destination) > .001:
+    #     print np.linalg.norm(current_state - destination)
+    #     print safety(destination - np.array(current_state))
+    #     current_state = current_state + safety(destination - np.array(current_state))
+    #     izzy._zeke._queueState(ZekeState(current_state))
+    #     time.sleep(.5)
+    #     print current_state
+    izzy._zeke._queueState(ZekeState(destination))
+    time.sleep(1)
 
 def safety(delta):
-    delta[0] = np.sign(delta[0]) * min(abs(delta[0]), .02)
+    delta[0] = np.sign(delta[0]) * min(abs(delta[0]), .2)
     delta[2] = np.sign(delta[2]) * min(abs(delta[2]), .007)
     return delta
 
@@ -468,7 +469,7 @@ if __name__ == '__main__':
                 if last is not None:
                     display_template(bc, last)
                 else:
-                    display_template(bc)
+                    result, last = display_template(bc)
                 print "Rolling out"
                 teleop(c, izzy, t, bc, person, last)
         else:
@@ -484,13 +485,15 @@ if __name__ == '__main__':
                     continue
                 print "Rolling out"
                 teleop(c, izzy, t, bc, person, template)
+                last = None
             elif char == 'p':
                 print "Displaying template"
                 if last is not None:
                     display_template(bc, last)
                 else:
-                    display_template(bc)
+                    result, last = display_template(bc)
                 print "Rolling out"
+                print last
                 teleop(c, izzy, t, bc, person, last)
             elif char == 't':
                 print "Iterating through training set"

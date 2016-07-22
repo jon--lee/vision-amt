@@ -37,7 +37,6 @@ def draw_circle(event,x,y,flags,param):
 
     if event == cv2.EVENT_LBUTTONDOWN:
         drawing = True
-        ix,iy = x,y
         tx, ty = ix, iy
         # print "hello world"
 
@@ -130,13 +129,15 @@ def convert_locations(state, ix, iy, tx, ty):
     extension = iy - ty 
     delta = []
     appear_delta = []
+
     delta.append(np.sign(rotation) * min(np.abs(pixelstoMeters(rotation))/3, .0266))
     delta.append(np.sign(extension) * min(np.abs(pixelstoMeters(extension))/3, .006))
     appear_delta.append(np.sign(rotation) * min(np.abs(pixelstoMeters(rotation)), .0266 * 4))
     appear_delta.append(np.sign(extension) * min(np.abs(pixelstoMeters(extension)), .006 * 4))
-    state[0] += appear_delta[0]
-    state[2] += appear_delta[1]
-    return state, delta 
+    n_state = list(state)
+    n_state[0] += appear_delta[0]
+    n_state[2] += appear_delta[1]
+    return n_state, delta 
 
 
 def convert_state(state):
@@ -224,7 +225,7 @@ def draw_rollouts(r_lst, name):
     # pasteOn(arm, full_arm, arm.size[0]/2, 0)
     # pasteOn(finger_L, full_arm, arm.size[0]/2, 100)
     # pasteOn(finger_R, full_arm, arm.size[0]/2, 100)
-    global img, drawing
+    global img, drawing, ix, iy, tx, ty
     r_i = 0
     while r_i < len(r_lst):
         rollout_num = r_lst[r_i]
@@ -239,7 +240,7 @@ def draw_rollouts(r_lst, name):
         cv2.setMouseCallback('image',draw_circle)
 
         lastx, lasty = tx, ty
-        for s in range(80):
+        for s in range(90):
             start = time.time()
             image_frame = image_path + str(s) + '.jpg'
             img = cv2.imread(image_frame)
@@ -256,7 +257,9 @@ def draw_rollouts(r_lst, name):
                     break
                 if time.time() - start > .05:
                     break
-        for i in range(80):
+        fst = True
+        # ix, iy = 
+        for i in range(90):
             state = convert_state(states.next())
             image_frame = image_path + str(i) + '.jpg'
             # print image_frame
@@ -268,21 +271,24 @@ def draw_rollouts(r_lst, name):
                 # start, end, base = state_to_pixel(state)
                 # cv2.line(img,start,end,(0,255,0),2)
                 # start,end, base = state_to_pixel(convert_locations(state, ix, iy, tx, ty))
+                o_stv = state_to_value(state)
+                ix, iy = o_stv[0], o_stv[1]
                 newstate, delta = convert_locations(state, ix, iy, tx, ty)
                 stv = state_to_value(newstate)
                 feedback.append([colors_path + str(i) + '.jpg'] + delta)
                 # cv2.circle(img,paste,10,(0,0,255),4)
-                rot = (state[0]- np.pi - .42)
                 cv2.circle(img, stv, 10, (255,0,0), 4)
+                cv2.circle(img, o_stv, 10, (0,0,255), 4)
 
-                paste, newarm = base_frame(rot, arm, state)
+                rot = (newstate[0]- np.pi - .42)
+                paste, newarm = base_frame(rot, arm, newstate)
 
-                paste_L, f_L = base_finger(rot, finger_L, state, np.array([16,0]))
-                paste_R, f_R = base_finger(rot, finger_R, state, np.array([-16,0]))
+                paste_L, f_L = base_finger(rot, finger_L, newstate, np.array([16,0]))
+                paste_R, f_R = base_finger(rot, finger_R, newstate, np.array([-16,0]))
 
                 pil_img = Image.fromarray(img)
                 pasteOn(pil_img, newarm, paste[0], paste[1])
-                print paste_R
+                print paste_R, ix, iy, tx, ty, delta
                 pasteOn(pil_img, f_R, paste_R[0], paste_R[1])
                 pasteOn(pil_img, f_L, paste_L[0], paste_L[1])
 
@@ -301,12 +307,22 @@ def draw_rollouts(r_lst, name):
                     mode = not mode
                 elif k == 27:
                     break
-                if time.time() - start > .25:
+                elif k == ord(' '):
+                    fst = False
                     break
+                if time.time() - start > .35 and not fst:
+                    if i == 89:
+                        blue = np.ones((420, 420)).astype('uint8') * 20
+                        img[:,:,0] += blue
+                        cv2.imshow('image',img)
+                        k = cv2.waitKey(30) & 0xFF
+                    break
+
             print "next frame: ", i
             # if name is not None:
             #     target_path = AMTOptions.rollouts_dir + name + "_rollouts/feedback_img_" + str(i) + ".jpg"
             #     cv2.imwrite(target_path, img)
+        print "You are at iteration: ", r_i
         print "do you want to continue? enter (y/n)"
         char = getch()
         if char == 'y':
