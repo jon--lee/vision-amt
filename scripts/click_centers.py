@@ -2,9 +2,8 @@ import cv2
 import numpy as np
 import object_finder
 from pipeline.bincam import BinaryCamera
-import time
+import time, os
 from options import Options
-import numpy as np
 
 global centroid
 
@@ -14,7 +13,7 @@ def get_center(event, x, y, flags, param):
 	if event == cv2.EVENT_LBUTTONDOWN:
 		centroid = (x, y)
 
-def centers(bc=None):
+def centers_cam(bc=None):
 	global centroid
 	if bc is None:
 		bc = BinaryCamera("./meta.txt")
@@ -48,6 +47,55 @@ def centers(bc=None):
 			break
 
 	return centroids
+
+def centers(img=None):
+	global centroid
+	# if bc is None:
+	# 	bc = BinaryCamera("./meta.txt")
+	# 	bc.open()
+	# 	frames = []
+	# 	fourcc = cv2.cv.CV_FOURCC(*'mp4v')
+	# 	writer = cv2.VideoWriter("hardware_reset4.mov", fourcc, 10.0, (420,420))
+	# frame = bc.read_frame()
+	cv2.imshow("camera",img)
+	cv2.waitKey(30)
+
+
+	centroid = (-1, -1)
+	centroids = []
+	cv2.setMouseCallback("camera", get_center)
+
+	while True:
+		frame = img.copy()
+		for center in centroids:
+			cv2.circle(frame,center, 10, (0,255,0), -1)
+		# print centroids
+
+
+		if centroid[0] != -1:
+			centroids.append(centroid)
+			centroid = (-1, -1)
+
+		fontFace = cv2.FONT_HERSHEY_SCRIPT_SIMPLEX;
+		fontScale = 2;
+		thickness = 3;
+		text = str(max_distance(centroids))
+
+		font = cv2.FONT_HERSHEY_SIMPLEX
+		cv2.putText(frame,text,(250,370), font, 2,(255,255,255),2)
+		a = cv2.waitKey(30)
+		cv2.imshow("camera",frame)
+		cv2.waitKey(30)
+		if a == ord('y'):
+			cv2.destroyAllWindows()
+			return 'y'
+		elif a == ord('n'):
+			cv2.destroyAllWindows()
+			return 'n'
+		elif a == ord('p'):
+			cv2.destroyAllWindows()
+			return 'p'
+	return None
 
 def max_distance(centroids):
 	values = []

@@ -5,7 +5,7 @@ import time
 from options import AMTOptions
 import numpy as np
 from PIL import Image
-import sys, argparse
+import sys, argparse, os
 sys.path.append('/home/annal/Izzy/vision_amt/scripts/objects/')
 from helper import pasteOn
 import tty, termios
@@ -204,17 +204,17 @@ def save_data(feedback, write_path):
     write_file.close()
 
 options = AMTOptions()
-def draw_rollouts(r_lst, name):
-
-    if name is not None:
-        write_path = AMTOptions.rollouts_dir + name + "_rollouts/retroactive_feedback" + str(r_lst[0]) + '_' + str(r_lst[-1]) +'.txt'
+def draw_rollouts(r_lst, name, record=False, supervised=False):
+    
+    if supervised:
+        tar_dir = AMTOptions.supervised_dir
     else:
-        write_path = AMTOptions.rollouts_dir + "retroactive_feedback" + str(r_lst[0]) + '_' + str(r_lst[-1]) +'.txt'
-
+        tar_dir = AMTOptions.rollouts_dir
+    start_path = tar_dir
     if name is not None:
-        start_path = AMTOptions.rollouts_dir + name + "_rollouts/"
-    else:
-        start_path = AMTOptions.rollouts_dir
+        start_path = tar_dir + name + "_rollouts/"
+
+    write_path = start_path + "retroactive_feedback" + str(r_lst[0]) + '_' + str(r_lst[-1]) +'.txt'
     write_file = open(write_path, 'w')
     write_file.close()
     cv2.namedWindow('image')
@@ -228,10 +228,19 @@ def draw_rollouts(r_lst, name):
     global img, drawing, ix, iy, tx, ty
     r_i = 0
     while r_i < len(r_lst):
+        if record:
+            frames = []
+            frames_folder = AMTOptions.amt_dir + 'Retro_frames/Video' + str(r_i) + '/'
+            os.makedirs(frames_folder)
         rollout_num = r_lst[r_i]
         feedback = []
-        rollout_name = 'rollout' + str(rollout_num)
-        image_path = start_path + rollout_name +'/' + name + '_' + 'rollout'+str(rollout_num) +'_frame_'
+        
+        if supervised:
+            rollout_name = 'supervised' + str(rollout_num)
+            image_path = start_path + rollout_name +'/' + name + '_' + 'supervised'+str(rollout_num) +'_frame_'
+        else:
+            rollout_name = 'rollout' + str(rollout_num)
+            image_path = start_path + rollout_name +'/' + name + '_' + 'rollout'+str(rollout_num) +'_frame_'
         colors_path = name + '_' + rollout_name + '_frame_'
         state_path = start_path + rollout_name +'/states.txt'
         states = open(state_path, 'r')
@@ -244,6 +253,9 @@ def draw_rollouts(r_lst, name):
             start = time.time()
             image_frame = image_path + str(s) + '.jpg'
             img = cv2.imread(image_frame)
+            if img is None:
+                break
+            # print image_frame
             rows,cols,colour = img.shape
             M = cv2.getRotationMatrix2D((cols/2,rows/2),270,1)
             img = cv2.warpAffine(img,M,(cols,rows))
@@ -260,10 +272,12 @@ def draw_rollouts(r_lst, name):
         fst = True
         # ix, iy = 
         for i in range(90):
-            state = convert_state(states.next())
             image_frame = image_path + str(i) + '.jpg'
-            # print image_frame
             img = cv2.imread(image_frame)
+            if img is None:
+                break
+            state = convert_state(states.next())
+            # print image_frame
             rows,cols,colour = img.shape
             M = cv2.getRotationMatrix2D((cols/2,rows/2),270,1)
             img = cv2.warpAffine(img,M,(cols,rows))
@@ -277,8 +291,8 @@ def draw_rollouts(r_lst, name):
                 stv = state_to_value(newstate)
                 feedback.append([colors_path + str(i) + '.jpg'] + delta)
                 # cv2.circle(img,paste,10,(0,0,255),4)
-                cv2.circle(img, stv, 10, (255,0,0), 4)
-                cv2.circle(img, o_stv, 10, (0,0,255), 4)
+                # cv2.circle(img, stv, 10, (255,0,0), 4)
+                # cv2.circle(img, o_stv, 10, (0,0,255), 4)
 
                 rot = (newstate[0]- np.pi - .42)
                 paste, newarm = base_frame(rot, arm, newstate)
@@ -296,6 +310,7 @@ def draw_rollouts(r_lst, name):
                 # cv2.rectangle(img,(ix,iy),(tx,ty),(0,255,0),-1)
             
             start = time.time()
+            j = 0
             while True:
                 if drawing:
                     if tx != lastx and ty != lasty:
@@ -310,9 +325,13 @@ def draw_rollouts(r_lst, name):
                 elif k == ord(' '):
                     fst = False
                     break
+                if record:
+                    if j % 100 == 0:
+                        frames.append(np.abs(img.copy()))
                 if time.time() - start > .35 and not fst:
                     if i == 89:
-                        blue = np.ones((420, 420)).astype('uint8') * 20
+                        img = img.copy()
+                        blue = np.ones((420, 420)).astype('uint8') * 50
                         img[:,:,0] += blue
                         cv2.imshow('image',img)
                         k = cv2.waitKey(30) & 0xFF
@@ -331,10 +350,14 @@ def draw_rollouts(r_lst, name):
             if char == 'y':
                 save_data(feedback, write_path)
                 r_i += 1
+                print "Rolling out next data point"
             else:
                 continue
         if char == 'n':
             break
+        if record:
+            for i in range(len(frames)):
+                cv2.imwrite(frames_folder + 'frame' + str(i) + '.jpg', frames[i])
     # print feedback
     
 
@@ -349,6 +372,8 @@ if __name__ == '__main__':
                         help="enter the starting value of rollout")
     parser.add_argument("-l", "--last", type=int,
                         help="enter the last value of the rollout")
+    parser.add_argument("-s", "--supervised", help="read from supervised directories",
+                    action="store_true")
     args = parser.parse_args()
     if args.name is not None:
         person = args.name 
@@ -364,6 +389,7 @@ if __name__ == '__main__':
     else:
         print "please enter a last value with -l (not inclusive)"
         sys.exit()
-    draw_rollouts([i for i in range(first, last)], person)
+    # draw_rollouts([i for i in range(first, last)], person, supervised=args.supervised)
+    draw_rollouts(range(first, last), person, supervised=args.supervised)
 
 # print max_distance(centers())

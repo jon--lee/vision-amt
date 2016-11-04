@@ -186,8 +186,49 @@ def display_template(bc, template=None):
             return 'next'
         time.sleep(.005)
 
-def save_templates(num):
-    save_directory = AMTOptions.amt_dir + 'saved_templates/'
+def show_template(template_path):
+    print template_path
+    template = np.load(template_path)
+    template[:,:,1] = template[:,:,2]
+    template[:,:,0] = np.zeros((420, 420))
+    # template[:,:,2] = np.zeros((420, 420))
+    # template = cv2.resize(template, (250, 250))
+    while 1:
+        cv2.imshow('camera', template)
+        a = cv2.waitKey(30)
+        if a == 27:
+            cv2.destroyAllWindows()
+            break
+        
+        elif a == ord(' '):
+            return template
+        time.sleep(.005)
+    return template
+
+def choose_template(template_path):
+    print template_path
+    template = cv2.imread(template_path)
+    template[:,:,1] = template[:,:,2]
+    template[:,:,0] = np.zeros((420, 420))
+    # template[:,:,2] = np.zeros((420, 420))
+    # template = cv2.resize(template, (250, 250))
+    while 1:
+        cv2.imshow('camera', template)
+        a = cv2.waitKey(30)
+        if a == 27:
+            cv2.destroyAllWindows()
+            break
+        
+        elif a == ord('n'):
+            return None
+        elif a == ord('y'):
+            return template
+        time.sleep(.005)
+    return template
+
+def save_templates(sub, num):
+    save_directory = AMTOptions.amt_dir + 'saved_templates/' + sub + '/'
+    os.makedirs(save_directory)
     filename = save_directory + 'template_paths.txt'
     paths = open(filename, 'w+')
     for i in range(num):
@@ -198,9 +239,42 @@ def save_templates(num):
         np.save(name, template)
     paths.close()
 
+def choose_templates(sub, num):
+    save_directory = AMTOptions.amt_dir + 'saved_templates/' + sub + '/'
+    try:
+        os.makedirs(save_directory)
+    except OSError as e:
+        pass
+    filename = save_directory + 'template_paths.txt'
+    paths = open(filename, 'w+')
+    i = 0
+    while i < num:
+        center = generate_template()
+        name = save_directory + 'template_' + str(i) + '.npy'
+        template = choose_template("/home/annal/Izzy/vision_amt/scripts/objects/template.png")
+        if template is not None:
+            i+= 1
+            paths.write(name + '\n')
+            np.save(name, template)
+    paths.close()
+
+
+def picture_template(pth):
+    paths = open(pth, 'r')
+    i = 0
+    for t_pth in paths:
+        print t_pth.split('\n')[0]
+        tmplte = show_template(t_pth.split('\n')[0])
+        name = AMTOptions.amt_dir + "template_pictures/template" + str(i) + ".jpg"
+        cv2.imwrite(name, tmplte)
+        i += 1
+    paths.close()
+
+
     
 if __name__ == '__main__':
-    save_templates(60)
+    choose_templates('adversary', 40)
+    picture_template(AMTOptions.templates_dir + '/human_hard_paths.txt')
 
 
 # bc = BinaryCamera('./meta.txt')

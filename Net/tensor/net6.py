@@ -74,6 +74,7 @@ class NetSix(TensorNet):
         self.y_out = tf.tanh(tf.matmul(self.h_fc1, self.w_fc2) + self.b_fc2)
 
         self.loss = tf.reduce_mean(.5*tf.square(self.y_out - self.y_))
+        self.err_mat = .5*tf.sqrt(tf.square(self.y_out - self.y_))
         self.fore = self.get_forward_err(self.y_,self.y_out)
         self.rot = self.get_rotation_err(self.y_,self.y_out)
 

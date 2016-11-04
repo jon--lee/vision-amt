@@ -1,22 +1,23 @@
+1 Jonathan: supervised first
 Jonathan 20 supervised:
 /media/1tb/Izzy/nets/net6_07-14-2016_16h10m54s.ckpt
 Training rotation loss: 0.0033037  Training extension loss: 0.000815085
 Testing rotation loss: 0.00567414  Testing extension loss: 0.00104567
-
-Jonathan 20 supervised 20 DAgger
-/media/1tb/Izzy/nets/net6_07-14-2016_17h46m20s.ckpt
-Training rotation loss: 0.00312133  Training extension loss: 0.000984958
-Testing rotation loss: 0.00481642  Testing extension loss: 0.0013325
-
-Jonathan 20 supervised 40 DAgger
-/media/1tb/Izzy/nets/net6_07-15-2016_10h44m06s.ckpt
-Training rotation loss: 0.00307925  Training extension loss: 0.00102162
-Testing rotation loss: 0.00396202  Testing extension loss: 0.000927192
+total: 30
+success rate: 0.2
+success number: 6.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout5', 'rollout6', 'rollout7', 'rollout8', 'rollout10', 'rollout12', 'rollout13', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout20', 'rollout22', 'rollout23', 'rollout24', 'rollout25', 'rollout26', 'rollout27', 'rollout28', 'rollout29']
+partials: []
 
 Jonathan 40 supervised
 /media/1tb/Izzy/nets/net6_07-15-2016_11h48m14s.ckpt
 Training rotation loss: 0.00367961  Training extension loss: 0.000790939
 Testing rotation loss: 0.00440046  Testing extension loss: 0.000978804
+total: 30
+success rate: 0.433333333333
+success number: 13.0
+failures: ['rollout2', 'rollout3', 'rollout5', 'rollout6', 'rollout7', 'rollout11', 'rollout12', 'rollout13', 'rollout15', 'rollout18', 'rollout19', 'rollout20', 'rollout23', 'rollout24', 'rollout25', 'rollout26', 'rollout27']
+partials: ['rollout0', 'rollout21', 'rollout29']
 
 Jonathan 60 supervised
 /media/1tb/Izzy/nets/net6_07-15-2016_11h57m33s.ckpt
@@ -27,6 +28,28 @@ success rate: 0.6
 success number: 18.0
 failures: ['rollout1', 'rollout2', 'rollout3', 'rollout6', 'rollout7', 'rollout13', 'rollout15', 'rollout18', 'rollout20', 'rollout23', 'rollout24', 'rollout26']
 
+Jonathan 20 supervised 20 DAgger
+/media/1tb/Izzy/nets/net6_07-14-2016_17h46m20s.ckpt
+Training rotation loss: 0.00312133  Training extension loss: 0.000984958
+Testing rotation loss: 0.00481642  Testing extension loss: 0.0013325
+total: 30
+success rate: 0.433333333333
+success number: 13.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout4', 'rollout7', 'rollout9', 'rollout14', 'rollout18', 'rollout19', 'rollout20', 'rollout21', 'rollout22', 'rollout23', 'rollout24', 'rollout27', 'rollout29']
+partials: ['rollout8']
+
+Jonathan 20 supervised 40 DAgger
+/media/1tb/Izzy/nets/net6_07-15-2016_10h44m06s.ckpt
+Training rotation loss: 0.00307925  Training extension loss: 0.00102162
+Testing rotation loss: 0.00396202  Testing extension loss: 0.000927192
+total: 30
+success rate: 0.5666666666
+success number: 17.0
+failures: ['rollout1', 'rollout2', 'rollout3', 'rollout4', 'rollout7', 'rollout9', 'rollout13', 'rollout19', 'rollout20', 'rollout21', 'rollout26', 'rollout27']
+partials: ['rollout0', rollout6', rollout5', 'rollout6', 'rollout23', 'rollout28']
+
+
+2 ChJon: DAgger first
 ChJon 20 Supervised:
 /media/1tb/Izzy/nets/net6_07-18-2016_11h05m15s.ckpt
 Testing rotation loss: 0.00730945  Testing extension loss: 0.00140689
@@ -44,31 +67,79 @@ Testing rotation loss: 0.00508226  Testing extension loss: 0.00116983
 ChJon 20 Supervised 40 DAgger:
 
 
+3 Jacky: DAgger first
 Jacky 20 Supervised:
 /media/1tb/Izzy/nets/net6_07-18-2016_13h43m29s.ckpt
 Training rotation loss: 0.00455671  Training extension loss: 0.00102246
 Testing rotation loss: 0.00546436  Testing extension loss: 0.00124806
+total: 30
+success rate: 0.18666
+success number: 5.0
+rollout30 at 17
+success: ['rollout9', 'rollout13', 'rollout16', 'rollout23/4', 'rollout28/9']
+partials: []
 
 Jacky 40 Supervised:
+Testing rotation loss: 0.00554861  Testing extension loss: 0.00123753
+Training rotation loss: 0.00410638  Training extension loss: 0.00111268
+/media/1tb/Izzy/nets/net6_07-22-2016_15h47m45s.ckpt
+total: 30
+success rate: 0.233333333333
+success number: 7.0
+failures: ['rollout1', 'rollout3', 'rollout5', 'rollout7', 'rollout8', 'rollout10', 'rollout11', 'rollout12', 'rollout14', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout20', 'rollout21', 'rollout22', 'rollout23', 'rollout24', 'rollout25', 'rollout26', 'rollout27', 'rollout28', 'rollout29']
+partials: ['rollout0', 'rollout2', 'rollout9']
 
 Jacky 60 Supervised:
+/media/1tb/Izzy/nets/net6_07-25-2016_10h45m25s.ckpt
+Testing rotation loss: 0.0059145  Testing extension loss: 0.00134645
+Training rotation loss: 0.00469706  Training extension loss: 0.00122038
+total: 30
+success rate: 0.633333333333
+success number: 19.0
+failures: ['rollout2', 'rollout3', 'rollout5', 'rollout11', 'rollout13', 'rollout14', 'rollout19', 'rollout20', 'rollout26', 'rollout27', 'rollout28']
+partials: ['rollout6', 'rollout8', 'rollout23', 'rollout25']
 
 Jacky 20 supervised 20 DAgger:
 /media/1tb/Izzy/nets/net6_07-18-2016_14h32m27s.ckpt
 Training rotation loss: 0.00321792  Training extension loss: 0.000634253
 Testing rotation loss: 0.00326308  Testing extension loss: 0.000645583
+total: 30
+success rate: 0.233333333333
+success number: 7.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout4', 'rollout5', 'rollout6', 'rollout7', 'rollout8', 'rollout9', 'rollout10', 'rollout13', 'rollout15', 'rollout18', 'rollout21', 'rollout22', 'rollout23', 'rollout24', 'rollout25', 'rollout26', 'rollout27', 'rollout28', 'rollout29']
+partials: ['rollout11', 'rollout17', 'rollout20']
 
 Jacky 20 Supervised 40 DAgger:
+/media/1tb/Izzy/nets/net6_07-25-2016_14h14m23s.ckpt
+Testing rotation loss: 0.00392441  Testing extension loss: 0.00114036
+Training rotation loss: 0.00287565  Training extension loss: 0.000783471
+total: 30
+success rate: 0.36666666
+success number: 11.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout4', 'rollout6', 'rollout7', 'rollout8', 'rollout10', 'rollout11', 'rollout12', 'rollout14', 'rollout15', 'rollout17', 'rollout19', 'rollout21', 'rollout24', 'rollout25', 'rollout26', 'rollout29']
+partials: ['rollout5', 'rollout9', rollout18', 'rollout23', 'rollout27']
 
+
+4 Aimee supervised first
 Aimee 20 supervised
 /media/1tb/Izzy/nets/net6_07-19-2016_16h47m52s.ckpt
 Testing rotation loss: 0.00630703  Testing extension loss: 0.00147899
 Training rotation loss: 0.0046998  Training extension loss: 0.00120489
+total: 30
+success rate: 0.6
+success number: 20.0
+failures: ['rollout2', 'rollout3', 'rollout5', 'rollout7', 'rollout9', 'rollout13', 'rollout18', 'rollout20', 'rollout23', 'rollout24', 'rollout25', 'rollout27']
+partials: ['rollout0', 'rollout8', 'rollout19']
 
 Aimee 40 Supervised
 /media/1tb/Izzy/nets/net6_07-20-2016_14h57m06s.ckpt
 Testing rotation loss: 0.0062859  Testing extension loss: 0.00138535
 Training rotation loss: 0.00578341  Training extension loss: 0.0012073
+total: 30
+success rate: 0.733333333333
+success number: 22.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout17', 'rollout18', 'rollout22', 'rollout26']
+partials: ['rollout4', 'rollout6', 'rollout23']
 
 Aimee 60 Supervised
 /media/1tb/Izzy/nets/net6_07-20-2016_15h06m14s.ckpt
@@ -83,76 +154,481 @@ Aimee 20 supervised 20 DAgger
 /media/1tb/Izzy/nets/net6_07-19-2016_17h27m25s.ckpt
 Training rotation loss: 0.00431591  Training extension loss: 0.00102008
 Testing rotation loss: 0.00483072  Testing extension loss: 0.00128905
+total: 30
+success rate: 0.3666666
+success number: 11.0
+failures: ['rollout1', 'rollout2', 'rollout3', 'rollout4', 'rollout5', 'rollout6', 'rollout7', 'rollout8', 'rollout9', 'rollout10', 'rollout14', 'rollout16', 'rollout18', 'rollout22', 'rollout23', 'rollout26', 'rollout27', 'rollout29']
+partials: ['rollout13', 'rollout19', 'rollout20', 'rollout24']
 
 Aimee 20 supervised 40 DAgger
 /media/1tb/Izzy/nets/net6_07-19-2016_17h59m22s.ckpt
 Training rotation loss: 0.00409635  Training extension loss: 0.00138011
 Testing rotation loss: 0.00455293  Testing extension loss: 0.00167824
+total: 30
+success rate: 0.36666666
+success number: 11.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout4', 'rollout5', 'rollout9', 'rollout11', 'rollout15', 'rollout17', 'rollout18', 'rollout19', 'rollout21', 'rollout22', 'rollout23', 'rollout25', 'rollout26', 'rollout27', 'rollout28', 'rollout29']
+partials: ['rollout7', 'rollout8', 'rollout12', 'rollout13', 'rollout20']
 
 
+5 Chris supervised first
 Chris 20 supervised:
 /media/1tb/Izzy/nets/net6_07-20-2016_10h28m56s.ckpt
 Training rotation loss: 0.00400524  Training extension loss: 0.000885993
 Testing rotation loss: 0.00426326  Testing extension loss: 0.000909617
+total: 30
+success rate: 0.266666666667
+success number: 8.0
+failures: ['rollout1', 'rollout2', 'rollout3', 'rollout4', 'rollout5', 'rollout6', 'rollout7', 'rollout9', 'rollout10', 'rollout11', 'rollout14', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout21', 'rollout23', 'rollout25', 'rollout26', 'rollout27', 'rollout28', 'rollout29']
+partials: ['rollout0', 'rollout8', 'rollout20']
 
 Chris 40 supervised:
 /media/1tb/Izzy/nets/net6_07-20-2016_10h38m04s.ckpt
 Training rotation loss: 0.00386369  Training extension loss: 0.000706461
 Testing rotation loss: 0.00417269  Testing extension loss: 0.000906161
+total: 30
+success rate: 0.433333333333
+success number: 13.0
+failures: ['rollout0', 'rollout2', 'rollout3', 'rollout6', 'rollout8', 'rollout11', 'rollout15', 'rollout17', 'rollout18', 'rollout20', 'rollout21', 'rollout22', 'rollout23', 'rollout25', 'rollout26', 'rollout27', 'rollout29']
+partials: ['rollout4', 'rollout19']
 
 Chris 60 Supervised:
 /media/1tb/Izzy/nets/net6_07-20-2016_13h04m31s.ckpt
 Training rotation loss: 0.00376084  Training extension loss: 0.000949132
 Testing rotation loss: 0.00365172  Testing extension loss: 0.00108131
-total: 24
-success rate: 0.541666666667
-success number: 13.0
+total: 30
+success rate: 0.63333333
+success number: 19.0
 failures: ['rollout0', 'rollout2', 'rollout3', 'rollout5', 'rollout7', 'rollout8', 'rollout10', 'rollout11', 'rollout15', 'rollout20', 'rollout23']
 
+Chris 20 Supervised 20 DAgger:
+/media/1tb/Izzy/nets/net6_07-22-2016_11h21m08s.ckpt
+Testing rotation loss: 0.00318303  Testing extension loss: 0.00123213
+Training rotation loss: 0.00297718  Training extension loss: 0.000883931
+total: 30
+success rate: 0.466666666667
+success number: 14.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout5', 'rollout7', 'rollout10', 'rollout12', 'rollout13', 'rollout15', 'rollout16', 'rollout18', 'rollout20', 'rollout23', 'rollout25', 'rollout27']
+partials: ['rollout8', 'rollout9', 'rollout22']
 
+Chris 20 Supervised 40 DAgger: (test set misnamed)
+/media/1tb/Izzy/nets/net6_07-22-2016_11h51m23s.ckpt
+Training rotation loss: 0.00277367  Training extension loss: 0.000943477
+Testing rotation loss: 0.00332053  Testing extension loss: 0.0010899
+total: 30
+success rate: 0.5333333333
+success number: 16.0
+failures: ['rollout0', 'rollout5', 'rollout7', rollout9', 'rollout10', 'rollout11', 'rollout12', 'rollout13', 'rollout15', 'rollout18', 'rollout19', 'rollout25', 'rollout26', 'rollout28']
+partials: ['rollout1', 'rollout2', 'rollout8', 'rollout22', 'rollout27', 'rollout29']
+
+6 Dave DAgger first
 Dave 20 supervised:
 /media/1tb/Izzy/nets/net6_07-20-2016_11h08m10s.ckpt
 Training rotation loss: 0.00316851  Training extension loss: 0.000824563
 Testing rotation loss: 0.00417444  Testing extension loss: 0.0011211
-Experimental values:
+total: 30
+success rate: 0.5
+success number: 15.0
+failures: ['rollout0', 'rollout1', 'rollout4', 'rollout5', 'rollout8', 'rollout10', 'rollout11', 'rollout12', 'rollout16', 'rollout18', 'rollout19', 'rollout20', 'rollout23', 'rollout25', 'rollout28']
+partials: ['rollout2']
 
 Dave 40 Supervised:
 /media/1tb/Izzy/nets/net6_07-20-2016_15h37m33s.ckpt
 Testing rotation loss: 0.00575682  Testing extension loss: 0.00140251
 Training rotation loss: 0.00391008  Training extension loss: 0.00100918
+total: 30
+success rate: 0.4
+success number: 12.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout5', 'rollout6', 'rollout7', 'rollout12', 'rollout13', 'rollout14', 'rollout17', 'rollout18', 'rollout19', 'rollout20', 'rollout23', 'rollout25', 'rollout26', 'rollout27', 'rollout28']
+partials: ['rollout8', 'rollout22', 'rollout24']
 
 Dave 60 Supervised:
 /media/1tb/Izzy/nets/net6_07-20-2016_15h50m37s.ckpt
 Training rotation loss: 0.00470244  Training extension loss: 0.00121949
 Testing rotation loss: 0.00620686  Testing extension loss: 0.00143315
+14 is not an error
+total: 30
+success rate: 0.6
+success number: 17.0
+failures: ['rollout0', 'rollout1', 'rollout8', 'rollout9', 'rollout11', 'rollout18', 'rollout19', 'rollout20', 'rollout21', 'rollout23', 'rollout27', 'rollout28']
 
 Dave 20 Supervised 20 DAgger:
 /media/1tb/Izzy/nets/net6_07-20-2016_11h53m16s.ckpt
 Training rotation loss: 0.00366571  Training extension loss: 0.000925185
 Testing rotation loss: 0.00331212  Testing extension loss: 0.000995859
+total: 30
+success rate: 0.1
+success number: 3.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout4', 'rollout5', 'rollout6', 'rollout7', 'rollout8', 'rollout9', 'rollout10', 'rollout12', 'rollout13', 'rollout14', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout20', 'rollout21', 'rollout22', 'rollout23', 'rollout24', 'rollout26', 'rollout27', 'rollout28', 'rollout29']
+partials: []
 
 Dave 20 supervised 40 DAgger:
 /media/1tb/Izzy/nets/net6_07-20-2016_15h26m59s.ckpt
 Training rotation loss: 0.002201  Training extension loss: 0.00102995
 Testing rotation loss: 0.00331112  Testing extension loss: 0.00118752
+total: 30
+success rate: 0.3
+success number: 9.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout4', 'rollout6', 'rollout7', 'rollout8', 'rollout9', 'rollout10', 'rollout13', 'rollout14', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout20', 'rollout21', 'rollout23', rollout26', 'rollout28', 'rollout29']
+partials: ['rollout17', 'rollout27']
 
 
+7 Lauren supervised first
 Lauren 20 Supervised:
 /media/1tb/Izzy/nets/net6_07-21-2016_12h36m29s.ckpt
 Training rotation loss: 0.00517868  Training extension loss: 0.000986535
 Testing rotation loss: 0.00544093  Testing extension loss: 0.00132393
+total: 30
+success rate: 0.233333333333
+success number: 7.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout5', 'rollout6', 'rollout7', 'rollout8', 'rollout10', 'rollout12', 'rollout13', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout20', 'rollout22', 'rollout24', 'rollout25', 'rollout26', 'rollout27', 'rollout28', 'rollout29']
+partials: []
 
 Lauren 40 Supervised:
 /media/1tb/Izzy/nets/net6_07-21-2016_13h56m55s.ckpt
 Training rotation loss: 0.00385355  Training extension loss: 0.0010395
 Testing rotation loss: 0.0066337  Testing extension loss: 0.00128641
+total: 30
+success rate: 0.333333333333
+success number: 10.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout5', 'rollout6', 'rollout7', 'rollout8', 'rollout11', 'rollout12', 'rollout13', 'rollout14', 'rollout16', 'rollout18', 'rollout19', 'rollout20', 'rollout24', 'rollout25', 'rollout27', 'rollout28']
+partials: ['rollout9', 'rollout26']
 
 Lauren 60 Supervised:
 /media/1tb/Izzy/nets/net6_07-21-2016_14h06m39s.ckpt
 Training rotation loss: 0.00594077  Training extension loss: 0.00133007
 Testing rotation loss: 0.00634737  Testing extension loss: 0.00147691
+total: 30
+success rate: 0.533333333333
+success number: 16.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout5', 'rollout7', 'rollout12', 'rollout13', 'rollout16', 'rollout18', 'rollout20', 'rollout24', 'rollout26', 'rollout27']
 
 Lauren 20 Supervised 20 DAgger
 /media/1tb/Izzy/nets/net6_07-21-2016_13h17m00s.ckpt
 Training rotation loss: 0.00343452  Training extension loss: 0.00105905
 Testing rotation loss: 0.00423857  Testing extension loss: 0.00134708
+total: 30
+success rate: 0.433333333333
+success number: 13.0
+failures: ['rollout0', 'rollout1', 'rollout3', 'rollout4', 'rollout7', 'rollout8', 'rollout10', 'rollout11', 'rollout13', 'rollout15', 'rollout16', 'rollout20', 'rollout21', 'rollout26', 'rollout27', 'rollout28', 'rollout29']
+partials: ['rollout2', 'rollout5', 'rollout6', 'rollout9', 'rollout12', 'rollout18', 'rollout19']
+
+Lauren 20 supervised 40 DAgger
+/media/1tb/Izzy/nets/net6_07-21-2016_14h16m19s.ckpt
+Testing rotation loss: 0.00380785  Testing extension loss: 0.00132337
+Training rotation loss: 0.0037098  Training extension loss: 0.000979442
+total: 30
+success rate: 0.3333333333
+success number: 10.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout4', 'rollout5', 'rollout6', 'rollout7', 'rollout9', 'rollout11', 'rollout12', 'rollout13', 'rollout17', 'rollout19', 'rollout22', 'rollout23', 'rollout24', 'rollout25', 'rollout27', 'rollout28']
+partials: ['rollout15', 'rollout20']
+
+
+8 Johan DAgger first
+Johan 20 Supervised
+/media/1tb/Izzy/nets/net6_07-21-2016_15h30m43s.ckpt
+Testing rotation loss: 0.00573169  Testing extension loss: 0.00108827
+Training rotation loss: 0.00442364  Training extension loss: 0.000803562
+total: 30
+success rate: 0.233333333333
+success number: 7.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout5', 'rollout6', 'rollout8', 'rollout9', 'rollout10', 'rollout11', 'rollout12', 'rollout14', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout20', 'rollout21', 'rollout22', 'rollout23', 'rollout24', 'rollout25', 'rollout26', 'rollout27']
+partials: ['rollout3', 'rollout29']
+
+Johan 40 Supervised
+/media/1tb/Izzy/nets/net6_07-22-2016_13h42m56s.ckpt
+Training rotation loss: 0.00509337  Training extension loss: 0.00103866
+Testing rotation loss: 0.00683122  Testing extension loss: 0.00122029
+total: 30
+success rate: 0.466666666667
+success number: 14.0
+failures: ['rollout0', 'rollout2', 'rollout3', 'rollout5', 'rollout7', 'rollout8', 'rollout10', 'rollout11', 'rollout14', 'rollout15', 'rollout16', 'rollout18', 'rollout20', 'rollout23', 'rollout24', 'rollout26']
+partials: ['rollout1', 'rollout9', 'rollout22', 'rollout27', 'rollout29']
+
+Johan 60 Supervised
+/media/1tb/Izzy/nets/net6_07-22-2016_13h52m02s.ckpt
+Training rotation loss: 0.00556805  Training extension loss: 0.00115331
+Testing rotation loss: 0.00656006  Testing extension loss: 0.00142319
+total: 30
+success rate: 0.7
+success number: 21.0
+failures: ['rollout3', 'rollout5', 'rollout7', 'rollout10', 'rollout11', 'rollout15', 'rollout18', 'rollout19', 'rollout28']
+
+Johan 20 Supervised 20 DAgger:
+/media/1tb/Izzy/nets/net6_07-21-2016_16h17m35s.ckpt
+Training rotation loss: 0.00348204  Training extension loss: 0.000875381
+Testing rotation loss: 0.00472482  Testing extension loss: 0.000860087
+rollout12 success 
+total: 30
+success rate: 0.433333333333
+success number: 13.0
+failures: ['rollout1', 'rollout2', 'rollout3', 'rollout5', 'rollout7', 'rollout9', 'rollout10', 'rollout12', 'rollout13', 'rollout14', 'rollout15', 'rollout16', 'rollout18', 'rollout22', 'rollout23', 'rollout27', 'rollout29']
+partials: ['rollout0', 'rollout11']
+
+Johan 20 supervised 40 DAgger:
+/media/1tb/Izzy/nets/net6_07-26-2016_11h51m53s.ckpt
+Testing rotation loss: 0.00384095  Testing extension loss: 0.000817478
+Training rotation loss: 0.00317396  Training extension loss: 0.000703814
+total: 30
+success rate: 0.233333333333
+success number: 7.0
+failures: ['rollout0', 'rollout2', 'rollout4', 'rollout5', 'rollout6', 'rollout7', 'rollout8', 'rollout9', 'rollout10', 'rollout11', 'rollout13', 'rollout14', 'rollout15', 'rollout16', 'rollout17', 'rollout18', 'rollout19', 'rollout20', 'rollout21', 'rollout23', 'rollout26', 'rollout27', 'rollout29']
+partials: ['rollout12', 'rollout22', 'rollout24', 'rollout25']
+
+
+9 Sherdil supervised first
+Sherdil 20 supervised
+/media/1tb/Izzy/nets/net6_07-25-2016_12h38m34s.ckpt
+Testing rotation loss: 0.00507023  Testing extension loss: 0.00135986
+Training rotation loss: 0.00408007  Training extension loss: 0.00101959
+total: 30
+success rate: 0.333333333333
+success number: 10.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout5', 'rollout6', 'rollout7', 'rollout8', 'rollout10', 'rollout11', 'rollout12', 'rollout13', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout21', 'rollout26', 'rollout27', 'rollout28']
+partials: ['rollout24']
+
+Sherdil 40 Supervised:
+/media/1tb/Izzy/nets/net6_07-25-2016_13h40m49s.ckpt
+Testing rotation loss: 0.00517322  Testing extension loss: 0.0011705
+Training rotation loss: 0.00386412  Training extension loss: 0.00102071
+total: 30
+success rate: 0.4
+success number: 12.0
+failures: ['rollout0', 'rollout1', 'rollout3', 'rollout8', 'rollout10', 'rollout11', 'rollout12', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout20', 'rollout21', 'rollout22', 'rollout23', 'rollout24', 'rollout26', 'rollout27']
+partials: ['rollout2']
+
+Sherdil 60 supervised:
+/media/1tb/Izzy/nets/net6_07-26-2016_12h40m57s.ckpt
+esting rotation loss: 0.00563483  Testing extension loss: 0.00159521
+Training rotation loss: 0.00479759  Training extension loss: 0.0013462
+total: 30
+success rate: 0.5333333
+success number: 16.0
+failures: ['rollout2', 'rollout3', 'rollout6', 'rollout7', 'rollout8', 'rollout10', rollout11', 'rollout13', 'rollout15', 'rollout18', 'rollout20', 'rollout21', 'rollout26', 'rollout27']
+partials: ['rollout0', 'rollout1', 'rollout5']
+
+Sherdil 20 supervised 20 DAgger
+/media/1tb/Izzy/nets/net6_07-25-2016_13h12m20s.ckpt
+Testing rotation loss: 0.00457468  Testing extension loss: 0.00102584
+Training rotation loss: 0.00360979  Training extension loss: 0.000883049
+total: 30
+success rate: 0.3
+success number: 9.0
+failures: ['rollout1', 'rollout2', 'rollout3', 'rollout4', 'rollout5', 'rollout6', 'rollout8', 'rollout10', 'rollout11', 'rollout12', 'rollout15', 'rollout16', 'rollout20', 'rollout21', 'rollout22', 'rollout23', 'rollout24', 'rollout25', 'rollout26', 'rollout27', 'rollout28']
+partials: ['rollout0', 'rollout9', 'rollout18', 'rollout19']
+
+Sherdil 20 Supervised 40 DAgger
+/media/1tb/Izzy/nets/net6_07-26-2016_13h29m25s.ckpt
+Testing rotation loss: 0.00366802  Testing extension loss: 0.00109242
+Training rotation loss: 0.00361879  Training extension loss: 0.00105538
+total: 30
+success rate: 0.6
+success number: 18.0
+failures: ['rollout0', ''rollout4', 'rollout7',  'rollout9', 'rollout10', 'rollout14', 'rollout15', 'rollout17', 'rollout18', 'rollout21', 'rollout26', 'rollout27']
+partials: ['rollout20', 'rollout29']
+
+
+10 Richard DAgger first
+Richard 20 supervised:
+/media/1tb/Izzy/nets/net6_07-26-2016_16h12m46s.ckpt
+Testing rotation loss: 0.00463492  Testing extension loss: 0.0011237
+Training rotation loss: 0.00386407  Training extension loss: 0.000868973
+total: 30
+success rate: 0.2
+success number: 5.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout5', 'rollout6', 'rollout7', 'rollout8', 'rollout9', 'rollout10', 'rollout11', 'rollout12', 'rollout13', 'rollout15', 'rollout18', 'rollout19', 'rollout20', 'rollout21', 'rollout23', 'rollout25', 'rollout26', 'rollout27', 'rollout28', 'rollout29']
+partials: ['rollout14', 'rollout17']
+
+Richard 40 Supervised:
+/media/1tb/Izzy/nets/net6_07-27-2016_15h02m33s.ckpt
+Testing rotation loss: 0.0061652  Testing extension loss: 0.00119129
+Training rotation loss: 0.00510587  Training extension loss: 0.00111776
+total: 30
+success rate: 0.466666666667
+success number: 14.0
+failures: ['rollout0', 'rollout2', 'rollout3', rollout9', 'rollout10', 'rollout11', 'rollout12', 'rollout14', 'rollout15', 'rollout17', 'rollout18', 'rollout19', 'rollout21', 'rollout22', 'rollout23', 'rollout26']
+partials: ['rollout5', 'rollout6', 'rollout8', 'rollout20']
+
+Richard 60 Supervised:
+/media/1tb/Izzy/nets/net6_07-26-2016_17h45m12s.ckpt
+Testing rotation loss: 0.00729752  Testing extension loss: 0.00148631
+Training rotation loss: 0.00514928  Training extension loss: 0.00142863
+total: 30
+success rate: 0.633333333
+success number: 19.0
+failures: ['rollout1', 'rollout2', rollout3', 'rollout8', 'rollout11', 'rollout16', 'rollout18', 'rollout20', 'rollout23', 'rollout24', 'rollout27']
+partials: ['rollout0', 'rollout5', rollout19', 'rollout26']
+
+Richard 20 Supervised 20 DAgger:
+/media/1tb/Izzy/nets/net6_07-26-2016_16h42m18s.ckpt
+Testing rotation loss: 0.00396094  Testing extension loss: 0.000987331
+Training rotation loss: 0.00340703  Training extension loss: 0.000793522
+total: 30
+success rate: 0.466666666667
+success number: 14.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout6', 'rollout7', 'rollout8', 'rollout10', 'rollout12', 'rollout13', 'rollout14', 'rollout20', 'rollout22', 'rollout25', 'rollout26', 'rollout27', 'rollout29']
+partials: ['rollout5']
+
+Richard 20 Supervised 40 DAgger
+Testing rotation loss: 0.00392331  Testing extension loss: 0.00114308
+Training rotation loss: 0.00291492  Training extension loss: 0.000985852
+/media/1tb/Izzy/nets/net6_07-27-2016_12h26m57s.ckpt
+total: 30
+success rate: 0.366666666667
+success number: 11.0
+failures: ['rollout0', 'rollout2', 'rollout4', 'rollout5', 'rollout6', 'rollout7', 'rollout9', 'rollout10', 'rollout11', 'rollout12', 'rollout13', 'rollout14', 'rollout15', 'rollout18', 'rollout19', 'rollout23', 'rollout25', 'rollout26', 'rollout27']
+partials: ['rollout16', 'rollout20', 'rollout29']
+
+
+11 Sona Supervised first
+Sona 20 Supervised
+/media/1tb/Izzy/nets/net6_07-27-2016_18h22m44s.ckpt
+Testing rotation loss: 0.0058642  Testing extension loss: 0.00110532
+Training rotation loss: 0.00356162  Training extension loss: 0.000964544
+total: 30
+success rate: 0.266666666667
+success number: 8.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout5', 'rollout6', 'rollout7', 'rollout9', 'rollout10', 'rollout11', 'rollout12', 'rollout13', 'rollout15', 'rollout18', 'rollout19', 'rollout20', 'rollout21', 'rollout22', 'rollout23', 'rollout25', 'rollout26', 'rollout27', 'rollout29']
+partials: ['rollout3']
+
+Sona 40 Supervised
+/media/1tb/Izzy/nets/net6_07-28-2016_16h16m38s.ckpt
+Testing rotation loss: 0.00463933  Testing extension loss: 0.0012908
+Training rotation loss: 0.00366465  Training extension loss: 0.000961442
+total: 30
+success rate: 0.36666666667
+success number: 11.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout5', 'rollout7', 'rollout8', 'rollout9', 'rollout10', 'rollout11', 'rollout12', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout21', 'rollout22', 'rollout25', 'rollout27']
+partials: ['rollout6', 'rollout13']
+
+Sona 60 Supervised
+/media/1tb/Izzy/nets/net6_07-28-2016_16h31m52s.ckpt
+Testing rotation loss: 0.00455761  Testing extension loss: 0.00131546
+Training rotation loss: 0.00513011  Training extension loss: 0.00120759
+total: 30
+success rate: 0.566666666667
+success number: 16.0
+failures: ['rollout0', 'rollout2', 'rollout3', 'rollout7', 'rollout11', 'rollout15', 'rollout16', 'rollout18', 'rollout20', 'rollout22', 'rollout25', 'rollout27', 'rollout28']
+partials: ['rollout1', 'rollout8', 'rollout12', 'rollout19']
+
+Sona 20 Supervised 20 DAgger
+/media/1tb/Izzy/nets/net6_07-28-2016_11h14m28s.ckpt
+Testing rotation loss: 0.00506639  Testing extension loss: 0.000931686
+Training rotation loss: 0.00337476  Training extension loss: 0.000790326
+total: 30
+success rate: 0.4333333333
+success number: 13.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout4', 'rollout6', 'rollout7', 'rollout9', 'rollout14', 'rollout15', 'rollout16', 'rollout18', 'rollout19', 'rollout21', rollout23', 'rollout26', 'rollout27']
+partials: ['rollout5', 'rollout29']
+
+Sona 20 Supervised 40 DAgger
+/media/1tb/Izzy/nets/net6_07-28-2016_16h07m15s.ckpt
+esting rotation loss: 0.00414278  Testing extension loss: 0.000797175
+Training rotation loss: 0.00339219  Training extension loss: 0.000876397
+total: 30
+success rate: 0.366666666667
+success number: 11.0
+failures: ['rollout0', 'rollout1', 'rollout2', 'rollout3', 'rollout6', 'rollout7', 'rollout8', 'rollout9', 'rollout12', 'rollout14', 'rollout15', 'rollout16', 'rollout18', 'rollout20', 'rollout21', 'rollout23', 'rollout24', 'rollout26', 'rollout29']
+partials: ['rollout4', 'rollout5', 'rollout19']
+
+
+Caleb:
+20 Supervised
+/media/1tb/Izzy/nets/net6_08-09-2016_16h45m48s.ckpt
+Testing rotation loss: 0.00297751  Testing extension loss: 0.00091449
+Training rotation loss: 0.00227761  Training extension loss: 0.000661623
+
+60 supervised
+/media/1tb/Izzy/nets/net6_08-16-2016_11h57m59s.ckpt
+
+60 supervised double 20
+/media/1tb/Izzy/nets/net6_08-16-2016_12h25m24s.ckpt
+
+125 supervised double10-40
+/media/1tb/Izzy/nets/net6_08-16-2016_13h17m45s.ckpt
+
+125 supervised net
+/media/1tb/Izzy/nets/net6_08-16-2016_14h21m05s.ckpt
+
+125 highly trained
+/media/1tb/Izzy/nets/net6_08-16-2016_15h33m46s.ckpt
+
+125 even more training
+/media/1tb/Izzy/nets/net6_08-17-2016_15h09m09s.ckpt
+
+125 tons
+/media/1tb/Izzy/nets/net6_08-17-2016_15h57m46s.ckpt
+
+155 tons
+/media/1tb/Izzy/nets/net6_08-17-2016_17h42m45s.ckpt
+exclude = [1, 4, 5, 135, 136, 137, 141, 142, 144, 20, 21, 24, 35, 56, 58, 60, 64, 68, 73, 75, 78, 80, 86, 105, 106, 109, 116, 117, 118, 148, 124]
+
+60 1000 iters
+[68, 101, 71, 73, 74, 107, 109, 80, 82, 115, 105, 120, 121, 92]
+/media/1tb/Izzy/nets/net6_08-18-2016_10h42m23s.ckpt
+
+hard rollouts: 155-194
+
+60 rand, 40 hard 1000 iters
+trained on 65-125, 155-195
+set([161, 166, 102, 73, 108, 78, 176, 114, 115, 116, 120, 121, 91, 188, 158, 95])
+/media/1tb/Izzy/nets/net6_08-18-2016_14h50m48s.ckpt
+total: 30
+success rate: 0.5
+success number: 15.0
+failures: ['rollout0', 'rollout2', 'rollout5', 'rollout6', 'rollout8', 'rollout10', 'rollout11', 'rollout12', 'rollout18', 'rollout20', 'rollout21', 'rollout24', 'rollout26', 'rollout27', 'rollout28']
+partials: ['rollout1', 'rollout23']
+
+100 rand, 1000 iters
+set([65, 145, 106, 143, 112, 113, 114, 147, 117, 124])
+/media/1tb/Izzy/nets/net6_08-18-2016_15h19m48s.ckpt
+total: 30
+success rate: 0.6
+success number: 18.0
+failures: ['rollout2', 'rollout3', 'rollout5', 'rollout6', 'rollout7', 'rollout8', 'rollout11', 'rollout12', 'rollout20', 'rollout21', 'rollout24', 'rollout27']
+partials: ['rollout14', 'rollout15', 'rollout23', 'rollout26']
+
+100 rand 1000 iters recompute dist 100
+set([96, 107, 114, 146, 106, 75, 109, 79, 144, 82, 84, 86, 122, 59, 60])
+/media/1tb/Izzy/nets/net6_08-18-2016_18h39m27s.ckpt
+
+frame weighting
+set([131, 70, 105, 76, 77, 110, 141, 80, 145, 114, 83, 149, 150, 143, 124])
+/media/1tb/Izzy/nets/net6_08-19-2016_11h59m09s.ckpt
+
+curriculum learning
+[129, 133, 72, 105, 74, 126, 111, 120, 106, 56, 152, 124, 93, 62]
+First net on first 20 frames
+/media/1tb/Izzy/nets/net6_08-19-2016_12h28m11s.ckpt
+
+
+
+validation weighting
+
+policy complexity trajectory weighting (complexity of the policy by entropy of commands)
+
+Agent replacement fields
+
+waypoint learning
+
+
+Aimee DAgger 40 loss values:
+/media/1tb/Izzy/nets/net6_09-03-2016_15h04m22s.ckpt
+[ 0.01789174  0.00380343  1.3048447 ]
+[ 0.0072151   0.00163082  0.54236924]
+set([33, 3, 4, 37, 6, 10, 11, 15, 35, 31])
+
+Aimee Supervised 60 loss values
+/media/1tb/Izzy/nets/net6_09-03-2016_15h43m17s.ckpt
+[ 0.00201305  0.00047988  0.15546959]
+[ 0.01000211  0.00234872  0.76653151]
+set([0, 3, 8, 42, 15, 35, 21, 56, 26, 31])
+
+Jonathan Supervised 60 loss values:
+set([1, 34, 4, 39, 40, 10, 43, 14, 20, 56])
+[ 0.01056503  0.00227828  0.77590118]
+[ 0.00156968  0.00041158  0.12745894]
+/media/1tb/Izzy/nets/net6_09-03-2016_16h12m38s.ckpt
+
+Jonathan DAgger 40 loss values:
+set([24, 10, 3, 18, 15])

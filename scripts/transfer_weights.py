@@ -28,8 +28,8 @@ def assign_variables(sess, target_layer_weights, target_layer_biases, source_wei
     """
     transfer_w_op = target_layer_weights.assign(source_weights)
     transfer_b_op = target_layer_biases.assign(source_biases)
-    # sess.run(transfer_w_op)
-    # sess.run(transfer_b_op)
+    sess.run(transfer_w_op)
+    sess.run(transfer_b_op)
 
 def get_layer_variables(sess, layer):
     """
