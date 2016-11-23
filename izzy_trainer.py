@@ -83,8 +83,9 @@ class AMT():
         return random.randint(0,2)
 
     def rollout_tf(self, num_frames=100):
-        net = self.options.tf_nets[0]
-        path = self.options.tf_net_paths[0]
+        net = self.options.tf_net
+        # path = self.options.tf_net_paths[0]
+        path = self.options.tf_net_path
         sess = net.load(var_path=path)
         # nets = self.options.tf_nets
 
@@ -165,7 +166,8 @@ class AMT():
     def return_to_start(self, current_state):
         print current_state, type(current_state)
         # destination = np.array([3.4701, 0.021, 0.024, 4.2359, 0.0004, 7.138])
-        destination = np.array([3.5857, 0.0017, 0.0117, 1.1239, 0.0002, 0.0])
+        # destination = np.array([3.5857, 0.0017, 0.0117, 1.1239, 0.0002, 0.0])
+        destination = np.array([2.0468, 0.2014, 0.0157, 1.1239, 0.0206, 0.0])
         # while np.linalg.norm(current_state - destination) > .001:
             # print np.linalg.norm(current_state - destination)
             # print self.safety(destination - np.array(current_state))
@@ -222,10 +224,14 @@ class AMT():
         izzy_state[2] += delta_state[1]
         izzy_state[3] = 1.1239
 
-        izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND, izzy_state[0])
-        izzy_state[0] = max(self.options.ROTATE_LOWER_BOUND, izzy_state[0])
-        izzy_state[2] = min(self.options.EXTENSION_UPPER_BOUND, izzy_state[2])
-        izzy_state[2] = max(self.options.EXTENSION_LOWER_BOUND, izzy_state[2])
+        # izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND, izzy_state[0])
+        # izzy_state[0] = max(self.options.ROTATE_LOWER_BOUND, izzy_state[0])
+        # izzy_state[2] = min(self.options.EXTENSION_UPPER_BOUND, izzy_state[2])
+        # izzy_state[2] = max(self.options.EXTENSION_LOWER_BOUND, izzy_state[2])
+        izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND-1.54, izzy_state[0])
+        izzy_state[0] = max(self.options.ROTATE_LOWER_BOUND-1.54, izzy_state[0])
+        izzy_state[2] = min(self.options.EXTENSION_UPPER_BOUND+.004, izzy_state[2])
+        izzy_state[2] = max(self.options.EXTENSION_LOWER_BOUND+.004, izzy_state[2])
         return izzy_state
 
     @staticmethod
@@ -446,8 +452,8 @@ if __name__ == "__main__":
     izzy._zeke.steady(False)
 
     # options.tf_net = izzynet_boost.IzzyNet_BEX(100)
-    # options.tf_net = net6.NetSix()
-    options.tf_nets = [net6.NetSix(), net6.NetSix()]
+    options.tf_net = net6.NetSix()
+    # options.tf_nets = [net6.NetSix(), net6.NetSix()]
 
     print iteration == 1 and person is not None
     if iteration == 1 and person is not None:
@@ -461,9 +467,9 @@ if __name__ == "__main__":
     # test_file = open(options.templates_dir + '/error_correspondence_paths.txt', 'r')
 
     # template_file = open(options.templates_dir + '/demo_templates_paths_Aimee.txt', 'r')
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_10-03-2016_14h50m03s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_11-22-2016_15h39m05s.ckpt'
 
-    options.tf_net_paths = ['/media/1tb/Izzy/nets/net6_10-10-2016_13h52m47s.ckpt', '/media/1tb/Izzy/nets/net6_10-10-2016_13h57m13s.ckpt']
+    # options.tf_net_paths = ['/media/1tb/Izzy/nets/net6_10-10-2016_13h52m47s.ckpt', '/media/1tb/Izzy/nets/net6_10-10-2016_13h57m13s.ckpt']
 
 
     #Net used for Singulation Demo 

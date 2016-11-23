@@ -29,6 +29,7 @@ img = np.zeros((512,512,3), np.uint8)
 drawing = False # true if mouse is pressed
 mode = True # if True, draw rectangle. Press 'm' to toggle to curve
 ix,iy = -1,-1
+record = True
 tx, ty = -1,-1
 
 # mouse callback function
@@ -53,6 +54,7 @@ def draw_circle(event,x,y,flags,param):
     elif event == cv2.EVENT_LBUTTONUP:
         drawing = False
         ix, iy = -1, -1
+        record = True
 
         # print drawing
         # if mode == True:
@@ -203,6 +205,31 @@ def save_data(feedback, write_path):
         write_file.write(str(line[0]) + ' ' + str(line[1]) + ' ' + str(line[2]) + '\n')
     write_file.close()
 
+def draw_state(state, colors_path, arm, img):
+    o_stv = state_to_value(state)
+    ix, iy = o_stv[0], o_stv[1]
+    newstate, delta = convert_locations(state, ix, iy, tx, ty)
+    stv = state_to_value(newstate)
+    
+    # cv2.circle(img,paste,10,(0,0,255),4)
+    # cv2.circle(img, stv, 10, (255,0,0), 4)
+    # cv2.circle(img, o_stv, 10, (0,0,255), 4)
+
+    rot = (newstate[0]- np.pi - .42)
+    paste, newarm = base_frame(rot, arm, newstate)
+
+    paste_L, f_L = base_finger(rot, finger_L, newstate, np.array([16,0]))
+    paste_R, f_R = base_finger(rot, finger_R, newstate, np.array([-16,0]))
+
+    pil_img = Image.fromarray(img)
+    pasteOn(pil_img, newarm, paste[0], paste[1])
+    print paste_R, ix, iy, tx, ty, delta
+    pasteOn(pil_img, f_R, paste_R[0], paste_R[1])
+    pasteOn(pil_img, f_L, paste_L[0], paste_L[1])
+
+    img = np.array(pil_img)
+    return img, delta
+
 options = AMTOptions()
 def draw_rollouts(r_lst, name, record=False, supervised=False):
     
@@ -282,31 +309,8 @@ def draw_rollouts(r_lst, name, record=False, supervised=False):
             M = cv2.getRotationMatrix2D((cols/2,rows/2),270,1)
             img = cv2.warpAffine(img,M,(cols,rows))
             if drawing:
-                # start, end, base = state_to_pixel(state)
-                # cv2.line(img,start,end,(0,255,0),2)
-                # start,end, base = state_to_pixel(convert_locations(state, ix, iy, tx, ty))
-                o_stv = state_to_value(state)
-                ix, iy = o_stv[0], o_stv[1]
-                newstate, delta = convert_locations(state, ix, iy, tx, ty)
-                stv = state_to_value(newstate)
+                img, delta = draw_state(state, colors_path, arm, img)
                 feedback.append([colors_path + str(i) + '.jpg'] + delta)
-                # cv2.circle(img,paste,10,(0,0,255),4)
-                # cv2.circle(img, stv, 10, (255,0,0), 4)
-                # cv2.circle(img, o_stv, 10, (0,0,255), 4)
-
-                rot = (newstate[0]- np.pi - .42)
-                paste, newarm = base_frame(rot, arm, newstate)
-
-                paste_L, f_L = base_finger(rot, finger_L, newstate, np.array([16,0]))
-                paste_R, f_R = base_finger(rot, finger_R, newstate, np.array([-16,0]))
-
-                pil_img = Image.fromarray(img)
-                pasteOn(pil_img, newarm, paste[0], paste[1])
-                print paste_R, ix, iy, tx, ty, delta
-                pasteOn(pil_img, f_R, paste_R[0], paste_R[1])
-                pasteOn(pil_img, f_L, paste_L[0], paste_L[1])
-
-                img = np.array(pil_img)
                 # cv2.rectangle(img,(ix,iy),(tx,ty),(0,255,0),-1)
             
             start = time.time()
@@ -363,6 +367,42 @@ def draw_rollouts(r_lst, name, record=False, supervised=False):
 
 
     cv2.destroyAllWindows()
+
+def correct_rollout(deltas, image_path, i, states):
+    cv2.namedWindow('image')
+    arm = Image.open("scripts/Arm_lbl_prv.png").rotate(90)
+    finger_L = Image.open("scripts/Gripper_t_lbl.png").rotate(90)
+    finger_R = Image.open("scripts/Gripper_lbl.png").rotate(90)
+    cv2.setMouseCallback('image',draw_circle)
+    end = False
+    deltas = []
+    while not end:
+        if getanother:
+            image_frame = image_path + str(i) + '.jpg'
+            img = cv2.imread(image_frame)
+            state = states[i]
+            M = cv2.getRotationMatrix2D((cols/2,rows/2),270,1)
+            img = cv2.warpAffine(img,M,(cols,rows))
+        rows,cols,colour = img.shape
+        t_img = img
+        if drawing:
+            t_img, delta = draw_state(state, colors_path, arm, img)
+        cv2.imshow("image",t_img) # draws a line along the length of the gripper
+        a = cv2.waitKey(30)
+        if a == 2555904:
+            i += 1 # right
+            getanother = True
+        elif a == 2424832:
+            i -= 1 # left
+            getanother = True
+        elif a == 27:
+            end = True
+        if record == True:
+            deltas.append((i, delta))
+            record = False
+    return deltas
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

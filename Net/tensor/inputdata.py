@@ -52,7 +52,7 @@ class InputData():
 
 
     
-def parse(filepath, stop=-1):
+def parse(filepath, stop=-1, shuffle = True):
     """
         Parses file containing paths and labels into list
         of tupals in the form of:
@@ -65,7 +65,8 @@ def parse(filepath, stop=-1):
     f = open(filepath, 'r')
     tups = []
     lines = [ x for x in f ]
-    random.shuffle(lines)
+    if shuffle:
+        random.shuffle(lines)
     for i, line in enumerate(lines):
         split = line.split(' ')
         path = split[0]
@@ -115,12 +116,12 @@ def process_out(n):
 
 class AMTData(InputData):
     
-    def __init__(self, train_path, test_path,channels=1, shuffle = False):
-        self.train_tups = parse(train_path)
-        self.test_tups = parse(test_path)
+    def __init__(self, train_path, test_path,channels=1, shuffle = True):
+        self.train_tups = parse(train_path, shuffle = shuffle)
+        self.test_tups = parse(test_path, shuffle = shuffle)
 
-        self.unordered_train = parse(train_path)
-        self.unordered_test = parse(test_path)
+        self.unordered_train = self.train_tups[:]
+        self.unordered_test = self.test_tups[:]
 
         self.dist = []
 
@@ -129,7 +130,10 @@ class AMTData(InputData):
         self.i = 0
         self.channels = channels
 
-        self.all = 0
+        self.train_all = 0
+        self.test_all = 0
+        self.train_paths_all = 0
+        self.test_paths_all = 0
 
         if shuffle:
             random.shuffle(self.unordered_train)
@@ -146,18 +150,60 @@ class AMTData(InputData):
         frame_num = int(path[path.find('_frame_') + len('_frame_'):path.find('.jpg')])
         return frame_num
 
+    def all_train_paths_batch(self, n):
+        '''
+        returns all the string labels, or None if all is at end, use all_train_reset to reset
+        '''
+        if self.train_paths_all == len(self.train_tups):
+            return None
+        elif self.train_paths_all + n > len(self.train_tups):
+            batch_tups = self.train_tups[self.train_paths_all:]
+            self.train_paths_all = len(self.train_tups)
+        else:
+            batch_tups = self.train_tups[self.train_paths_all:n+self.train_paths_all]
+            self.train_paths_all = self.train_paths_all + n
+        # print self.all, batch_tups
+        batch = zip(*batch_tups)
+        return list(batch[0]), list(batch[1])
+
+    def all_test_paths_batch(self, n):
+        '''
+        returns all the data, or None if all is at end, use all_train_reset to reset
+        '''
+        if self.test_paths_all == len(self.test_tups):
+            return None
+        elif self.test_paths_all + n > len(self.test_tups):
+            batch_tups = self.test_tups[self.test_paths_all:]
+            self.test_paths_all = len(self.test_tups)
+        else:
+            batch_tups = self.test_tups[self.test_paths_all:n+self.test_paths_all]
+            self.test_paths_all = self.test_paths_all + n
+        # print self.all, batch_tups
+        batch = zip(*batch_tups)
+        return list(batch[0]), list(batch[1])
+
+
+    def all_reset(self):
+        '''
+        sets self.all = 0
+        '''
+        self.test_all = 0
+        self.train_all = 0
+        self.train_paths_all = 0
+        self.test_paths_all = 0
+
     def all_train_batch(self, n):
         '''
         returns all the data, or None if all is at end, use all_train_reset to reset
         '''
-        if self.all == len(self.train_tups):
+        if self.train_all == len(self.train_tups):
             return None
-        elif self.all + n > len(self.train_tups):
-            batch_tups = self.train_tups[self.all:]
-            self.all = len(self.train_tups)
+        elif self.train_all + n > len(self.train_tups):
+            batch_tups = self.train_tups[self.train_all:]
+            self.train_all = len(self.train_tups)
         else:
-            batch_tups = self.train_tups[self.all:n+self.all]
-            self.all = self.all + n
+            batch_tups = self.train_tups[self.train_all:n+self.train_all]
+            self.train_all = self.train_all + n
         # print self.all, batch_tups
         batch = []
         for path, labels in batch_tups:
@@ -174,15 +220,15 @@ class AMTData(InputData):
         '''
         returns all the data, or None if all is at end, use all_train_reset to reset
         '''
-        if self.all == len(self.test_tups):
+        if self.test_all == len(self.test_tups):
             return None
-        elif self.all + n > len(self.test_tups):
-            batch_tups = self.test_tups[self.all:]
-            self.all = len(self.test_tups)
+        elif self.test_all + n > len(self.test_tups):
+            batch_tups = self.test_tups[self.test_all:]
+            self.test_all = len(self.test_tups)
         else:
-            batch_tups = self.test_tups[self.all:n+self.all]
-            self.all = self.all + n
-        # print self.all, batch_tups
+            batch_tups = self.test_tups[self.test_all:n+self.test_all]
+            self.test_all = self.test_all + n
+        # print self.test_all, batch_tups
         batch = []
         for path, labels in batch_tups:
             im = cv2.imread(path)
@@ -198,7 +244,8 @@ class AMTData(InputData):
         '''
         sets self.all = 0
         '''
-        self.all = 0
+        self.train_all = 0
+        self.train_paths_all = 0
 
 
     def next_train_batch(self, n):

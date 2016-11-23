@@ -39,6 +39,8 @@ if __name__ == '__main__':
                         help="enter the ending value of the frames to be used for training")
     parser.add_argument("-sm", "--smooth", type=int,
                         help="determines if a butterworth filter should be applied over the data, of order N")
+    parser.add_argument("-t", "--test_size", type=int,
+                        help="determines the size of the test set")
     args = parser.parse_args()
     if args.name is not None:
         person = args.name 
@@ -55,6 +57,7 @@ if __name__ == '__main__':
     else:
         print "please enter a last value with -l (not inclusive)"
         sys.exit()
+    test_size = args.test_size if args.test_size is not None else 10
     initial = args.initial if args.initial is not None else 0
     end = args.end if args.end is not None else 100
 
@@ -100,12 +103,12 @@ if __name__ == '__main__':
 
         
         outfile.close()
-    skipped = compile_supervisor.compile_reg(smooth=smooth)
+    skipped = compile_supervisor.compile_reg(smooth=smooth, num=test_size)
 
     data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file,channels=3)
     net = net6.NetSix()
     path = '/media/1tb/Izzy/nets/net6_10-10-2016_13h57m13s.ckpt'
-    net_name = net.optimize(700,data, path=path, batch_size=200)
+    net_name = net.optimize(300,data, path=path, batch_size=200)
     outf = open(AMTOptions.amt_dir + 'last_net.txt', 'w')
     outf.write(net_name)
     outf.close()
