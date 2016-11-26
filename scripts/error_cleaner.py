@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, time
 sys.path.append('/home/annal/Izzy/vision_amt/')
 from Net.tensor import net3
 from Net.tensor import net4
@@ -34,7 +34,7 @@ def kfolds(k, trajs):
 
 def write_errors(net, data, sess):
     evaluations = []
-    full_batch = data.all_test_batch(100)
+    full_batch = data.all_test_batch(50)
     j = 0
     with sess.as_default():
         while full_batch is not None:
@@ -44,13 +44,13 @@ def write_errors(net, data, sess):
             num_used = len(full_ims)
             print num_used
             j += len(full_ims)
-            full_batch = data.all_test_batch(100)
+            full_batch = data.all_test_batch(50)
             evaluations += net.y_out.eval(feed_dict=full_dict).tolist()
             # rot_loss = net.rot.eval(feed_dict=full_dict) # regression
             # fore_loss = net.fore.eval(feed_dict=full_dict) # regression
             # norm_loss = rot_loss/.02666667 + fore_loss/.006
             # losses = [losses[0] + rot_loss*num_used , losses[1] + fore_loss*num_used, losses[2]+norm_loss*num_used]
-        print "done evaluating"
+    print "done evaluating"
     return np.array(evaluations)
 
 def states_file_path(name, test, traj):
@@ -88,14 +88,16 @@ def k_test(k, deltas_path, threshold, errors_path, name, test):
     # print trajs
 
     print holdout
+    sholdout = set(holdout)
     # print folds
 
     states = []
     for traj in trajs:
-        states_file = open(states_file_path(name, test, traj), 'r')
-        for state in states_file:
-            states.append(convert_state(state))
-        states_file.close()
+        if traj not in sholdout:
+            states_file = open(states_file_path(name, test, traj), 'r')
+            for state in states_file:
+                states.append(convert_state(state))
+            states_file.close()
 
     k_at = 0
     path = AMTOptions.colors_dir
@@ -104,6 +106,7 @@ def k_test(k, deltas_path, threshold, errors_path, name, test):
 
 
     for group in folds:
+        print "iteration " +str(k_at)
         sgroup = set(group)
         new_train = AMTOptions.amt_dir + 'train_folds.txt'
         new_test = AMTOptions.amt_dir + 'test_folds.txt'
@@ -122,7 +125,7 @@ def k_test(k, deltas_path, threshold, errors_path, name, test):
             line = line[:-1] + '\n'
             if traj_num(line) in sgroup:
                 trainf.write(path+ line)
-            else:
+            elif traj_num(line) not in sholdout:
                 testf.write(path+ line)
         old_trainf.close()
         trainf.close()
@@ -134,6 +137,8 @@ def k_test(k, deltas_path, threshold, errors_path, name, test):
         outf.write(net_name)
         train_nets.append(net_name)
         outf.close()
+        ops.reset_default_graph()
+        net = net6.NetSix()
         sess = net.load(var_path=net_name)
         evaluations = write_errors(net, data, sess)
         sess.close()
@@ -152,33 +157,35 @@ def k_test(k, deltas_path, threshold, errors_path, name, test):
         labels = np.array(labels)
         errs = np.abs(evaluations-labels).tolist()
         named_errs = zip(named_errs, errs, labels.tolist(), evaluations.tolist())
-        worst = [-1 for i in range(10)]
-        below = []
-        i = 0
-        # print [ev for ev in evaluations]
-        for name, e, label, ev in named_errs:
-            if np.linalg.norm(e) > threshold:
-                below.append(i + k_at*n_in)
-            if np.linalg.norm(e) > np.linalg.norm(worst[0]):
-                worst[0] = e
-                worst.sort(key=lambda e: np.linalg.norm(e))
-            i += 1
+        # worst = [-1 for i in range(10)]
+        # below = []
+        # i = 0
+        # # print [ev for ev in evaluations]
+        # for name, e, label, ev in named_errs:
+        #     if np.linalg.norm(e) > threshold:
+        #         below.append(i + k_at*n_in)
+        #     if np.linalg.norm(e) > np.linalg.norm(worst[0]):
+        #         worst[0] = e
+        #         worst.sort(key=lambda e: np.linalg.norm(e))
+        #     i += 1
+        print k_at
         k_at += 1
         all_names_errs += named_errs
         # print all_names_errs 
         ops.reset_default_graph()
+        time.sleep(3)
     error_file = open(errors_path + "comparisons.txt", 'w')
     statistics_eval = []
     i=0
     print len(states)
     print len(all_names_errs)
     for name, e, label, ev in all_names_errs:
-        statistics_eval.append((name, e, label, ev, states[i]))
+        #statistics_eval.append((name, e, label, ev, states[i]))
         error_file.write(name + "\t" + str(e[0]) + " " + str(e[1]) + "\t" + str(label[0]) + " " + str(label[1]) + "\t" + str(ev[0]) + " " + str(ev[1]) + "\t" + stringify_state(states[i]) + "\n")
         i += 1
     error_file.close()
     # write some values
-    stats_file = open(errors_path + "comparisons.txt", 'w')
+    stats_file = open(errors_path + "stats.txt", 'w')
     stats_file.write(str(train_nets) + '\n')
     holdouts = "Holdout Trajectories: "
     for hout in holdout:
