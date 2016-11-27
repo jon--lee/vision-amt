@@ -153,7 +153,7 @@ def gather_feedback(error_path, new_deltas_path, pname='', test=''):
     above = threshold_errs(all_names_errs, .001)
     worst = highest_errors(all_names_errs, 20)
 
-    for a as above:
+    for a in above:
         name, e, label, ev, stv = all_names_errs[a]:
         i = frame_num(name)
         rnum = traj_num(name)
