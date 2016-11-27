@@ -104,8 +104,7 @@ class NetTest(object):
 
 
 if __name__ == '__main__':
-
-    nt = NetTest(net_path ='/media/1tb/Izzy/nets/net6_06-23-2016_09h27m56s.ckpt')
+    nt = NetTest(net_path =sys.args[1])
     nt.rollCall()
     nt.computerER()
 

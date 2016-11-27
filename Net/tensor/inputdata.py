@@ -52,7 +52,7 @@ class InputData():
 
 
     
-def parse(filepath, stop=-1):
+def parse(filepath, stop=-1, shuffle = True):
     """
         Parses file containing paths and labels into list
         of tupals in the form of:
@@ -65,7 +65,8 @@ def parse(filepath, stop=-1):
     f = open(filepath, 'r')
     tups = []
     lines = [ x for x in f ]
-    random.shuffle(lines)
+    if shuffle:
+        random.shuffle(lines)
     for i, line in enumerate(lines):
         split = line.split(' ')
         path = split[0]
@@ -87,7 +88,7 @@ def im2tensor(im,channels=1):
     zeros = np.zeros((h, w, channels))
     for i in range(channels):
         #Binary Mask
-        zeros[:,:,i] = np.round(im[:,:,i] / 255.0 - .25, 0)
+        zeros[:,:,i] = np.round(im[:,:,i] / 255.0 - .27, 0)
         #zeros[:,:,i] = np.round(im[:,:,i] / 255.0, 0)
 
         #Nomarlized RGB
@@ -115,15 +116,137 @@ def process_out(n):
 
 class AMTData(InputData):
     
-    def __init__(self, train_path, test_path,channels=1):
-        self.train_tups = parse(train_path)
-        self.test_tups = parse(test_path)
+    def __init__(self, train_path, test_path,channels=1, shuffle = True):
+        self.train_tups = parse(train_path, shuffle = shuffle)
+        self.test_tups = parse(test_path, shuffle = shuffle)
+
+        self.unordered_train = self.train_tups[:]
+        self.unordered_test = self.test_tups[:]
+
+        self.dist = []
+
+        self.amount = len(self.train_tups)
 
         self.i = 0
         self.channels = channels
 
-        random.shuffle(self.train_tups)
-        random.shuffle(self.test_tups)
+        self.train_all = 0
+        self.test_all = 0
+        self.train_paths_all = 0
+        self.test_paths_all = 0
+
+        if shuffle:
+            random.shuffle(self.unordered_train)
+            random.shuffle(self.unordered_test)
+
+        self.frame_weights = []
+        for path, labels in self.train_tups:
+            frame_no = self.get_frame_number(path)
+            self.frame_weights.append(1.0/(10.0 + frame_no))
+        self.frame_weights = self.frame_weights/np.sum(self.frame_weights)
+
+
+    def get_frame_number(self, path):
+        frame_num = int(path[path.find('_frame_') + len('_frame_'):path.find('.jpg')])
+        return frame_num
+
+    def all_train_paths_batch(self, n):
+        '''
+        returns all the string labels, or None if all is at end, use all_train_reset to reset
+        '''
+        if self.train_paths_all == len(self.train_tups):
+            return None
+        elif self.train_paths_all + n > len(self.train_tups):
+            batch_tups = self.train_tups[self.train_paths_all:]
+            self.train_paths_all = len(self.train_tups)
+        else:
+            batch_tups = self.train_tups[self.train_paths_all:n+self.train_paths_all]
+            self.train_paths_all = self.train_paths_all + n
+        # print self.all, batch_tups
+        batch = zip(*batch_tups)
+        return list(batch[0]), list(batch[1])
+
+    def all_test_paths_batch(self, n):
+        '''
+        returns all the data, or None if all is at end, use all_train_reset to reset
+        '''
+        if self.test_paths_all == len(self.test_tups):
+            return None
+        elif self.test_paths_all + n > len(self.test_tups):
+            batch_tups = self.test_tups[self.test_paths_all:]
+            self.test_paths_all = len(self.test_tups)
+        else:
+            batch_tups = self.test_tups[self.test_paths_all:n+self.test_paths_all]
+            self.test_paths_all = self.test_paths_all + n
+        # print self.all, batch_tups
+        batch = zip(*batch_tups)
+        return list(batch[0]), list(batch[1])
+
+
+    def all_reset(self):
+        '''
+        sets self.all = 0
+        '''
+        self.test_all = 0
+        self.train_all = 0
+        self.train_paths_all = 0
+        self.test_paths_all = 0
+
+    def all_train_batch(self, n):
+        '''
+        returns all the data, or None if all is at end, use all_train_reset to reset
+        '''
+        if self.train_all == len(self.train_tups):
+            return None
+        elif self.train_all + n > len(self.train_tups):
+            batch_tups = self.train_tups[self.train_all:]
+            self.train_all = len(self.train_tups)
+        else:
+            batch_tups = self.train_tups[self.train_all:n+self.train_all]
+            self.train_all = self.train_all + n
+        # print self.all, batch_tups
+        batch = []
+        for path, labels in batch_tups:
+            im = cv2.imread(path)
+            im = im2tensor(im,self.channels)
+            batch.append((im, labels))
+        batch = zip(*batch)
+
+
+
+        return list(batch[0]), list(batch[1])
+
+    def all_test_batch(self, n):
+        '''
+        returns all the data, or None if all is at end, use all_train_reset to reset
+        '''
+        if self.test_all == len(self.test_tups):
+            return None
+        elif self.test_all + n > len(self.test_tups):
+            batch_tups = self.test_tups[self.test_all:]
+            self.test_all = len(self.test_tups)
+        else:
+            batch_tups = self.test_tups[self.test_all:n+self.test_all]
+            self.test_all = self.test_all + n
+        # print self.test_all, batch_tups
+        batch = []
+        for path, labels in batch_tups:
+            im = cv2.imread(path)
+            im = im2tensor(im,self.channels)
+            batch.append((im, labels))
+        batch = zip(*batch)
+
+
+
+        return list(batch[0]), list(batch[1])
+
+    def all_train_reset(self):
+        '''
+        sets self.all = 0
+        '''
+        self.train_all = 0
+        self.train_paths_all = 0
+
 
     def next_train_batch(self, n):
         """
@@ -131,10 +254,10 @@ class AMTData(InputData):
         :param n: number of examples to return in batch
         :return: tuple with images in [0] and labels in [1]
         """
-        if self.i + n > len(self.train_tups):
+        if self.i + n > len(self.unordered_train):
             self.i = 0
-            random.shuffle(self.train_tups)
-        batch_tups = self.train_tups[self.i:n+self.i]
+            random.shuffle(self.unordered_train)
+        batch_tups = self.unordered_train[self.i:n+self.i]
         batch = []
         for path, labels in batch_tups:
             im = cv2.imread(path)
@@ -145,11 +268,22 @@ class AMTData(InputData):
         self.i = self.i + n
         return list(batch[0]), list(batch[1])
 
+    def next_weighted_batch(self, n):
+        samples = np.random.choice(len(self.train_tups),p=self.dist, size = n)
+        batch_tups = []
+        for sample in samples:
+            batch_tups.append(self.train_tups[sample])
+        batch = []
+        for path, labels in batch_tups:
+            im = cv2.imread(path)
+            im = im2tensor(im,self.channels)
+            batch.append((im, labels))
+        batch = zip(*batch)
+        self.i = self.i + n
+        return list(batch[0]), list(batch[1])
 
-
-
-
-
+    def alter_dist(self, dist):
+        self.dist = dist
 
     def next_test_batch(self):
         """
@@ -157,10 +291,10 @@ class AMTData(InputData):
         :return: tuple with images in [0], labels in [1]
         """
         batch = []
-        for path, labels in self.test_tups[:200]:
+        for path, labels in self.unordered_test[:200]:
             im = cv2.imread(path,self.channels)
             im = im2tensor(im,self.channels)
             batch.append((im, labels))
-        random.shuffle(self.test_tups)
+        random.shuffle(self.unordered_test)
         batch = zip(*batch)
         return list(batch[0]), list(batch[1])

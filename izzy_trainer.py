@@ -1,15 +1,17 @@
 import sys
 sys.path.append('/home/annal/Izzy/vision_amt/scripts')
 sys.path.append('/home/annal/Izzy/vision_amt/scripts/objects/')
+sys.path.append('/home/annal/Izzy/')
 import tty, termios
 from options import AMTOptions
 from pipeline.bincam import BinaryCamera
-from Net.tensor import inputdata, net3,net4,net5,net6, net6_c
+from Net.tensor import net3,net4,net5,net6, net6_c
+from Tensor_Net.tensor import inputdata, izzynet_boost
 from scripts.objects import singulationImg
 from scripts import overlay, click_centers, transfer_weights
+from tensorflow.python.framework import ops
 import time, datetime, os, random, argparse
 import datetime
-import os
 import random
 import cv2
 import imp
@@ -54,12 +56,13 @@ class AMT():
         self.graphs = []
         self.name = name
         self.current_template = None
-        self.skip = False
+        self.skip = False # used to determine if a value should be skipped
         self.test_folder = ''
-        self.fail = False
-        self.partial = False
-        self.test_partials = []
-        self.test_fails = []
+        self.fail = False #did the current rollout fail
+        self.partial = False # did the current rollout partially succeed
+        self.test_partials = [] # partial values in the test set
+        self.test_fails = [] #failures in the test set (by name)
+        self.final_state = None
 
     def rescale_sup(self, deltas):
         deltas[0] = deltas[0]*0.026666666666667
@@ -73,10 +76,20 @@ class AMT():
         deltas[1] = np.sign(deltas[1])*np.min([0.01,np.abs(deltas[1])])
         return deltas
 
+    def choose_net(self):
+        '''
+        Someday we would like to input an arbitrary choose_net function, but for now...
+        '''
+        return random.randint(0,2)
+
     def rollout_tf(self, num_frames=100):
         net = self.options.tf_net
-        path = self.options.tf_net_path[0]
-        sess = net.load(var_path=self.options.tf_net_path)
+        # path = self.options.tf_net_paths[0]
+        path = self.options.tf_net_path
+        sess = net.load(var_path=path)
+        # nets = self.options.tf_nets
+
+        # sesses = [self.options.tf_net.load(var_path=self.options.tf_net_paths[i], lowmem= True) for i in range(len(nets))]
         recording = []
         current_state = self.state(self.izzy.getState()) 
         
@@ -109,6 +122,8 @@ class AMT():
                 true_state = np.array(self.state(self.izzy.getState()))
                 # current_state = np.array(true_state)
                 # outval = net.output(sess, gray_frame,channels=3, clasfc=True)
+                # net_idx = self.choose_net()
+                # outval = nets[net_idx].output(sesses[net_idx], gray_frame,channels=3)
                 outval = net.output(sess, gray_frame,channels=3)
                 print "outval: ", outval
                 delta_state = self.rescale_sup(outval)
@@ -133,7 +148,7 @@ class AMT():
                 print "offset", offset
                 time.sleep(offset)
                 print "total time: ", time.time() - start
-
+                self.final_state = frame
 
        
         except KeyboardInterrupt:
@@ -151,7 +166,8 @@ class AMT():
     def return_to_start(self, current_state):
         print current_state, type(current_state)
         # destination = np.array([3.4701, 0.021, 0.024, 4.2359, 0.0004, 7.138])
-        destination = np.array([3.5857, 0.0017, 0.0117, 1.1239, 0.0002, 0.0])
+        # destination = np.array([3.5857, 0.0017, 0.0117, 1.1239, 0.0002, 0.0])
+        destination = np.array([2.0468, 0.2014, 0.0157, 1.1239, 0.0206, 0.0])
         # while np.linalg.norm(current_state - destination) > .001:
             # print np.linalg.norm(current_state - destination)
             # print self.safety(destination - np.array(current_state))
@@ -182,10 +198,9 @@ class AMT():
             self.total += 1
             print "Click the centers to determine success"
             if not self.skip and len(self.test_folder) > 0:
-                distance = click_centers.max_distance(click_centers.centers(self.bc))
+                print "Did the task succeed? (y/n/p)" 
+                char = click_centers.centers(self.final_state.copy())
                 cv2.destroyAllWindows()
-                print "Did the task succeed? (y/n,p), max distance was: " + str(distance) + " assumed success: " + str(distance>=100.0) 
-                char = getch()
                 if char == 'y':
                     self.succeed += 1
                 elif char == 'p':
@@ -209,10 +224,14 @@ class AMT():
         izzy_state[2] += delta_state[1]
         izzy_state[3] = 1.1239
 
-        izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND, izzy_state[0])
-        izzy_state[0] = max(self.options.ROTATE_LOWER_BOUND, izzy_state[0])
-        izzy_state[2] = min(self.options.EXTENSION_UPPER_BOUND, izzy_state[2])
-        izzy_state[2] = max(self.options.EXTENSION_LOWER_BOUND, izzy_state[2])
+        # izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND, izzy_state[0])
+        # izzy_state[0] = max(self.options.ROTATE_LOWER_BOUND, izzy_state[0])
+        # izzy_state[2] = min(self.options.EXTENSION_UPPER_BOUND, izzy_state[2])
+        # izzy_state[2] = max(self.options.EXTENSION_LOWER_BOUND, izzy_state[2])
+        izzy_state[0] = min(self.options.ROTATE_UPPER_BOUND-1.54, izzy_state[0])
+        izzy_state[0] = max(self.options.ROTATE_LOWER_BOUND-1.54, izzy_state[0])
+        izzy_state[2] = min(self.options.EXTENSION_UPPER_BOUND+.004, izzy_state[2])
+        izzy_state[2] = max(self.options.EXTENSION_LOWER_BOUND+.004, izzy_state[2])
         return izzy_state
 
     @staticmethod
@@ -272,7 +291,8 @@ class AMT():
             elif self.partial:
                 self.test_partials.append(rollout_name)
                 self.partial = False
-            statistics_file.write("failures: " + str(self.test_fails))
+            statistics_file.write("failures: " + str(self.test_fails) + '\n')
+            statistics_file.write("partials: " + str(self.test_partials))
             statistics_file.close()
         rollout_states_file = open(rollout_path + "states.txt", 'a+')
         rollout_deltas_file = open(rollout_path + "net_deltas.txt", 'a+')
@@ -291,17 +311,22 @@ class AMT():
 
         i = 0
         for frame, state,deltas, true_state in recording:
-            if self.name:
-                filename = self.name + '_' + self.test_folder[:-1] + '_' + rollout_name + "_frame_" + str(i) + ".jpg"
+            if len(self.test_folder[:-1]) == 0:
+                test_folder = self.test_folder[:-1]
             else:
-                filename = self.test_folder[:-1] + '_' + rollout_name + "_frame_" + str(i) + ".jpg"
+                test_folder = self.test_folder[:-1] + '_'
+            if self.name:
+                filename = self.name + '_' + test_folder  + rollout_name + "_frame_" + str(i) + ".jpg"
+            else:
+                filename = test_folder + rollout_name + "_frame_" + str(i) + ".jpg"
             raw_states_file.write(filename + self.lst2str(state) + "\n") 
             rollout_states_file.write(filename + self.lst2str(state) + "\n")
             rollout_deltas_file.write(filename + self.lst2str(deltas) + "\n")
             true_states_file.write(filename + self.lst2str(true_state) + "\n")
-            cv2.imwrite(self.options.originals_dir + filename, frame)
-            cv2.imwrite(self.options.grayscales_dir + filename, self.gray(frame))
-            cv2.imwrite(self.options.binaries_dir + filename, self.segment(frame))
+            if len(self.test_folder[:-1]) < 0:
+                cv2.imwrite(self.options.originals_dir + filename, frame)
+                cv2.imwrite(self.options.grayscales_dir + filename, self.gray(frame))
+                cv2.imwrite(self.options.binaries_dir + filename, self.segment(frame))
             cv2.imwrite(self.options.colors_dir + filename, self.color(frame))
             cv2.imwrite(rollout_path + filename, frame)
             i += 1
@@ -312,7 +337,7 @@ class AMT():
         recording = []
         print "Done saving."
 
-    def display_template(self, template=None):
+    def display_template(self, template=None, record=False):
         if template is None:
             template = cv2.imread("/home/annal/Izzy/vision_amt/scripts/objects/template.png")
         template[:,:,1] = template[:,:,2]
@@ -320,6 +345,12 @@ class AMT():
         # template[:,:,2] = np.zeros((420, 420))
         # template = cv2.resize(template, (250, 250))
         start = time.time()
+
+        frames = []
+        if record:
+            frames_folder = self.options.amt_dir + 'AR_frames/Test' + str(self.total) + '/'
+            os.makedirs(frames_folder)
+        i = 0
         while 1:
             frame = self.bc.read_frame()
             frame = inputdata.im2tensor(frame, channels = 3)
@@ -334,7 +365,14 @@ class AMT():
             if self.skip:
                 if time.time() - start > 13:
                     break
+            if record:
+                frames.append(final)
+            i += 1
             time.sleep(.005)
+        if record:
+            for i in range(len(frames)):
+                cv2.imwrite(frames_folder + 'frame' + str(i) + '.jpg', frames[i]*255)
+
 
     def next_rollout(self):
         """
@@ -413,7 +451,9 @@ if __name__ == "__main__":
     izzy = DexRobotZeke()
     izzy._zeke.steady(False)
 
+    # options.tf_net = izzynet_boost.IzzyNet_BEX(100)
     options.tf_net = net6.NetSix()
+    # options.tf_nets = [net6.NetSix(), net6.NetSix()]
 
     print iteration == 1 and person is not None
     if iteration == 1 and person is not None:
@@ -424,8 +464,13 @@ if __name__ == "__main__":
         print "not running a set iteration"
         template_file = open(options.templates_dir + '/saved_template_paths.txt', 'r')
     test_file = open(options.templates_dir + '/human_study_test_set_paths.txt', 'r')
+    # test_file = open(options.templates_dir + '/error_correspondence_paths.txt', 'r')
 
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_07-21-2016_16h17m35s.ckpt'
+    # template_file = open(options.templates_dir + '/demo_templates_paths_Aimee.txt', 'r')
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_11-22-2016_15h39m05s.ckpt'
+
+    # options.tf_net_paths = ['/media/1tb/Izzy/nets/net6_10-10-2016_13h52m47s.ckpt', '/media/1tb/Izzy/nets/net6_10-10-2016_13h57m13s.ckpt']
+
 
     #Net used for Singulation Demo 
     # template_file = open(options.templates_dir + '/demo_templates_paths.txt', 'r')

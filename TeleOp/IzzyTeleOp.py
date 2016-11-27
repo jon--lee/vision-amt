@@ -321,7 +321,7 @@ def apply_deltas(delta_state,t_i):
 
     return t_i#, t_t
 
-def display_template(bc, template=None):
+def display_template(bc, template=None, cnt=0, record=False):
     if template is None:
         template = cv2.imread("/home/annal/Izzy/vision_amt/scripts/objects/template.png")
 
@@ -329,6 +329,11 @@ def display_template(bc, template=None):
     template[:,:,0] = np.zeros((420, 420))
     # template[:,:,2] = np.zeros((420, 420))
     # template = cv2.resize(template, (250, 250))
+    if record:
+        frames = []
+        frames_folder = AMTOptions.amt_dir + 'AR_frames/Sup'+ str(cnt) + '/'
+        os.makedirs(frames_folder)
+    i = 0
     while 1:
         frame = bc.read_frame()
         frame = inputdata.im2tensor(frame, channels = 3)
@@ -340,7 +345,13 @@ def display_template(bc, template=None):
             break
         elif a == ord(' '):
             return 'next', template
+        if record:
+            frames.append(final)
+        i += 1
         time.sleep(.005)
+    if record:
+        for i in range(len(frames)):
+            cv2.imwrite(frames_folder + 'frame' + str(i) + '.jpg', frames[i]*255)
     return 'display', template
 
 def record_template(bc, template=None):
@@ -457,7 +468,7 @@ if __name__ == '__main__':
                 print 'Using template: ' + name
                 template = np.load(name)
                 last = template
-                result = display_template(bc, template)[0]
+                result = display_template(bc, template, cnt=i_at)[0]
                 print result
                 print "Rolling out..."
                 if result == 'next':
@@ -529,5 +540,6 @@ if __name__ == '__main__':
                 if result != 'next':
                     teleop(c, izzy, t, bc, person, template)
                 print "Done rolling out."
+
     print "Done"
    

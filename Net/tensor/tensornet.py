@@ -51,7 +51,7 @@ class TensorNet():
 
 
 
-    def load(self, var_path=None):
+    def load(self, var_path=None,lowmem=False):
         """
             load net's variables from absolute path or relative
             to the current working directory. Returns the session
@@ -60,7 +60,11 @@ class TensorNet():
         if not var_path:
             raise Exception("No path to model variables specified")
         print "Restoring existing net from " + var_path + "..."
-        sess = tf.Session()
+        if lowmem:
+            print "use low memory"
+            sess = tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.4)))
+        else:
+            sess = tf.Session()
         with sess.as_default():
             sess.run(tf.initialize_all_variables())
             # changed to self.saver
@@ -69,17 +73,17 @@ class TensorNet():
         return sess
 
 
-    def optimize(self, iterations, data, path=None, batch_size=100, test_print=20, save=True):
+    def optimize(self, iterations, data, path=None, batch_size=100, test_print=20, save=True, use_weights=False):
         """
             optimize net for [iterations]. path is either absolute or 
             relative to current working directory. data is InputData object (see class for details)
             mini_batch_size as well
         """
         if path:
-            sess = self.load(var_path=path)
+            sess = self.load(var_path=path, lowmem = True)
         else:
             print "Initializing new variables..."
-            sess = tf.Session()
+            sess = tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.4)))
             sess.run(tf.initialize_all_variables())
             
         if options:
@@ -91,7 +95,32 @@ class TensorNet():
         try:
             with sess.as_default():
                 for i in range(iterations):
-                    batch = data.next_train_batch(batch_size)
+                    if i % 100 == 0 and use_weights:
+                        # use weighting based on error
+                        # dist = []
+                        # full_batch = data.all_train_batch(500)
+                        # j = 0
+                        # while full_batch is not None:
+                        #     full_ims, full_labels = full_batch
+                        #     full_dict = { self.x: full_ims, self.y_: full_labels }
+                        #     dist.extend(self.err_mat.eval(full_dict).tolist())
+                        #     print "Evaluating... finished ", j, data.amount
+                        #     j += 500
+                        #     full_batch = data.all_train_batch(500)
+                        # data.all_train_reset()
+                        # dist = np.array(dist)
+                        # dist = np.sum(dist, axis=1)
+                        # print dist.shape
+                        # dist = dist/np.sum(dist)
+                        # print dist.shape
+                        # data.alter_dist(dist)
+
+                        # use weighting based on the frame number
+                        data.alter_dist(data.frame_weights)
+                    if use_weights:
+                        batch = data.next_weighted_batch(batch_size)
+                    else:
+                        batch = data.next_train_batch(batch_size)
                     ims, labels = batch
 
                     feed_dict = { self.x: ims, self.y_: labels }
@@ -100,7 +129,8 @@ class TensorNet():
                         # batch_loss = self.loss.eval(feed_dict=feed_dict) # regression
                         rot_loss = self.rot.eval(feed_dict=feed_dict) # regression
                         fore_loss = self.fore.eval(feed_dict=feed_dict) # regression
-                        self.log("[ Iteration " + str(i) + " ] Training rotation loss: " + str(rot_loss) + "  Training extension loss: " + str(fore_loss))
+                        norm_loss = rot_loss/.02666667 + fore_loss/.006
+                        self.log("[ Iteration " + str(i) + " ] Training rotation loss: " + str(rot_loss) + "  Training extension loss: " + str(fore_loss) + "  Training norm loss: " + str(norm_loss))
                     if i % test_print == 0:
                         test_batch = data.next_test_batch()
                         test_ims, test_labels = test_batch
@@ -110,7 +140,8 @@ class TensorNet():
                         # self.log("[ Iteration " + str(i) + " ] Test loss: " + str(test_loss))
                         rot_t_loss = self.rot.eval(feed_dict=test_dict) # regression
                         fore_t_loss = self.fore.eval(feed_dict=test_dict) # regression
-                        self.log("[ Iteration " + str(i) + " ] Testing rotation loss: " + str(rot_t_loss) + "  Testing extension loss: " + str(fore_t_loss))
+                        norm_t_loss = rot_t_loss/.02666667 + fore_t_loss/.006
+                        self.log("[ Iteration " + str(i) + " ] Testing rotation loss: " + str(rot_t_loss) + "  Testing extension loss: " + str(fore_t_loss) + "  Testing norm loss: " + str(norm_t_loss))
                     self.train.run(feed_dict=feed_dict)
                 
 

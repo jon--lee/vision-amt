@@ -1,8 +1,13 @@
 import numpy as np
+import scipy as sci
+from scipy import signal
 import os, sys
 from options import AMTOptions
 import scripts.clean_supervisor
 from random import shuffle
+
+def rol_num(x):
+    return int(x[x.find('s/supervised') + len('s/supervised'):])
 
 
 
@@ -21,6 +26,7 @@ def load_rollouts(clean, rand, r_rng, f_rng, outfile, name = None):
     if len(supervisor_dirs) < np.max(r_rng):
         return True
     supervisor_dirs = supervisor_dirs[r_rng[0]:r_rng[1]]
+    # supervisor_dirs = supervisor_dirs[65:125] + supervisor_dirs[155:195]
 
     for dirname in supervisor_dirs:
         deltas = []
@@ -29,24 +35,24 @@ def load_rollouts(clean, rand, r_rng, f_rng, outfile, name = None):
             states = []
             states_file = open(dirname + '/states.txt', 'r')
 
+
         i = 0
         if clean:
             for delta, state in zip(deltas_file, states_file):
                 if (i >= f_rng[0] and i <= f_rng[1]) or f_rng[1] == -1:
-                    deltas.append(delta)
                     states.append(state)
                 i += 1
-        else:
-            for delta in deltas_file:
-                if (i >= f_rng[0] and i <= f_rng[1]) or f_rng[1] == -1:
-                    deltas.append(delta)
-                i += 1
+
+        for delta in deltas_file:
+            if (i >= f_rng[0] and i <= f_rng[1]) or f_rng[1] == -1:
+                deltas.append(delta)
+            i += 1
         # print deltas, states
+
         deltas_file.close()
-        if clean:
-            states_file.close()
 
         if clean:
+            states_file.close()
             new_deltas = scripts.clean_supervisor.clean_repeats(states, deltas)
         else:
             new_deltas = deltas

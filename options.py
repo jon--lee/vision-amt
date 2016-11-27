@@ -57,6 +57,7 @@ class AMTOptions(Options):
     policies_dir = Options.amt_dir + "policies/"
     supervised_dir = Options.amt_dir + "supervised_rollouts/"
     templates_dir = Options.amt_dir + "templates/"
+    gpu_options_fraction = 0.08
 
     # for zeke
     # ROTATE_UPPER_BOUND = 3.82

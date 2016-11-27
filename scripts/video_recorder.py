@@ -1,7 +1,7 @@
-from pipeline.bincam import BinaryCamera
-import cv2
-import time
-from options import Options
+# from pipeline.bincam import BinaryCamera
+# import cv2
+# import time
+# from options import Options
 
 
 from time import time
@@ -14,10 +14,19 @@ from template_finder import TemplateGUI
 
 
 class VideoMaker(object):
-    def __init__(self,rng =[]):
-        self.addr = "data/amt/supervised_rollouts/Caleb_rollouts/"
-        self.rollouts = self.compileList(rng)
+    def __init__(self,rng =[],addr="data/amt/supervised_rollouts/Aimee_rollouts/",supervised=True):
+        self.addr = addr
+        if supervised:
+            self.rollouts = self.compileList(rng)
+        else:
+            self.rollouts = self.compileRol(rng)
      
+
+    def compileRol(self,rng):
+        rollouts = []
+        for r in rng:
+            rollouts.append("rollout"+str(r))
+        return rollouts
 
 
     def compileList(self,rng):
@@ -45,7 +54,7 @@ class VideoMaker(object):
         
         for rollout in self.rollouts:
             for i in range(0,100):
-                img = cv2.imread(self.addr+rollout+'/'+rollout+'_frame_'+str(i)+'.jpg',1)
+                img = cv2.imread(self.addr+rollout+'/'+'Aimee_'+rollout+'_frame_'+str(i)+'.jpg',1)
                 writer.write(img)
 
         writer.release()
@@ -57,7 +66,7 @@ class VideoMaker(object):
         
         for rollout in self.rollouts:
             for i in range(0,100):
-                img = cv2.imread(self.addr+rollout+'/'+'Caleb_' + rollout+'_frame_'+str(i)+'.jpg',1)
+                img = cv2.imread(self.addr+rollout+'/'+'Aimee_' + rollout+'_frame_'+str(i)+'.jpg',1)
                 writer.write(img)
 
         writer.release()
@@ -69,6 +78,22 @@ class VideoMaker(object):
 
     def run_many(self):
         self.filmSupervised(self.rollouts)
+
+    def run_rols(self):
+        self.filmAnis()
+        # self.filmRollouts(self.rollouts)
+
+    def filmAnis(self):
+        fourcc = cv2.cv.CV_FOURCC(*'mp4v')
+
+        writer = cv2.VideoWriter(self.addr+'anim'+'.mov', fourcc, 20.0, (1200,1200))
+        
+        for rollout in self.rollouts:
+            for i in range(0,150):
+                img = cv2.imread(self.addr+str(i)+'.jpg',1)
+                writer.write(img)
+
+        writer.release()
             
 
 
@@ -76,9 +101,9 @@ class VideoMaker(object):
 
 if __name__ == '__main__':
     print "running"
-    rng = [i for i in range(0, 5)]
-    ct = VideoMaker(rng)
-    ct.run_many()
+    rng = [i for i in [17,23]]
+    ct = VideoMaker(rng,addr="anis/test_rotate_diamond_ani/",supervised=False)
+    ct.run_rols()
 
 
 # bc = BinaryCamera("./meta.txt")
