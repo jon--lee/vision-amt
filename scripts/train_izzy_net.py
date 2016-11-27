@@ -41,6 +41,8 @@ if __name__ == '__main__':
                         help="determines if a butterworth filter should be applied over the data, of order N")
     parser.add_argument("-t", "--test_size", type=int,
                         help="determines the size of the test set")
+    parser.add_argument("-s", "--skip", type=str,
+                        help="a path to a file, which contains the line 'Holdout Trajectories:' followed by space separated holdout numbers")
     args = parser.parse_args()
     if args.name is not None:
         person = args.name 
@@ -103,7 +105,17 @@ if __name__ == '__main__':
 
         
         outfile.close()
-    skipped = compile_supervisor.compile_reg(smooth=smooth, num=test_size)
+    if args.skip is None:
+        skipped = compile_supervisor.compile_reg(smooth=smooth, num=test_size)
+    else:
+        holdout = []
+        skip_file = open(args.skip, 'r')
+        for line in skip_file:
+            if line.find("Holdout Trajectories:") != -1:
+                values = line.split(' ')
+                for value in values[2:]:
+                    holdout.append(int(value))
+        skipped = compile_supervisor.compile_reg(skipped = holdout, smooth=smooth, num=test_size)
 
     data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file,channels=3)
     net = net6.NetSix()

@@ -46,12 +46,13 @@ def states_to_line(state_start, state_next):
 def rescale_sup(deltas):
     # deltas[0] = deltas[0]*0.00754716981132
     # deltas[1] = deltas[1]*0.004
-    deltas[0] = deltas[0]*0.02666666666667
-    deltas[1] = deltas[1]*0.006
+    new_deltas = deltas.copy()
+    new_deltas[0] = deltas[0]*0.02666666666667
+    new_deltas[1] = deltas[1]*0.006
 
     # deltas[2] = 0.0
     # deltas[3] = 0.0
-    return deltas
+    return new_deltas
 
 def exagerrate_delta(delta):
     return np.array(delta) * 4
@@ -78,9 +79,9 @@ def state_to_pixel(state):
     # base_ext = .385 # The extention
     # ang_offset = np.pi + .28#0.26760734641 # the offset of horizontal from the angle
     L = 420 #size in pixels of the viewscreen
-    base_ext = .495 # The extention
+    base_ext = .4#.495 # The extention
     ang_offset = np.pi + .45#0.26760734641 # the offset of horizontal from the angle
-    bx, by = 270,180 #metersToPixels(.3), metersToPixels(.2)
+    bx, by = 195, 180#270,180 #metersToPixels(.3), metersToPixels(.2)
     ###
 
     grip_ang = -(float(state[0]) - ang_offset)
@@ -895,15 +896,15 @@ if __name__ == '__main__':
     # hards = [113, 83, 104, 12, 56, 71, 90, 66, 63, 67, 57, 28, 54, 59, 111, 55, 69, 74, 39, 5, 50, 75, 101, 97, 20, 48, 16, 13, 65, 87, 79, 99, 32, 34, 44, 38, 85, 102, 112, 95, 73, 22, 76, 17, 24, 4, 37, 107, 92, 23, 61, 77, 78, 30, 14, 72, 105, 46, 64, 7, 35, 93, 47, 60, 109, 94, 11, 58, 62, 45, 18, 110, 80, 43, 98, 40, 41, 106, 21, 86, 88, 6, 52, 108, 33, 15, 29, 36, 82, 100, 2, 70, 10, 0, 31, 1, 3, 26, 19, 89, 91, 8, 96, 9, 49, 27, 25, 42, 68, 53, 51, 84, 81, 103]
 
 
-    # options.tf_net_path = sys.argv[1]
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_09-03-2016_15h07m52s.ckpt'
+    options.tf_net_path = sys.argv[1]
+    # options.tf_net_path = '/media/1tb/Izzy/nets/net6_09-03-2016_15h07m52s.ckpt'
     sess = net.load(var_path=options.tf_net_path)
     # compare_supervisor_net_rol(options, net, sess, exclude, (0,-1), name='Caleb')
 
-    # evaluate_supervisor_net(options, net, sess, training=True)
-    # evaluate_supervisor_net(options, net, sess, training=False)
+    evaluate_supervisor_net(options, net, sess, training=True)
+    evaluate_supervisor_net(options, net, sess, training=False)
     # compare_supervisor_net(options, net, sess, range(65, 125), (0,-1), name='Caleb', exclude=exclude)
-    compare_supervisor_net(options, net, sess, range(425, 455), (0,-1))
+    # compare_supervisor_net(options, net, sess, range(425, 455), (0,-1))
     # compare_supervisor_net(options, net, sess, range(315, 415), (0,-1))
 
     # compare_supervisor_deltas(options, net, sess, range(0,5), f_rng = (0,-1), name='Jonathan', o_rng=(0,4))

@@ -1,12 +1,12 @@
-import cv2, sys
+import cv2, sys, argparse
+# sys.path.append('/home/huarsc/research/vision-amt/')
 sys.path.append('/home/annal/Izzy/vision_amt/')
 import time
 from options import AMTOptions
 import numpy as np
-from Net.tensor import inputdata, net3,net4,net5,net6, net6_c
 import matplotlib.pyplot as plt
 import scripts.izzy_feedback as feedback
-import scripts.visualizer_supervised.py as vis
+import scripts.visualizer_supervised as vis
 
 def get_names(name):
     if len(name) != 0:
@@ -30,7 +30,6 @@ def get_test(folname, imname, test):
     if len(test) != 0:
         folname = folname + test + '/'
         imname = imname + test + '_'
-    print test, folname
     return folname, imname
 
 def states_file_path(name, test, traj):
@@ -46,40 +45,16 @@ def assign_path(image_path, rollout_num, options, name='', test='', frame_num = 
         return options.rollouts_dir + folname + 'rollout'+str(rollout_num) +'/rollout'+str(rollout_num) + '_frame_' + str(frame_num) + '.jpg'
     return None
 
-def convert_delta(f_delta):
+def convert_delta(delta):
     new_delta = [0.0] * 6
     new_delta[0] = delta[0]
     new_delta[2] = delta[1]
     return new_delta
 
-def draw_trajectory(image_path, traj_num, evaluations, name='', test = '', hard=0):
-    initial_image = cv2.imread(image_path)
-    states = open(states_file_path(name, test, traj_num), 'r')
-    first = True
-    i = 0
-    for stv, delta in zip(states, evaluations):
-        if first:
-            last = vis.bound_state(vis.string_state(stv))
-            first = False
-            continue
-        state = vis.bound_state(vis.string_state(stv))
-        sup_change = vis.states_to_line(last, state)
-        state_pts = vis.state_to_pixel(state)
 
-        f_delta = convert_delta(f_delta)
-        f_change = vis.command_to_line(f_delta, state)
-        if hard == i:
-            color = (0,191,191)
-        else:
-            color = (50, 100, 100)
-        vis.draw_result(initial_image, f_change, color = (0,191,191))
-        vis.draw_result(initial_image, sup_change, color = (0,255,0), thick = 1)
-        state = last
-        i += 1
-    return initial_image
 
 def highest_errors(all_names_errs, num):
-    highest = [-1 for _ in range(num)]
+    highest = [(-1, -1) for _ in range(num)]
     i = 0
     for name, e, label, ev, stv in all_names_errs:
         err = np.linalg.norm(e)
@@ -94,6 +69,7 @@ def threshold_errs(all_names_errs, threshold):
     for name, e, label, ev, stv in all_names_errs:
         err = np.linalg.norm(e)
         if err > threshold:
+            print(e)
             over.append(i)
         i += 1
     return over
@@ -106,7 +82,7 @@ def read_err_line(line):
     sp = vals[2].split(' ')
     label = np.array([float(sp[0]), float(sp[1])])
     sp = vals[3].split(' ')
-    evaluation = np.array([float(sp[0]), float(sp[1])])
+    ev = np.array([float(sp[0]), float(sp[1])])
     sp = vals[4].split(' ')
     state = np.array([float(sp[0]), float(sp[1]), float(sp[2]), float(sp[3])])
     return (name, e, label, ev, state)
@@ -132,8 +108,8 @@ def get_evaluations(all_names_errs, i):
         curnum = traj_num(name)
         if curnum != rnum:
             break
-        evals = [ev] + evals
-        states = [stv] + states
+        evals = evals + [ev]
+        states = states + [stv]
         at += 1
     return evals, states
 
@@ -144,28 +120,37 @@ def gather_feedback(error_path, new_deltas_path, pname='', test=''):
     errs_vals = open(error_path, 'r')
     all_names_errs = []
 
-    new_deltas = []
+    new_deltas = dict()
     for name, e, label, ev, stv in all_names_errs:
         new_deltas.append(label)
 
     for line in errs_vals:
         all_names_errs.append(read_err_line(line))
-    above = threshold_errs(all_names_errs, .001)
+    above = threshold_errs(all_names_errs, 1.5)
     worst = highest_errors(all_names_errs, 20)
 
     for a in above:
-        name, e, label, ev, stv = all_names_errs[a]:
+        name, e, label, ev, stv = all_names_errs[a]
         i = frame_num(name)
         rnum = traj_num(name)
-        pth = assign_path(AMTOptions.supervised_dir, rnum, AMTOptions, pname, i)
-        evaluations, states = get_evaluations_states(all_names_errs, i)
-        base_im = draw_trajectory(pth, rnum, evaluations, pname, test, hard)
-        deltas = feedback.correct_rollout(deltas, image_path, i, states)
-        for delta in deltas:
-            new_deltas[a + i - delta(0)] = delta[1]
+        pth = assign_path(AMTOptions.supervised_dir, rnum, AMTOptions, pname, frame_num=i)
+        evaluations, states = get_evaluations(all_names_errs, a)
+        # base_im = draw_trajectory(pth, rnum,  i)
+        # impath = pth[:pth.find('.jpg')-1]
+        if rnum in new_deltas:
+            deltas = feedback.correct_rollout(pth, i, states, evaluations, rnum, pname, test, new_deltas[rnum])
+        else:            
+            deltas = feedback.correct_rollout(pth, i, states, evaluations, rnum, pname, test)
+        if deltas:
+            if rnum not in new_deltas:
+                new_deltas[rnum] = dict()
+            for index, delta in deltas.items():
+                new_deltas[rnum][index] = delta
     new_delta_file = open(new_deltas_path, 'w')
-    for delta in new_deltas:
-        new_delta_file.write(new_deltas)
+    for rnum in new_deltas.keys():
+        for fnum in new_deltas[rnum].keys():
+            new_delta_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + str(new_deltas[rnum][fnum][0]) + "\t" + str(new_deltas[rnum][fnum][1]) + "\n")
+    new_delta_file.close()
 
 
 if __name__ == '__main__':
@@ -176,4 +161,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.test == None:
         args.test = ''
-    k_test(6, AMTOptions.deltas_file, .02, AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/" + args.output, args.name, args.test)
+    gather_feedback(AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/comparisons.txt", AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/new_deltas.txt", args.name, args.test)

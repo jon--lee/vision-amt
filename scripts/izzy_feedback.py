@@ -7,6 +7,9 @@ import numpy as np
 from PIL import Image
 import sys, argparse, os
 sys.path.append('/home/annal/Izzy/vision_amt/scripts/objects/')
+# sys.path.append('/home/huarsc/research/vision-amt/scripts/objects/')
+import scripts.visualizer_supervised as vis
+
 from helper import pasteOn
 import tty, termios
 
@@ -29,12 +32,23 @@ img = np.zeros((512,512,3), np.uint8)
 drawing = False # true if mouse is pressed
 mode = True # if True, draw rectangle. Press 'm' to toggle to curve
 ix,iy = -1,-1
-record = True
+record = False
 tx, ty = -1,-1
+
+def states_file_path(name, test, traj):
+    return AMTOptions.supervised_dir + name + "_rollouts/" + test + "/supervised" + str(traj)+ "/states.txt"
+
+def convert_delta(delta):
+    new_delta = [0.0] * 6
+    # print delta
+    new_delta[0] = delta[0]
+    new_delta[2] = delta[1]
+    return new_delta
+
 
 # mouse callback function
 def draw_circle(event,x,y,flags,param):
-    global ix,iy,drawing,mode, img, tx, ty
+    global ix,iy,drawing,mode, img, tx, ty, record
 
     if event == cv2.EVENT_LBUTTONDOWN:
         drawing = True
@@ -55,6 +69,7 @@ def draw_circle(event,x,y,flags,param):
         drawing = False
         ix, iy = -1, -1
         record = True
+        print "up"
 
         # print drawing
         # if mode == True:
@@ -107,9 +122,9 @@ def state_to_pixel(state):
 
 def state_to_value(state):
     L = 420 #size in pixels of the viewscreen
-    base_ext = .41 # The extention
-    ang_offset = np.pi + .42#0.26760734641 # the offset of horizontal from the angle
-    by, bx = 210,250#metersToPixels(.3), metersToPixels(.2)
+    base_ext = .4#.41 # The extention
+    ang_offset = np.pi + .41#0.26760734641 # the offset of horizontal from the angle
+    by, bx = 195, 250#210,250#metersToPixels(.3), metersToPixels(.2)
 
     grip_ang = (float(state[0]) - ang_offset)
     grip_ext = (float(state[2]) + base_ext)
@@ -205,15 +220,16 @@ def save_data(feedback, write_path):
         write_file.write(str(line[0]) + ' ' + str(line[1]) + ' ' + str(line[2]) + '\n')
     write_file.close()
 
-def draw_state(state, colors_path, arm, img):
+def draw_state(state, colors_path, arm, finger_L, finger_R, img):
+    print "Draw state", state
     o_stv = state_to_value(state)
+    print o_stv
     ix, iy = o_stv[0], o_stv[1]
     newstate, delta = convert_locations(state, ix, iy, tx, ty)
     stv = state_to_value(newstate)
+
     
     # cv2.circle(img,paste,10,(0,0,255),4)
-    # cv2.circle(img, stv, 10, (255,0,0), 4)
-    # cv2.circle(img, o_stv, 10, (0,0,255), 4)
 
     rot = (newstate[0]- np.pi - .42)
     paste, newarm = base_frame(rot, arm, newstate)
@@ -223,11 +239,19 @@ def draw_state(state, colors_path, arm, img):
 
     pil_img = Image.fromarray(img)
     pasteOn(pil_img, newarm, paste[0], paste[1])
-    print paste_R, ix, iy, tx, ty, delta
+    # print paste_R, ix, iy, tx, ty, delta
     pasteOn(pil_img, f_R, paste_R[0], paste_R[1])
     pasteOn(pil_img, f_L, paste_L[0], paste_L[1])
 
     img = np.array(pil_img)
+    # f_delta = convert_delta(np.array(delta))
+    # f_change, true_f = vis.command_to_line(f_delta, state)
+    # vis.draw_result(img, f_change, color = (255,0,0), thick = 2)
+    cv2.circle(img, stv, 10, (255,0,0), 4)
+    cv2.circle(img, o_stv, 10, (0,0,255), 4)
+    cv2.line(img, stv, o_stv, (255, 0, 0), 2)
+    # cv2.imshow("pil", img)
+    # cv2.waitKey(0)
     return img, delta
 
 options = AMTOptions()
@@ -309,7 +333,7 @@ def draw_rollouts(r_lst, name, record=False, supervised=False):
             M = cv2.getRotationMatrix2D((cols/2,rows/2),270,1)
             img = cv2.warpAffine(img,M,(cols,rows))
             if drawing:
-                img, delta = draw_state(state, colors_path, arm, img)
+                img, delta = draw_state(state, colors_path, arm, finger_L, finger_R, img)
                 feedback.append([colors_path + str(i) + '.jpg'] + delta)
                 # cv2.rectangle(img,(ix,iy),(tx,ty),(0,255,0),-1)
             
@@ -365,41 +389,133 @@ def draw_rollouts(r_lst, name, record=False, supervised=False):
     # print feedback
     
 
-
     cv2.destroyAllWindows()
 
-def correct_rollout(deltas, image_path, i, states):
+def draw_trajectory(image_path, traj_num, evaluations, name='', test = '', hard=0, deltas=None):
+    initial_image = cv2.imread(image_path)
+
+    states = open(states_file_path(name, test, traj_num), 'r')
+    first = True
+    i = 0
+    drawafter = []
+    states_lst = []
+    thisstate = None
+    for stv, delta in zip(states, evaluations):
+        if first:
+            last = vis.bound_state(vis.string_state(stv))
+            first = False
+            continue
+        state = vis.bound_state(vis.string_state(stv))
+        states_lst.append(state)
+        sup_change = vis.states_to_line(last, state)
+        state_pts = vis.state_to_pixel(state)
+
+        f_delta = convert_delta(vis.rescale_sup(delta))
+        f_change, true_f = vis.command_to_line(f_delta, state)
+        if hard == i:
+            print sup_change
+            thisstate = state
+            color = (0,191,191)
+        else:
+            color = (50, 100, 100)
+        if i in deltas:
+            if deltas[i] != "delete":
+                vis.draw_result(initial_image, f_change, color = color, thick = 2)
+        else:
+            vis.draw_result(initial_image, f_change, color = color, thick = 2)
+
+        vis.draw_result(initial_image, sup_change, color = (0,255,0), thick = 1)
+        last = state
+        i += 1
+    if deltas is not None:
+        for key in deltas.keys():
+            if deltas[key] != "delete":
+                f_delta = convert_delta(np.array(deltas[key]))
+                f_change, true_f = vis.command_to_line(f_delta, states_lst[key])
+                vis.draw_result(initial_image, f_change, color = (0,0,255), thick=2)
+    states.close()
+    return initial_image, thisstate
+
+def correct_rollout(image_path, i, states, evaluations, rnum, pname, test='', deltas=None):
+    global record
     cv2.namedWindow('image')
-    arm = Image.open("scripts/Arm_lbl_prv.png").rotate(90)
-    finger_L = Image.open("scripts/Gripper_t_lbl.png").rotate(90)
-    finger_R = Image.open("scripts/Gripper_lbl.png").rotate(90)
+    arm = Image.open("scripts/Arm_lbl_prv.png").rotate(90, expand =1)
+    finger_L = Image.open("scripts/Gripper_t_lbl.png").rotate(90, expand =1)
+    finger_R = Image.open("scripts/Gripper_lbl.png").rotate(90, expand =1)
+    # arm = Image.open("scripts/objects/back.png")
+    # pasteOn(arm, full_arm, arm.size[0]/2, 0)
+    # pasteOn(finger_L, full_arm, arm.size[0]/2, 100)
+    # pasteOn(finger_R, full_arm, arm.size[0]/2, 100)
+    # cv2.imshow("name", np.array(arm))
+    # cv2.waitKey(0)
     cv2.setMouseCallback('image',draw_circle)
     end = False
-    deltas = []
+    if deltas is None:
+        deltas = dict()
+    hasnext = True
+
+    getanother = True
     while not end:
         if getanother:
-            image_frame = image_path + str(i) + '.jpg'
-            img = cv2.imread(image_frame)
-            state = states[i]
-            M = cv2.getRotationMatrix2D((cols/2,rows/2),270,1)
-            img = cv2.warpAffine(img,M,(cols,rows))
-        rows,cols,colour = img.shape
+
+            image_frame = image_path[:image_path.find('_frame_') + len('_frame_')] + str(i+1) + '.jpg'
+            # print image_frame
+            imgnxt = cv2.imread(image_frame)
+            if imgnxt is None:
+                image_frame = image_path[:image_path.find('_frame_') + len('_frame_')] + str(i) + '.jpg'
+                # print image_frame
+                imgnxt = cv2.imread(image_frame)
+                if imgnxt is None:
+                    hasnext = False
+
+
+            if hasnext:
+                print image_frame
+                img, state = draw_trajectory(image_frame, rnum, evaluations, name=pname, test = test, hard=i, deltas=deltas)
+                print state
+                hasnext = True
+                # state = states[i]
+                print state
+                cols, rows, colsiz = img.shape
+                M = cv2.getRotationMatrix2D((cols/2,rows/2),270,1)
+                img = cv2.warpAffine(img,M,(cols,rows))
+            getanother = False
         t_img = img
         if drawing:
-            t_img, delta = draw_state(state, colors_path, arm, img)
+            t_img, delta = draw_state(state, image_frame, arm, finger_L, finger_R,  img)
         cv2.imshow("image",t_img) # draws a line along the length of the gripper
         a = cv2.waitKey(30)
-        if a == 2555904:
+        if a == ord('.'):
+            print "right"
             i += 1 # right
             getanother = True
-        elif a == 2424832:
+            hasnext = True
+        elif a == ord(','):
+            print "left"
+            print i
             i -= 1 # left
             getanother = True
+            hasnext = True
+        elif a == ord('d'):
+            deltas[i] = "delete"
+            print("appended delete")
+            print deltas
+        elif a == ord('r'):
+            delta = vis.rescale_sup(evaluations[i])
+            deltas[i] = delta
+            print("used robot choice")
+            print deltas
+        elif a == ord('s'):
+            deltas.pop(i, None)
+            print("popped " + str(i))
+            print deltas
         elif a == 27:
             end = True
-        if record == True:
-            deltas.append((i, delta))
+        if record:
             record = False
+            deltas[i] = delta
+            print deltas
+
     return deltas
 
 
