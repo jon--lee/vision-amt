@@ -1,6 +1,6 @@
 import cv2, sys, argparse
-# sys.path.append('/home/huarsc/research/vision-amt/')
-sys.path.append('/home/annal/Izzy/vision_amt/')
+sys.path.append('/home/huarsc/research/vision-amt/')
+# sys.path.append('/home/annal/Izzy/vision_amt/')
 import time
 from options import AMTOptions
 import numpy as np
@@ -66,12 +66,17 @@ def highest_errors(all_names_errs, num):
 def threshold_errs(all_names_errs, threshold):
     over = []
     i = 0
+    errs = []
     for name, e, label, ev, stv in all_names_errs:
         err = np.linalg.norm(e)
+        errs.append(err)
         if err > threshold:
             print(e)
             over.append(i)
         i += 1
+    errs.sort()
+    plt.plot(errs)
+    plt.show()
     return over
 
 def read_err_line(line):
@@ -104,19 +109,22 @@ def get_evaluations(all_names_errs, i):
     curnum = rnum 
     at = i+1
     while True:
-        name, e, label, ev, stv = all_names_errs[at]
-        curnum = traj_num(name)
-        if curnum != rnum:
+        try:
+            name, e, label, ev, stv = all_names_errs[at]
+            curnum = traj_num(name)
+            if curnum != rnum:
+                break
+            evals = evals + [ev]
+            states = states + [stv]
+            at += 1
+        except IndexError as e:
             break
-        evals = evals + [ev]
-        states = states + [stv]
-        at += 1
     return evals, states
 
 
 
 
-def gather_feedback(error_path, new_deltas_path, pname='', test=''):
+def gather_feedback(error_path, new_deltas_path, output_file_path, pname='', test=''):
     errs_vals = open(error_path, 'r')
     all_names_errs = []
 
@@ -126,7 +134,7 @@ def gather_feedback(error_path, new_deltas_path, pname='', test=''):
 
     for line in errs_vals:
         all_names_errs.append(read_err_line(line))
-    above = threshold_errs(all_names_errs, 1.5)
+    above = threshold_errs(all_names_errs, 1.3)
     worst = highest_errors(all_names_errs, 20)
 
     for a in above:
@@ -146,11 +154,19 @@ def gather_feedback(error_path, new_deltas_path, pname='', test=''):
                 new_deltas[rnum] = dict()
             for index, delta in deltas.items():
                 new_deltas[rnum][index] = delta
-    new_delta_file = open(new_deltas_path, 'w')
+    new_delta_file = open(new_deltas_path + output_file_path, 'w')
     for rnum in new_deltas.keys():
         for fnum in new_deltas[rnum].keys():
             new_delta_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + str(new_deltas[rnum][fnum][0]) + "\t" + str(new_deltas[rnum][fnum][1]) + "\n")
     new_delta_file.close()
+
+    new_remove_file = open(new_deltas_path + "new_remove.txt", 'w')
+    for a in above:
+        name, e, label, ev, stv = all_names_errs[a]
+        fnum = frame_num(name)
+        rnum = traj_num(name)
+        new_remove_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + "d" + "\t" + "e" + "\n")
+    new_remove_file.close()
 
 
 if __name__ == '__main__':
@@ -161,4 +177,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.test == None:
         args.test = ''
-    gather_feedback(AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/comparisons.txt", AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/new_deltas.txt", args.name, args.test)
+    gather_feedback(AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/comparisons.txt", AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/", args.output, args.name, args.test)

@@ -40,8 +40,8 @@ echo "sup60"
 
 echo "Sona"
 echo "sup60"
-#tpython scripts/error_cleaner.py -n Jonathan -o comparisons.txt -f 0 -l 60
+tpython scripts/error_cleaner.py -n Sona -o comparisons.txt -f 0 -l 60
 
 echo "Richard"
 echo "sup60"
-tpython scripts/error_cleaner.py -n Richard -o comparisons.txt -f 0 -l 60
+#tpython scripts/error_cleaner.py -n Richard -o comparisons.txt -f 0 -l 60
