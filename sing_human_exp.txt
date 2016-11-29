@@ -637,6 +637,8 @@ set([24, 10, 3, 18, 15])
 SMOOTHNG:
 Aimee 300 iterations Butterworth 5 filter:
 /media/1tb/Izzy/nets/net6_11-22-2016_15h39m05s.ckpt
+[ Iteration 279 ] Training rotation loss: 0.00204767  Training extension loss: 0.000544081  Training norm loss: 0.167467909929
+[ Iteration 280 ] Testing rotation loss: 0.0063333  Testing extension loss: 0.00179175  Testing norm loss: 0.536123625739
 
-Aimee 700 iterations Butterworth 5 filter:
+Aimee 700 iterations Butterworth 5 filter: (60sup test)
 /media/1tb/Izzy/nets/net6_11-22-2016_13h49m16s.ckpt

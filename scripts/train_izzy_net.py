@@ -8,9 +8,12 @@ from options import AMTOptions
 import numpy as np, argparse
 from scripts import compile_supervisor, merge_supervised
 
-def copy_over(infile, outfile, first, last, frame_first=0, frame_last=100):
+def copy_over(infile, outfile, first, last, frame_first=0, frame_last=100, supervised=False):
     lines = infile.readlines()
-    rol_num = lambda x: int(x[x.find('_rollout') + len('_rollout'):x.find('_frame_')])
+    if supervised:
+        rol_num = lambda x: int(x[x.find('_supervised') + len('_supervised'):x.find('_frame_')])
+    else:
+        rol_num = lambda x: int(x[x.find('_rollout') + len('_rollout'):x.find('_frame_')])
     frame_num = lambda x: int(x[x.find('_frame_') + len('_frame_'):x.find('.jpg')])
     for line in lines:
         # print line, rol_num(line), first, last
@@ -41,8 +44,11 @@ if __name__ == '__main__':
                         help="determines if a butterworth filter should be applied over the data, of order N")
     parser.add_argument("-t", "--test_size", type=int,
                         help="determines the size of the test set")
-    parser.add_argument("-s", "--skip", type=str,
+    parser.add_argument("-ho", "--holdout", type=str,
                         help="a path to a file, which contains the line 'Holdout Trajectories:' followed by space separated holdout numbers")
+    parser.add_argument("-dn", "--deltasname", type=str,
+                        help="a path to the file containing deltas to be used. If none, uses deltas from another source")
+
     args = parser.parse_args()
     if args.name is not None:
         person = args.name 
@@ -73,47 +79,52 @@ if __name__ == '__main__':
         print "specify type"
         sys.exit()
     outfile = open(AMTOptions.amt_dir + 'deltas.txt', 'w+')
-    if sup:
-        failure = merge_supervised.load_rollouts(False, False, (first,last), (initial,end), outfile, name = person)
-        if failure:
-            print "did not have the sufficient rollouts specified"
-        outfile.close()
+    if args.deltasname is None:
+        if sup:
+            failure = merge_supervised.load_rollouts(False, False, (first,last), (initial,end), outfile, name = person)
+            if failure:
+                print "did not have the sufficient rollouts specified"
+            outfile.close()
+        else:
+            failure = merge_supervised.load_rollouts(False, False, (0,20), (0,-1), outfile, name = person)
+            if failure:
+                print "did not have the sufficient rollouts specified... Do you have at least 20 supervised rollouts"
+                sys.exit()
+            f = []
+            for (dirpath, dirnames, filenames) in os.walk(AMTOptions.rollouts_dir + person + "_rollouts/"):
+                f.extend(filenames)
+            for filename in f:
+                read_path = AMTOptions.rollouts_dir + person + "_rollouts/" + filename
+                if read_path.find("retroactive_feedback") != -1 and read_path.find("~") == -1:
+                    print filename
+                    paths = filename.split('_')
+                    index = len('feedback')
+                    end_index = paths[2].find(".txt")
+                    start = int(paths[1][index:])
+                    end = int(paths[2][:end_index])
+                    print start, end
+                    if start < last and first <= end:
+                        infile = open(read_path, 'r')
+
+                        copy_over(infile, outfile, max(start, first), min(last, end), frame_first =initial, frame_last=end)
+                        infile.close()
+            outfile.close()
     else:
-        failure = merge_supervised.load_rollouts(False, False, (0,20), (0,-1), outfile, name = person)
-        if failure:
-            print "did not have the sufficient rollouts specified... Do you have at least 20 supervised rollouts"
-            sys.exit()
-        f = []
-        for (dirpath, dirnames, filenames) in os.walk(AMTOptions.rollouts_dir + person + "_rollouts/"):
-            f.extend(filenames)
-        for filename in f:
-            read_path = AMTOptions.rollouts_dir + person + "_rollouts/" + filename
-            if read_path.find("retroactive_feedback") != -1 and read_path.find("~") == -1:
-                print filename
-                paths = filename.split('_')
-                index = len('feedback')
-                end_index = paths[2].find(".txt")
-                start = int(paths[1][index:])
-                end = int(paths[2][:end_index])
-                print start, end
-                if start < last and first <= end:
-                    infile = open(read_path, 'r')
-
-                    copy_over(infile, outfile, max(start, first), min(last, end), frame_first =initial, frame_last=end)
-                    infile.close()
-            
-
-        
+        outfile = open(AMTOptions.amt_dir + 'deltas.txt', 'w+')
+        infile = open(AMTOptions.amt_dir + "cross_computations/" + person + "_crossvals/" + args.deltasname, 'r')
+        copy_over(infile, outfile, 0, 60, frame_first=0, frame_last=-1, supervised=True)
         outfile.close()
-    if args.skip is None:
+        infile.close()
+    if args.holdout is None:
         skipped = compile_supervisor.compile_reg(smooth=smooth, num=test_size)
     else:
         holdout = []
-        skip_file = open(args.skip, 'r')
+        skip_file = open(AMTOptions.amt_dir + "cross_computations/" + person + "_crossvals/" + args.holdout, 'r')
         for line in skip_file:
             if line.find("Holdout Trajectories:") != -1:
                 values = line.split(' ')
-                for value in values[2:]:
+                print values
+                for value in values[2:-1]:
                     holdout.append(int(value))
         skipped = compile_supervisor.compile_reg(skipped = holdout, smooth=smooth, num=test_size)
 
