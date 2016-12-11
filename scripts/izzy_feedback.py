@@ -6,8 +6,8 @@ from options import AMTOptions
 import numpy as np
 from PIL import Image
 import sys, argparse, os
-sys.path.append('/home/annal/Izzy/vision_amt/scripts/objects/')
-# sys.path.append('/home/huarsc/research/vision-amt/scripts/objects/')
+# sys.path.append('/home/annal/Izzy/vision_amt/scripts/objects/')
+sys.path.append('/home/huarsc/research/vision-amt/scripts/objects/')
 import scripts.visualizer_supervised as vis
 
 from helper import pasteOn
