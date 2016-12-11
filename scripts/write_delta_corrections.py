@@ -1,5 +1,6 @@
 import cv2, sys, argparse
-sys.path.append('/home/huarsc/research/vision-amt/')
+# sys.path.append('/home/huarsc/research/vision-amt/')
+sys.path.append('/home/annal/Izzy/vision_amt/')
 from scripts import merge_supervised
 from options import AMTOptions
 
