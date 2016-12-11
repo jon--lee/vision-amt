@@ -137,28 +137,28 @@ def gather_feedback(error_path, new_deltas_path, output_file_path, pname='', tes
     above = threshold_errs(all_names_errs, 1.3)
     worst = highest_errors(all_names_errs, 20)
 
-    # for a in above:
-    #     name, e, label, ev, stv = all_names_errs[a]
-    #     i = frame_num(name)
-    #     rnum = traj_num(name)
-    #     pth = assign_path(AMTOptions.supervised_dir, rnum, AMTOptions, pname, frame_num=i)
-    #     evaluations, states = get_evaluations(all_names_errs, a)
-    #     # base_im = draw_trajectory(pth, rnum,  i)
-    #     # impath = pth[:pth.find('.jpg')-1]
-    #     if rnum in new_deltas:
-    #         deltas = feedback.correct_rollout(pth, i, states, evaluations, rnum, pname, test, new_deltas[rnum])
-    #     else:            
-    #         deltas = feedback.correct_rollout(pth, i, states, evaluations, rnum, pname, test)
-    #     if deltas:
-    #         if rnum not in new_deltas:
-    #             new_deltas[rnum] = dict()
-    #         for index, delta in deltas.items():
-    #             new_deltas[rnum][index] = delta
-    # new_delta_file = open(new_deltas_path + output_file_path, 'w')
-    # for rnum in new_deltas.keys():
-    #     for fnum in new_deltas[rnum].keys():
-    #         new_delta_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + str(new_deltas[rnum][fnum][0]) + "\t" + str(new_deltas[rnum][fnum][1]) + "\n")
-    # new_delta_file.close()
+    for a in above:
+        name, e, label, ev, stv = all_names_errs[a]
+        i = frame_num(name)
+        rnum = traj_num(name)
+        pth = assign_path(AMTOptions.supervised_dir, rnum, AMTOptions, pname, frame_num=i)
+        evaluations, states = get_evaluations(all_names_errs, a)
+        # base_im = draw_trajectory(pth, rnum,  i)
+        # impath = pth[:pth.find('.jpg')-1]
+        if rnum in new_deltas:
+            deltas = feedback.correct_rollout(pth, i, states, evaluations, rnum, pname, test, new_deltas[rnum])
+        else:            
+            deltas = feedback.correct_rollout(pth, i, states, evaluations, rnum, pname, test)
+        if deltas:
+            if rnum not in new_deltas:
+                new_deltas[rnum] = dict()
+            for index, delta in deltas.items():
+                new_deltas[rnum][index] = delta
+    new_delta_file = open(new_deltas_path + output_file_path, 'w')
+    for rnum in new_deltas.keys():
+        for fnum in new_deltas[rnum].keys():
+            new_delta_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + str(new_deltas[rnum][fnum][0]) + "\t" + str(new_deltas[rnum][fnum][1]) + "\n")
+    new_delta_file.close()
 
 
 
@@ -170,14 +170,14 @@ def gather_feedback(error_path, new_deltas_path, output_file_path, pname='', tes
     #     new_remove_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + "d" + "\t" + "e" + "\n")
     # new_remove_file.close()
 
-    new_robot_replace_file = open(new_deltas_path + "new_robot_alter.txt", 'w')
-    for a in above:
-        name, e, label, ev, stv = all_names_errs[a]
-        delta = vis.rescale_sup(ev)
-        fnum = frame_num(name)
-        rnum = traj_num(name)
-        new_robot_replace_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + str(delta[0]) + "\t" + str(delta[1]) + "\n")
-    new_robot_replace_file.close()
+    # new_robot_replace_file = open(new_deltas_path + "new_robot_alter.txt", 'w')
+    # for a in above:
+    #     name, e, label, ev, stv = all_names_errs[a]
+    #     delta = vis.rescale_sup(ev)
+    #     fnum = frame_num(name)
+    #     rnum = traj_num(name)
+    #     new_robot_replace_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + str(delta[0]) + "\t" + str(delta[1]) + "\n")
+    # new_robot_replace_file.close()
 
 
 if __name__ == '__main__':
