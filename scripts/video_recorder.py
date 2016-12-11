@@ -6,10 +6,12 @@
 
 from time import time
 import IPython
-import cv2
+import cv2, sys
 import numpy as np
 from matplotlib import pyplot as plt
 import numpy.linalg as LA
+
+from options import AMTOptions
 from template_finder import TemplateGUI
 
 
@@ -51,10 +53,13 @@ class VideoMaker(object):
         fourcc = cv2.cv.CV_FOURCC(*'mp4v')
 
         writer = cv2.VideoWriter(self.addr+'rollouts'+'.mov', fourcc, 10.0, (420,420))
-        
+        print self.rollouts
         for rollout in self.rollouts:
             for i in range(0,100):
-                img = cv2.imread(self.addr+rollout+'/'+'Aimee_'+rollout+'_frame_'+str(i)+'.jpg',1)
+                # img = cv2.imread(self.addr+rollout+'/'+'Aimee_'+rollout+'_frame_'+str(i)+'.jpg',1)
+                addr = self.addr+"Johan_rollouts/Alter_Sup60_test/"+rollout + "/Johan_Alter_Sup60_test_" + rollout + "_frame_" + str(i) + ".jpg"
+                print addr
+                img = cv2.imread(addr)
                 writer.write(img)
 
         writer.release()
@@ -80,8 +85,8 @@ class VideoMaker(object):
         self.filmSupervised(self.rollouts)
 
     def run_rols(self):
-        self.filmAnis()
-        # self.filmRollouts(self.rollouts)
+        # self.filmAnis()
+        self.filmRollouts(self.rollouts)
 
     def filmAnis(self):
         fourcc = cv2.cv.CV_FOURCC(*'mp4v')
@@ -101,8 +106,8 @@ class VideoMaker(object):
 
 if __name__ == '__main__':
     print "running"
-    rng = [i for i in [17,23]]
-    ct = VideoMaker(rng,addr="anis/test_rotate_diamond_ani/",supervised=False)
+    rng = [i for i in range(0,30)]
+    ct = VideoMaker(rng,addr=AMTOptions.rollouts_dir,supervised=False)
     ct.run_rols()
 
 

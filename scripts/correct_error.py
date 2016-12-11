@@ -1,6 +1,6 @@
 import cv2, sys, argparse
-sys.path.append('/home/huarsc/research/vision-amt/')
-# sys.path.append('/home/annal/Izzy/vision_amt/')
+# sys.path.append('/home/huarsc/research/vision-amt/')
+sys.path.append('/home/annal/Izzy/vision_amt/')
 import time
 from options import AMTOptions
 import numpy as np
@@ -74,9 +74,9 @@ def threshold_errs(all_names_errs, threshold):
             print(e)
             over.append(i)
         i += 1
-    errs.sort()
-    plt.plot(errs)
-    plt.show()
+    # errs.sort()
+    # plt.plot(errs)
+    # plt.show()
     return over
 
 def read_err_line(line):
@@ -160,13 +160,13 @@ def gather_feedback(error_path, new_deltas_path, output_file_path, pname='', tes
     #         new_delta_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + str(new_deltas[rnum][fnum][0]) + "\t" + str(new_deltas[rnum][fnum][1]) + "\n")
     # new_delta_file.close()
 
-    new_remove_file = open(new_deltas_path + "new_remove.txt", 'w')
-    for a in above:
-        name, e, label, ev, stv = all_names_errs[a]
-        fnum = frame_num(name)
-        rnum = traj_num(name)
-        new_remove_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + "d" + "\t" + "e" + "\n")
-    new_remove_file.close()
+    # new_remove_file = open(new_deltas_path + "new_remove.txt", 'w')
+    # for a in above:
+    #     name, e, label, ev, stv = all_names_errs[a]
+    #     fnum = frame_num(name)
+    #     rnum = traj_num(name)
+    #     new_remove_file.write(pname + "\t" + str(rnum) + "\t" + str(fnum) + "\t" + "d" + "\t" + "e" + "\n")
+    # new_remove_file.close()
 
 
 if __name__ == '__main__':
