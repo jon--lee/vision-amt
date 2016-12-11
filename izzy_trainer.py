@@ -467,7 +467,7 @@ if __name__ == "__main__":
     # test_file = open(options.templates_dir + '/error_correspondence_paths.txt', 'r')
 
     # template_file = open(options.templates_dir + '/demo_templates_paths_Aimee.txt', 'r')
-    options.tf_net_path = '/media/1tb/Izzy/nets/net6_11-28-2016_20h28m52s.ckpt'
+    options.tf_net_path = '/media/1tb/Izzy/nets/net6_11-27-2016_20h07m58s.ckpt'
 
     # options.tf_net_paths = ['/media/1tb/Izzy/nets/net6_10-10-2016_13h52m47s.ckpt', '/media/1tb/Izzy/nets/net6_10-10-2016_13h57m13s.ckpt']
 

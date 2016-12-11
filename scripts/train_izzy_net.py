@@ -130,8 +130,8 @@ if __name__ == '__main__':
 
     data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file,channels=3)
     net = net6.NetSix()
-    path = '/media/1tb/Izzy/nets/net6_10-10-2016_13h57m13s.ckpt'
-    net_name = net.optimize(300,data, path=path, batch_size=200)
+    #path = '/media/1tb/Izzy/nets/net6_10-10-2016_13h57m13s.ckpt'
+    net_name = net.optimize(300,data, batch_size=200)
     outf = open(AMTOptions.amt_dir + 'last_net.txt', 'w')
     outf.write(net_name)
     outf.close()
