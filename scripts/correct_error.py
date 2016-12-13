@@ -1,6 +1,6 @@
 import cv2, sys, argparse
-sys.path.append('/home/huarsc/research/vision-amt/')
-# sys.path.append('/home/annal/Izzy/vision_amt/')
+# sys.path.append('/home/huarsc/research/vision-amt/')
+sys.path.append('/home/annal/Izzy/vision_amt/')
 import time
 from options import AMTOptions
 import numpy as np

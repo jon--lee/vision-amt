@@ -74,11 +74,13 @@ if __name__ == '__main__':
 
     # plt.show()
 
-    N = 5
-    improvement_rates = (5.8175, 7.4998825, 11.666655, -1.666666667, 1.666666575)
-    error_std = (7.382313887/2, 6.30994292/2,6.382847965/2, 5.773502692/2, 4.303314747/2)
+    N = 6
+    improvement_rates = (0.0776665, 0.074998825, 0.1124999663, -0.01666666667, 0.01666666575, -0.008333335)
+    improvement_rates = np.array(improvement_rates) * 100
+    error_std = (0.04306462356, 0.02065401543, 0.02083333261, 0.02886751346, 0.02151657374, 0.03435921233)
+    error_std = np.array(error_std) * 100
     ind = np.arange(N)    # the x locations for the groups
-    width = 0.35       # the width of the bars: can also be len(x) sequence
+    width = 0.5       # the width of the bars: can also be len(x) sequence
 
     p1 = plt.bar(ind, improvement_rates, width, color='r', yerr=error_std)
     # p2 = plt.bar(ind, womenMeans, width, color='y',
@@ -86,9 +88,11 @@ if __name__ == '__main__':
 
     plt.ylabel('Percentage Improvement')
     plt.title('Improvement by applying noise correction')
-    plt.xticks(ind + width/2., ('Adaptive', 'Smoothing', 'Combined', 'Removed all', 'Removed human'))
+    plt.xticks(ind + width/2., ('Adaptive', 'Smoothing', 'Combined', 'Remove', 'Cut', 'Robot'))
     plt.yticks(np.arange(-10, 25, 5))
-    # plt.legend((p1[0], p2[0]), ('Men', 'Women'))
+    # plt.legend((p1[0], p2[0]), ('Baseline', 'Improvement'))
+
+    # plt.legend((p1[0], p2[0]), ('Baseline', 'Improvement'))
 
     plt.show()
 
