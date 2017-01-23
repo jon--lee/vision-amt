@@ -121,7 +121,10 @@ def compile_reg(skipped=[], smooth = None, num=10):
                     for r in range(last_trajectory.shape[1]):
                         last_trajectory[:,r] = signal.filtfilt(a, b, last_trajectory[:,r])
                     for i in range(len(last_trajectory_str)):
+                        print last_trajectory_str[i], last_trajectory[i]
+                        # last_trajectory_str[i] = last_trajectory[i]
                         last_trajectory_str[i] = replace(last_trajectory_str[i], last_trajectory[i])
+                        print last_trajectory_str[i], last_trajectory[i]
                         train_file.write(path + last_trajectory_str[i])
                 last_rol = r_num
                 last_trajectory = []
