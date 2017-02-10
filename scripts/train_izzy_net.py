@@ -48,6 +48,8 @@ if __name__ == '__main__':
                         help="a path to a file, which contains the line 'Holdout Trajectories:' followed by space separated holdout numbers")
     parser.add_argument("-dn", "--deltasname", type=str,
                         help="a path to the file containing deltas to be used. If none, uses deltas from another source")
+    parser.add_argument("-nn", "--nonet", action="store_true",
+                        help="Switch on for the net to be trained")
 
     args = parser.parse_args()
     if args.name is not None:
@@ -68,7 +70,7 @@ if __name__ == '__main__':
     test_size = args.test_size if args.test_size is not None else 10
     initial = args.initial if args.initial is not None else 0
     end = args.end if args.end is not None else 100
-
+    run_net = args.nonet
     sup = True
     smooth = args.smooth
     if args.DAgger:
@@ -128,17 +130,18 @@ if __name__ == '__main__':
                     holdout.append(int(value))
         skipped = compile_supervisor.compile_reg(skipped = holdout, smooth=smooth, num=test_size)
 
-    data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file,channels=3)
-    net = net6.NetSix()
-    #path = '/media/1tb/Izzy/nets/net6_10-10-2016_13h57m13s.ckpt'
-    net_name = net.optimize(300,data, batch_size=200)
-    outf = open(AMTOptions.amt_dir + 'last_net.txt', 'w')
-    outf.write(net_name)
-    outf.close()
-    # path = '/media/1tb/Izzy/nets/net6_08-19-2016_12h28m11s.ckpt'
-    # net.optimize(700,data,path = path, batch_size=200)
-    outf = open(AMTOptions.amt_dir + 'testing_outputs.txt', 'a+')
-    outf.write(person + ', is supervised data: ' + str(sup) + ', range: ' + str(first) +  ', ' +str(last) + '\n')
-    outf.write(str(skipped) + '\n')
-    outf.write(net_name + '\n')
-    outf.close()
+    if not run_net:
+        data = inputdata.AMTData(AMTOptions.train_file, AMTOptions.test_file,channels=3)
+        net = net6.NetSix()
+        #path = '/media/1tb/Izzy/nets/net6_10-10-2016_13h57m13s.ckpt'
+        net_name = net.optimize(300,data, batch_size=200)
+        outf = open(AMTOptions.amt_dir + 'last_net.txt', 'w')
+        outf.write(net_name)
+        outf.close()
+        # path = '/media/1tb/Izzy/nets/net6_08-19-2016_12h28m11s.ckpt'
+        # net.optimize(700,data,path = path, batch_size=200)
+        outf = open(AMTOptions.amt_dir + 'testing_outputs.txt', 'a+')
+        outf.write(person + ', is supervised data: ' + str(sup) + ', range: ' + str(first) +  ', ' +str(last) + '\n')
+        outf.write(str(skipped) + '\n')
+        outf.write(net_name + '\n')
+        outf.close()

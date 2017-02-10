@@ -81,6 +81,7 @@ def threshold_errs(all_names_errs, threshold):
 
 def read_err_line(line):
     vals = line.split('\t')
+    print vals
     name = vals[0]
     sp = vals[1].split(' ')
     e = np.array([float(sp[0]), float(sp[1])])
@@ -88,9 +89,12 @@ def read_err_line(line):
     label = np.array([float(sp[0]), float(sp[1])])
     sp = vals[3].split(' ')
     ev = np.array([float(sp[0]), float(sp[1])])
-    sp = vals[4].split(' ')
-    state = np.array([float(sp[0]), float(sp[1]), float(sp[2]), float(sp[3])])
-    return (name, e, label, ev, state)
+    if len(vals) == 5:
+        sp = vals[4].split(' ')
+        state = np.array([float(sp[0]), float(sp[1]), float(sp[2]), float(sp[3])])
+        return (name, e, label, ev, state)
+    if len(vals) == 4:
+        return (name, e, label, ev, None)
 
 def get_evaluations(all_names_errs, i):
     evals = []
@@ -162,6 +166,30 @@ def gather_feedback(error_path, new_deltas_path, output_file_path, pname='', tes
 
 
 
+def visualize_feedback(error_path, pname='', test=''):
+    errs_vals = open(error_path, 'r')
+    all_names_errs = []
+
+    new_deltas = dict()
+    for name, e, label, ev, stv in all_names_errs:
+        new_deltas.append(label)
+
+    for line in errs_vals:
+        all_names_errs.append(read_err_line(line))
+    above = threshold_errs(all_names_errs, .8)#1.3)
+    worst = highest_errors(all_names_errs, 100)
+
+    for a in above:
+        name, e, label, ev, stv = all_names_errs[a]
+        i = frame_num(name)
+        rnum = traj_num(name)
+        pth = assign_path(AMTOptions.supervised_dir, rnum, AMTOptions, pname, frame_num=i)
+        evaluations, states = get_evaluations(all_names_errs, a)
+        # base_im = draw_trajectory(pth, rnum,  i)
+        # impath = pth[:pth.find('.jpg')-1]
+        deltas = feedback.correct_rollout(pth, i, states, evaluations, rnum, pname, test)
+
+
     # new_remove_file = open(new_deltas_path + "new_remove.txt", 'w')
     # for a in above:
     #     name, e, label, ev, stv = all_names_errs[a]
@@ -185,7 +213,12 @@ if __name__ == '__main__':
     parser.add_argument("-n", "--name", type=str, help="run experiment, will prompt for name")
     parser.add_argument("-t", "--test", type=str, help="test folder name")
     parser.add_argument("-o", "--output", type=str, help="file to output values to")
+    parser.add_argument("-v", "--visualize", action="store_true", help="Only visualize outputs, not altering them")
+    parser.add_argument("-f", "--filename", type=str, help="name of file containing comparisons")
     args = parser.parse_args()
     if args.test == None:
         args.test = ''
-    gather_feedback(AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/comparisons.txt", AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/", args.output, args.name, args.test)
+    if not args.visualize:
+        gather_feedback(AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/comparisons.txt", AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/", args.output, args.name, args.test)
+    else:
+        visualize_feedback(AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/" + args.filename, args.name, args.test)

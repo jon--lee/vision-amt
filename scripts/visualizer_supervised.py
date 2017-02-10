@@ -1,6 +1,6 @@
 #visualizer
 
-import cv2, sys
+import cv2, sys, argparse
 sys.path.append('/home/annal/Izzy/vision_amt/')
 import time
 from options import AMTOptions
@@ -811,7 +811,7 @@ def assign_path(image_path, rollout_num, options, name='', test=''):
 
     return None
 
-def evaluate_supervisor_net(options, net, sess, training=False):
+def evaluate_supervisor_net(options, net, sess, training=False, name=None):
     '''
     gathers error rates on the comparison of the supervisor and the net
     '''
@@ -840,12 +840,22 @@ def evaluate_supervisor_net(options, net, sess, training=False):
         losses = np.array(losses)/j
     outf = open(AMTOptions.amt_dir + 'testing_outputs.txt', 'a+')
     finals = open(AMTOptions.amt_dir + 'testing_values.txt', 'a+')
+    if name is not None:
+        outf.write(name + '\n')
     outf.write('Is training loss: ' + str(training) + ', values: ' + str(losses) + '\n')
     finals.write(str(training) + '\t' + str(losses) + '\n')
     outf.close()
     finals.close()
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-n", "--name", type=str,
+                        help="run experiment, will prompt for name")
+    parser.add_argument("-nn", "--net", type=str,
+                        help="get the path to the neural net to be used for this visualization")
+    args = parser.parse_args()
+
+
     options = AMTOptions()
     net = net6.NetSix()
     options.tf_net = net
@@ -896,13 +906,14 @@ if __name__ == '__main__':
     # hards = [113, 83, 104, 12, 56, 71, 90, 66, 63, 67, 57, 28, 54, 59, 111, 55, 69, 74, 39, 5, 50, 75, 101, 97, 20, 48, 16, 13, 65, 87, 79, 99, 32, 34, 44, 38, 85, 102, 112, 95, 73, 22, 76, 17, 24, 4, 37, 107, 92, 23, 61, 77, 78, 30, 14, 72, 105, 46, 64, 7, 35, 93, 47, 60, 109, 94, 11, 58, 62, 45, 18, 110, 80, 43, 98, 40, 41, 106, 21, 86, 88, 6, 52, 108, 33, 15, 29, 36, 82, 100, 2, 70, 10, 0, 31, 1, 3, 26, 19, 89, 91, 8, 96, 9, 49, 27, 25, 42, 68, 53, 51, 84, 81, 103]
 
 
-    options.tf_net_path = sys.argv[1]
+    options.tf_net_path = args.net
+
     # options.tf_net_path = '/media/1tb/Izzy/nets/net6_09-03-2016_15h07m52s.ckpt'
     sess = net.load(var_path=options.tf_net_path)
     # compare_supervisor_net_rol(options, net, sess, exclude, (0,-1), name='Caleb')
 
-    evaluate_supervisor_net(options, net, sess, training=True)
-    evaluate_supervisor_net(options, net, sess, training=False)
+    evaluate_supervisor_net(options, net, sess, training=True, name = args.name)
+    evaluate_supervisor_net(options, net, sess, training=False, name = args.name)
     # compare_supervisor_net(options, net, sess, range(65, 125), (0,-1), name='Caleb', exclude=exclude)
     # compare_supervisor_net(options, net, sess, range(425, 455), (0,-1))
     # compare_supervisor_net(options, net, sess, range(315, 415), (0,-1))

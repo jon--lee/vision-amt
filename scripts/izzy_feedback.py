@@ -417,14 +417,16 @@ def draw_trajectory(image_path, traj_num, evaluations, name='', test = '', hard=
             thisstate = state
             color = (0,191,191)
         else:
-            color = (50, 100, 100)
-        if i in deltas:
-            if deltas[i] != "delete":
-                vis.draw_result(initial_image, f_change, color = color, thick = 2)
-        else:
-            vis.draw_result(initial_image, f_change, color = color, thick = 2)
+            color = (10, 151, 221)
 
-        vis.draw_result(initial_image, sup_change, color = (0,255,0), thick = 1)
+        # draws the deltas
+        # if i in deltas:
+        #     if deltas[i] != "delete":
+        #         vis.draw_result(initial_image, f_change, color = color, thick = 2)
+        # else:
+        #     vis.draw_result(initial_image, f_change, color = color, thick = 2)
+
+        vis.draw_result(initial_image, sup_change, color = (191,191,0), thick = 3)
         last = state
         i += 1
     if deltas is not None:

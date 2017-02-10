@@ -1,3 +1,6 @@
+import cv2, sys
+sys.path.append('/home/annal/Izzy/vision_amt/')
+
 from options import AMTOptions
 import numpy as np, argparse
 from scripts import compile_supervisor, merge_supervised
@@ -26,7 +29,7 @@ def scale(deltas):
 
 def replace(x, vals):
     d_line = x.split(' ')
-    return d_line[0] + ' ' + ' '.join([str(val) for val in vals]) + '\n'
+    return d_line[0]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -63,7 +66,7 @@ if __name__ == '__main__':
 
     deltas_path = AMTOptions.deltas_file
     deltas_file = open(deltas_path, 'r')
-    difference_file = open(AMTOptions.amt_dir + args.target, 'w')
+    difference_file = open(AMTOptions.amt_dir + "cross_computations/" + args.name + "_crossvals/" + args.target, 'w')
     print AMTOptions.amt_dir + args.target
     full_trajectory = []
 
@@ -72,7 +75,9 @@ if __name__ == '__main__':
     last_rol = -1
     for line in deltas_file:
         r_num = traj_num(line)
-                
+        
+        if r_num == 59:
+            print last_rol
         path = AMTOptions.colors_dir
         labels = line.split()
         # print line
@@ -85,22 +90,32 @@ if __name__ == '__main__':
         # train_file.write(line)
         
         if last_rol != r_num:
-            if last_rol != -1:
+            if last_rol != -1 and last_rol not in holdout:
                 next_trajectory = np.array(last_trajectory)
                 a,b = signal.butter(args.smooth, 0.05)
-                for r in range(next_trajectory.shape[1] - 1):
+                for r in range(next_trajectory.shape[1]):
                     next_trajectory[:,r] = signal.filtfilt(a, b, next_trajectory[:,r])
                 # print next_trajectory, last_trajectory
                 for i in range(len(last_trajectory_str)):
-                    diff = np.linalg.norm(next_trajectory[i] - np.array(last_trajectory[i]))
+                    diff = np.abs(next_trajectory[i] - np.array(last_trajectory[i]))
                     # print diff, last_trajectory[i], next_trajectory[i]
-                    last_trajectory_str[i] = replace(last_trajectory_str[i], next_trajectory[i])
-                    difference_file.write(path + last_trajectory_str[i][:-1] + " " + " ".join(map(str, last_trajectory[i])) + " " + str(diff) + "\n")
+                    last_trajectory_str[i] = replace(last_trajectory_str[i], next_trajectory[i]) #the next trajectory
+                    difference_file.write(path + last_trajectory_str[i] + "\t" + " ".join(map(str, diff)) + "\t" + " ".join(map(str, next_trajectory[i])) + "\t" + " ".join(map(str, last_trajectory[i])) + "\n")
             last_rol = r_num
             last_trajectory = []
             last_trajectory_str = []
         last_trajectory.append(deltas)
         last_trajectory_str.append(line)
+    next_trajectory = np.array(last_trajectory)
+    a,b = signal.butter(args.smooth, 0.05)
+    for r in range(next_trajectory.shape[1]):
+        next_trajectory[:,r] = signal.filtfilt(a, b, next_trajectory[:,r])
+    # print next_trajectory, last_trajectory
+    for i in range(len(last_trajectory_str)):
+        diff = np.abs(next_trajectory[i] - np.array(last_trajectory[i]))
+        # print diff, last_trajectory[i], next_trajectory[i]
+        last_trajectory_str[i] = replace(last_trajectory_str[i], next_trajectory[i]) #the next trajectory
+        difference_file.write(path + last_trajectory_str[i] + "\t" + " ".join(map(str, diff)) + "\t" + " ".join(map(str, next_trajectory[i])) + "\t" + " ".join(map(str, last_trajectory[i])) + "\n")
     deltas_file.close()
     difference_file.close()
 
